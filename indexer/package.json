@@ -7,7 +7,7 @@
     "build": "pnpm run /build:/",
     "build:server": "vite --config vite.config.ts build",
     "dev": "pnpm --stream run /dev:/",
-    "dev:server": "vite --force --config vite.config.ts",
+    "dev:server": "vite --force --config vite.config.ts --host",
     "format": "pnpm run /format:/ && pnpm dlx sort-package-json",
     "format:app": "eslint app --fix",
     "format:server": "eslint server --fix",
