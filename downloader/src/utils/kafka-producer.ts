@@ -1,4 +1,4 @@
-import { Kafka, Producer } from 'kafkajs';
+import { Kafka, Partitioners, Producer } from 'kafkajs';
 
 class KafkaProducer {
     private producer: Producer;
@@ -7,10 +7,13 @@ class KafkaProducer {
     constructor(topic: string) {
         const kafka = new Kafka({
             clientId: 'my-app',
-            brokers: ['localhost:9092']
+            brokers: ['localhost:9093']
         });
 
-        this.producer = kafka.producer();
+        this.producer = kafka.producer({
+            createPartitioner: Partitioners.LegacyPartitioner
+
+        });
         this.topic = topic;
     }
 

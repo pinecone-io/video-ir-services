@@ -65,16 +65,26 @@ const convertBoundingBox = (box: DetectedBoundingBox): BoundingBox => {
 };
 
 const getVideoNameAndFrameIndex = (imagePath: string) => {
-  const videoName = imagePath.replace(/\/.+/, "");
-  const frameIndex = path.basename(imagePath).split(".")[0]!;
-  return { videoName, frameIndex };
+  try {
+    const videoName = imagePath.replace(/\/.+/, "");
+    const frameIndex = path.basename(imagePath).split(".")[0]!;
+    return { videoName, frameIndex };
+  } catch (error) {
+    console.log(`Error in getVideoNameAndFrameIndex: ${error}`);
+    return undefined;
+  }
 };
 
 const fetchImageAndBoundingBoxes = async (imagePath: string) => {
-  const url = await getS3SignedUrl(imagePath);
-  const image = await RawImage.fromURL(url);
-  const boundingBoxes = await detectObjects(image);
-  return { image, boundingBoxes };
+  try {
+    const url = await getS3SignedUrl(imagePath);
+    const image = await RawImage.fromURL(url);
+    const boundingBoxes = await detectObjects(image);
+    return { image, boundingBoxes };
+  } catch (error) {
+    console.log(`Error in fetchImageAndBoundingBoxes: ${error}`);
+    return undefined;
+  }
 };
 
 const generateBoxId = (box: DetectedBoundingBox) =>
@@ -159,12 +169,28 @@ const processBoundingBoxes = async (
   return files;
 };
 
-const segmentImage = async (imagePath: string) => {
-  try {
-    const { videoName, frameIndex } = getVideoNameAndFrameIndex(imagePath);
-    const { boundingBoxes } = await fetchImageAndBoundingBoxes(imagePath);
-    const obj = await getS3Object(imagePath);
+const addToDeadLetterQueue = async (imagePath: string, errorMessage: string) => {
+  // Implement the logic to add the error message and image path to the dead letter queue
+  // ...
+  console.log("___")
+};
 
+const segmentImage = async (imagePath: string) => {
+  const { videoName, frameIndex } = getVideoNameAndFrameIndex(imagePath) || {};
+
+  const { boundingBoxes } = await fetchImageAndBoundingBoxes(imagePath) || {};
+
+
+  if (!videoName || !frameIndex || !boundingBoxes) {
+    // Add the error to the dead letter queue
+    await addToDeadLetterQueue(imagePath, "Undefined results");
+    return [];
+  }
+
+  const obj = await getS3Object(imagePath);
+  console.log("downloaded", imagePath);
+
+  try {
     if (boundingBoxes) {
       await writeFrameToRedis(frameIndex, imagePath, boundingBoxes);
       const files = await processBoundingBoxes(
@@ -175,12 +201,16 @@ const segmentImage = async (imagePath: string) => {
       );
       return files;
     }
-    return [];
-  } catch (error) {
+  } catch (error: any) {
     console.log(`Error in segmentImage: ${error}`);
-    return [];
+    // Add the error to the dead letter queue
+    await addToDeadLetterQueue(imagePath, error.message);
+    return undefined;
   }
+  return [];
 };
+
+
 
 async function embedAndUpsert({
   imagePaths,
@@ -221,30 +251,36 @@ async function embedAndUpsert({
 
 await embedder.init(modelName);
 
-const indexImages = async (name: string, limit?: number) => {
+const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: number; filesList?: string[]; }) => {
   const client = await getAwsS3Client();
-
-  // NOTE: Here we have limit up to 1000 images
-  const files = await client.send(
-    new ListObjectsV2Command({
-      Bucket: AWS_S3_BUCKET,
-      Prefix: `${name}/frame`,
-    }),
-  );
-
-  if (!files.Contents) {
-    console.error(name, `Bucket is empty`);
-    return;
+  let list: string[] = []
+  if (!filesList && name) {
+    const files = await client.send(
+      new ListObjectsV2Command({
+        Bucket: AWS_S3_BUCKET,
+        Prefix: `${name}/frame`,
+      }),
+    );
+    if (files && files.Contents) {
+      list = limit ? files.Contents.slice(0, limit).map((x) => x.Key!) : files.Contents.map((x) => x.Key!);
+    }
+  } else {
+    if (!filesList) {
+      throw new Error("No files list provided");
+    }
+    list = filesList;
   }
 
-  const filesList = limit ? files.Contents.slice(0, limit) : files.Contents;
+  console.log("Processing files: ", list.length, console.time())
 
-  for (const file of filesList) {
+  for (const fileName of list) {
     try {
-      const segmentedFiles = await segmentImage(file.Key || "");
+      // console.log("LIST", list.length);
+      const segmentedFiles = (await segmentImage(fileName || ""))?.filter(x => x) || [];
+      // console.log("Segmented files: ", segmentedFiles)
       await embedAndUpsert({ imagePaths: segmentedFiles, chunkSize: 100 });
     } catch (error) {
-      console.error(`Error processing file ${file}: ${error}`);
+      console.error(`Error processing file ${fileName}: ${error}`);
     }
   }
 };

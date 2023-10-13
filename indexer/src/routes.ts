@@ -15,7 +15,7 @@ const routes: Route[] = [
       try {
         const name = req.query.name as string;
         const limit = req.query.limit as number | undefined;
-        await indexImages(name, limit);
+        await indexImages({ name, limit });
         res.status(200).json({ message: "Indexing complete" });
       } catch (error) {
         console.log(error);
