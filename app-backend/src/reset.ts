@@ -1,6 +1,6 @@
 import { Pinecone } from "@pinecone-database/pinecone";
 import redis from "./redis";
-import { PINECONE_INDEX, PINECONE_NAMESPACE, getEnv } from "./utils/enviroment";
+import { PINECONE_INDEX, PINECONE_NAMESPACE, getEnv } from "./utils/environment";
 
 const namespace = PINECONE_NAMESPACE;
 const pineconeClient = await new Pinecone({

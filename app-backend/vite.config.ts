@@ -1,7 +1,5 @@
-import path from "path";
 import { defineConfig } from "vitest/config";
 import { VitePluginNode } from "vite-plugin-node";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,29 +16,8 @@ export default defineConfig({
       adapter: "express",
       appPath: "./src/index.ts",
     }),
-    viteStaticCopy({
-      targets: [
-        {
-          src: path.resolve(__dirname, "data"),
-          dest: "./",
-        },
-        {
-          src: path.resolve(__dirname, "output"),
-          dest: "./",
-        },
-        {
-          src: path.resolve(__dirname, "db.json"),
-          dest: "./",
-        },
-        {
-          src: path.resolve(__dirname, "objectDetectionDb.json"),
-          dest: "./",
-        },
-      ],
-    }),
   ],
   build: {
-    outDir: "../dist/server",
     emptyOutDir: true,
     target: "node18.17.1",
   },

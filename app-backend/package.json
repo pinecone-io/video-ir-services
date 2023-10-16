@@ -3,20 +3,16 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "pnpm run /build:/",
-    "build:server": "vite --config vite.config.ts build",
-    "dev": "pnpm --stream run /dev:/",
-    "dev:server": "vite --force --config vite.config.ts",
-    "format": "pnpm run /format:/ && pnpm dlx sort-package-json",
-    "format:app": "eslint app --fix",
-    "format:server": "eslint server --fix",
-    "lint": "pnpm run /lint:/",
-    "lint:app": "tsc --p ./app && eslint app",
-    "lint:server": "tsc --p ./server && eslint server",
+    "build": "vite --config ./vite.config.ts build",
+    "dev": "vite --force --config vite.config.ts",
+    "format:server": "eslint . --fix",
+    "lint": "tsc --p . && eslint .",
     "maintance:depcheck": "pnpm dlx depcheck",
     "maintance:outdated": "pnpm outdated",
-    "start": "node dist/server",
-    "test": "vitest run --config vite.config.ts  --coverage --retry 5"
+    "start": "node dist",
+    "test": "vitest run --config vite.config.ts  --coverage --retry 5",
+    "docker:build": "docker build -t video-recognition_api .",
+    "docker:run": "docker run -p 3000:3000 video-recognition_api"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -25,6 +21,7 @@
     "@aws-sdk/client-s3": "^3.428.0",
     "@aws-sdk/s3-request-presigner": "^3.428.0",
     "@pinecone-database/pinecone": "^1.1.1",
+    "@smithy/node-http-handler": "^2.1.7",
     "@xenova/transformers": "^2.6.2",
     "express": "^4.18.2",
     "kafkajs": "^2.2.4",

@@ -1,10 +1,11 @@
 import express, { Express, Router } from "express";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { createServer } from 'vite'
+import { createServer } from "vite";
 
 import { resolvers } from "./routes";
 import {
+  IS_PROD,
   PINECONE_DATA_DIR_PATH,
   PINECONE_OUTPUT_DIR_PATH,
 } from "./utils/environment";
@@ -31,5 +32,11 @@ app.use("/data", express.static(join(__dirname, PINECONE_DATA_DIR_PATH)));
 app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)));
 app.get("/ping", (req, res) => res.send("pong2"));
 
-export const viteNodeApp = app;
+if (IS_PROD) {
+  const port = 3000;
+  app.listen(port, () => {
+    console.log(`Server started on ${port} port`);
+  });
+}
 
+export const viteNodeApp = app;
