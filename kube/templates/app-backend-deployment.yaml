@@ -24,7 +24,7 @@ spec:
         - mountPath: /srv/www
           name: redis-storage
       - name: app-backend
-        image: video-recognition_api:latest
+        image: video-recognition_api
         # TODO remove next line when we have AWS ECR
         imagePullPolicy: Never
         ports:

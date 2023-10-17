@@ -90,8 +90,16 @@ const routes: Route[] = [
   {
     route: "/health",
     method: "get",
-    handler: (req, res) => {
-      res.status(200).json({ message: "Server is healthy" });
+    handler: async (req, res) => {
+      const downloaderApi = await fetch(
+        "http://video-ir-dev-downloader:3001/api/health"
+      )
+        .then((response) => response.json())
+        .catch((error) => error);
+
+      res
+        .status(200)
+        .json([{ message: "App Backend server is healthy :)" }, downloaderApi]);
     },
   },
 ];

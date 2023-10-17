@@ -28,7 +28,7 @@ const routes: Route[] = [
         route: "/health",
         method: "get",
         handler: (_, res) => {
-            res.status(200).json({ message: "Server is healthy" });
+            res.status(200).json({ message: "Downloader server is healthy :)" });
         },
     },
 ];

@@ -17,30 +17,9 @@ export default defineConfig({
     VitePluginNode({
       adapter: "express",
       appPath: "./src/index.ts",
-    }),
-    viteStaticCopy({
-      targets: [
-        {
-          src: path.resolve(__dirname, "data"),
-          dest: "./",
-        },
-        {
-          src: path.resolve(__dirname, "output"),
-          dest: "./",
-        },
-        {
-          src: path.resolve(__dirname, "db.json"),
-          dest: "./",
-        },
-        {
-          src: path.resolve(__dirname, "objectDetectionDb.json"),
-          dest: "./",
-        },
-      ],
-    }),
+    })
   ],
   build: {
-    outDir: "../dist/server",
     emptyOutDir: true,
     target: "node18.17.1",
   },

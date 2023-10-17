@@ -24,3 +24,18 @@ kubectl logs -n dev {pod_id}
 
 # Delete everything
 kubectl delete all --all -n {namespace}
+
+# Execute commands from pod
+kubectl exec -n dev -it {pod-name} -- /bin/bash
+
+## In case someting is missing in pod eg. curl we can install it
+apt update && apt install curl -y
+
+#########
+# Rebuild dockers
+########
+cd app-backend &&
+pnpm docker:build &&
+cd ../downloader &&
+pnpm docker:build &&
+cd ..

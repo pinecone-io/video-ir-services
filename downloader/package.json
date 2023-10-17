@@ -5,8 +5,13 @@
   "type": "module",
   "scripts": {
     "postinstall": "cd node_modules/.pnpm/fluent-ffmpeg@2.1.2/node_modules/fluent-ffmpeg/ && mkdir -p lib-cov && cp -r ./lib/* ./lib-cov",
+    "build": "vite --config ./vite.config.ts build",
     "dev": "vite --force --config vite.config.ts --host",
-    "lint": "pnpm run /lint:/"
+    "format:server": "eslint . --fix",
+    "lint": "tsc --p . && eslint .",
+    "start": "node dist",
+    "docker:build": "docker build -t video-recognition_downloader .",
+    "docker:run": "docker run -p 3001:3001 video-recognition_downloader"
   },
   "devDependencies": {
     "typescript": "^5.0.2",
