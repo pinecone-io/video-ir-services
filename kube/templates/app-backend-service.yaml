@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: {{ .Release.Name }}-app-backend
+  ports:
+    - protocol: TCP
+      port: 3000
+      nodePort: 30000

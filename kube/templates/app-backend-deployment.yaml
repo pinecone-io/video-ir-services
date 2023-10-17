@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-app-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-app-backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-app-backend
+    spec:
+      containers:
+      - name: redis
+        image: redis:latest
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - mountPath: /srv/www
+          name: redis-storage
+      - name: app-backend
+        image: video-recognition_api:latest
+        # TODO remove next line when we have AWS ECR
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
+      volumes:
+      - name: redis-storage
+        emptyDir: {}
