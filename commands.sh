@@ -39,3 +39,23 @@ pnpm docker:build &&
 cd ../downloader &&
 pnpm docker:build &&
 cd ..
+
+
+
+#########
+# API curl requests. Note: probobly ports in url will need to change depending on configuration
+########
+
+curl --location 'http://localhost:5173/api/resetDB'
+
+curl --location 'http://localhost:5173/api/download' \
+--header 'Content-Type: application/json' \
+--data '{
+    "name": "highway-surveillance",
+    "target": "https://www.youtube.com/watch?v=PJ5xXXcfuTc",
+    "fps": 30
+}'
+
+curl --location 'http://localhost:5173/api/indexImages?name=highway-surveillance'
+
+curl 'http://localhost:5173/api/queryBox?boxId=c3c431632713de9ea13ed82a6cfad02b'

@@ -1,7 +1,6 @@
 import express, { Express, Router } from "express";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { createServer } from 'vite'
 
 import { resolvers } from "./routes";
 import {
@@ -21,25 +20,21 @@ const app: Express = express();
 // Ensure that Pinecone index exist
 await initIndex();
 
-
-let filesList: string[] = [];
-let processedFiles: string[] = [];
-const consumer = await createKafkaConsumer("unprocessed-files-3", async (message: KafkaMessage) => {
-
-
-  const file = message.value?.toString();
-  if (file) {
-    filesList.push(file);
+const consumer = await createKafkaConsumer(
+  "unprocessed-files-3",
+  async (message: KafkaMessage) => {
+    const file = message.value?.toString();
+    
+    if (file) {
+      console.log("Start Procesing:", file);
+      console.time(file)
+      await indexImages({ filesList: [file] });
+      console.timeEnd(file)
+      console.log("Finished Processing:", file)
+      console.log("------------------------")
+    }
   }
-  if (filesList.length >= 5 || true) {
-    const time = new Date().toISOString();
-    await indexImages({ filesList });
-    // console.log("processing", filesList, time)
-    processedFiles.push(...filesList);
-    filesList = [];
-
-  }
-});
+);
 
 const router = Router();
 
@@ -55,4 +50,3 @@ app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)));
 app.get("/ping", (req, res) => res.send("pong2"));
 
 export const viteNodeApp = app;
-

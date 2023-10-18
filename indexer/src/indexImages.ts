@@ -77,7 +77,7 @@ const getVideoNameAndFrameIndex = (imagePath: string) => {
 
 const fetchImageAndBoundingBoxes = async (imagePath: string) => {
   try {
-    const url = await getS3SignedUrl(imagePath);
+    const url = generateS3Url(imagePath);
     const image = await RawImage.fromURL(url);
     const boundingBoxes = await detectObjects(image);
     return { image, boundingBoxes };
@@ -271,18 +271,19 @@ const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: 
     list = filesList;
   }
 
-  console.log("Processing files: ", list.length, console.time())
+  console.log("Processing files: ", list.length)
 
   for (const fileName of list) {
     try {
-      // console.log("LIST", list.length);
+      console.log("LIST", list.length);
       const segmentedFiles = (await segmentImage(fileName || ""))?.filter(x => x) || [];
-      // console.log("Segmented files: ", segmentedFiles)
+      console.log("Segmented files: ", segmentedFiles)
       await embedAndUpsert({ imagePaths: segmentedFiles, chunkSize: 100 });
     } catch (error) {
       console.error(`Error processing file ${fileName}: ${error}`);
     }
   }
+  console.log("done")
 };
 
 export { indexImages };
