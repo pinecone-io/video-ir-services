@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-indexer
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-indexer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-indexer
+    spec:
+      containers:
+      - name: indexer
+        image: video-recognition_indexer
+        # TODO remove next line when we have AWS ECR
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3002

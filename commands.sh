@@ -12,6 +12,10 @@ helm install --dry-run --debug video-ir ./kube -f kube/values.yaml --create-name
 helm upgrade --install video-ir ./kube -f kube/values.yaml --create-namespace --namespace dev
 
 
+# Delete all
+helm ls -n dev --all --short | xargs -L1 helm -n dev delete
+
+
 ########
 # kubectl
 #######
@@ -38,8 +42,9 @@ cd app-backend &&
 pnpm docker:build &&
 cd ../downloader &&
 pnpm docker:build &&
-cd ..
-
+cd ../indexer
+pnpm docker:build &&
+cd
 
 
 #########
