@@ -23,6 +23,7 @@ class KafkaProducer {
             topic: this.topic,
             messages: messages.map((message: string) => ({
                 value: message,
+                key: message
             })),
         });
         await this.producer.disconnect();

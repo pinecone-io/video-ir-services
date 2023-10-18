@@ -9,7 +9,7 @@ export default defineConfig({
     port: 3002,
   },
   optimizeDeps: {
-    exclude: ['fsevents']
+    exclude: ["fsevents"],
   },
   plugins: [
     VitePluginNode({
