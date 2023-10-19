@@ -3,23 +3,14 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "postinstall": "cd node_modules/.pnpm/fluent-ffmpeg@2.1.2/node_modules/fluent-ffmpeg/ && mkdir -p lib-cov && cp -r ./lib/* ./lib-cov",
-    "build": "pnpm run /build:/",
-    "build:server": "vite --config vite.config.ts build",
-    "dev": "pnpm --stream run /dev:/",
-    "dev:server": "vite --force --config vite.config.ts --host",
-    "format": "pnpm run /format:/ && pnpm dlx sort-package-json",
-    "format:app": "eslint app --fix",
-    "format:server": "eslint server --fix",
-    "lint": "pnpm run /lint:/",
-    "lint:app": "tsc --p ./app && eslint app",
-    "lint:server": "tsc --p ./server && eslint server",
+    "build": "vite --config vite.config.ts build",
+    "dev": "vite --force --config vite.config.ts --host",
+    "format": "eslint . --fix && pnpm dlx sort-package-json",
+    "lint": "tsc --p ./server && eslint server",
     "maintance:depcheck": "pnpm dlx depcheck",
     "maintance:outdated": "pnpm outdated",
     "start": "node dist/server",
-    "test": "vitest run --config vite.config.ts  --coverage --retry 5",
-    "docker:build": "docker build -t video-recognition_indexer .",
-    "docker:run": "docker run -p 3000:3000 video-recognition_indexer"
+    "test": "vitest run --config vite.config.ts  --coverage --retry 5"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -27,6 +18,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.428.0",
     "@aws-sdk/s3-request-presigner": "^3.428.0",
+    "@liuli-util/vite-plugin-node": "^0.7.0",
     "@pinecone-database/pinecone": "^1.1.1",
     "@rollup/plugin-typescript": "^11.1.5",
     "@smithy/node-http-handler": "^2.1.7",

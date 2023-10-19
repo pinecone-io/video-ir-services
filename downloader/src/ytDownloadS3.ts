@@ -48,6 +48,9 @@ const extractFrames = async (videoPath: string, name: string, fps: number): Prom
                     // Delete the local file
                     await unlinkAsync(outputFilePath);
 
+                    // Send for indexing
+                    await producer.sendMessages([filePath]);
+
                 }
                 console.log("Frames extraction completed.");
                 resolve(files);
@@ -76,7 +79,6 @@ const downloadS3 = async (target = "", name = "video", fps = 1) => {
         writable.on("finish", async () => {
             try {
                 const files = await extractFrames(videoPath, name, fps);
-                await producer.sendMessages(files);
                 resolve();
             } catch (error) {
                 console.log(error);

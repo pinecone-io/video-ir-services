@@ -1,7 +1,6 @@
 import express, { Express, Router } from "express";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { createServer } from 'vite'
 
 import { resolvers } from "./routes";
 import {
@@ -12,11 +11,6 @@ import { initIndex } from "./utils/pinecone";
 import { KafkaMessage } from "kafkajs";
 import { createKafkaConsumer } from "./utils/kafka-consumer";
 import { indexImages } from "./indexImages";
-import { Worker } from 'worker_threads';
-import path from 'path';
-import EventEmitter from "events";
-
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,41 +21,27 @@ const app: Express = express();
 await initIndex();
 
 
-let isProcessing = false;
-const messageQueue: KafkaMessage[] = [];
-
-const messageEvent = new EventEmitter();
-
+let filesList: string[] = [];
+let processedFiles: string[] = [];
 const consumer = await createKafkaConsumer("unprocessed-files-3", async (message: KafkaMessage) => {
-  messageQueue.push(message);
-  messageEvent.emit('newMessage');
+
+
+  const file = message.value?.toString();
+  if (file) {
+    filesList.push(file);
+  }
+  if (filesList.length >= 5 || true) {
+    const time = new Date().toISOString();
+    await indexImages({ filesList });
+    // console.log("processing", filesList, time)
+    processedFiles.push(...filesList);
+    filesList = [];
+
+  }
 });
 
-
-const processMessages = async () => {
-  if (isProcessing) {
-    console.log("still processing");
-    return;
-  }
-
-  while (messageQueue.length > 0) {
-    const message = messageQueue.shift();
-    const file = message?.value?.toString();
-
-    if (!isProcessing) {
-      isProcessing = true;
-      await indexImages({ filesList: [file!] });
-      isProcessing = false;
-    } else {
-      process.stdout.write(".");
-    }
-  }
-  if (messageQueue.length === 0) {
-    console.log("done processing");
-  }
-};
-
 messageEvent.on('newMessage', processMessages);
+
 
 const router = Router();
 
@@ -77,4 +57,3 @@ app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)));
 app.get("/ping", (req, res) => res.send("pong2"));
 
 export const viteNodeApp = app;
-
