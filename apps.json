@@ -1,9 +1,9 @@
 {
   "apps": [
     {
-      "name": "indexer",
+      "name": "downloader",
       "script": "./start.sh",
-      "cwd": "/Users/roie.s.c/dev/viral-services/indexer",
+      "cwd": "/Users/roie.s.c/dev/viral-services/downloader",
       "watch": true,
       "env": {
         "NODE_ENV": "development",
@@ -15,9 +15,9 @@
       }
     },
     {
-      "name": "downloader",
+      "name": "indexer-1",
       "script": "./start.sh",
-      "cwd": "/Users/roie.s.c/dev/viral-services/downloader",
+      "cwd": "/Users/roie.s.c/dev/viral-services/indexer",
       "watch": true,
       "env": {
         "NODE_ENV": "development",
@@ -26,6 +26,20 @@
       "env_production": {
         "NODE_ENV": "production",
         "PORT": "8001"
+      }
+    },
+    {
+      "name": "indexer-2",
+      "script": "./start.sh",
+      "cwd": "/Users/roie.s.c/dev/viral-services/indexer",
+      "watch": true,
+      "env": {
+        "NODE_ENV": "development",
+        "PORT": "3002"
+      },
+      "env_production": {
+        "NODE_ENV": "production",
+        "PORT": "8002"
       }
     }
   ]

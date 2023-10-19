@@ -17,7 +17,9 @@
     "maintance:depcheck": "pnpm dlx depcheck",
     "maintance:outdated": "pnpm outdated",
     "start": "node dist/server",
-    "test": "vitest run --config vite.config.ts  --coverage --retry 5"
+    "test": "vitest run --config vite.config.ts  --coverage --retry 5",
+    "docker:build": "docker build -t video-recognition_indexer .",
+    "docker:run": "docker run -p 3000:3000 video-recognition_indexer"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -26,12 +28,16 @@
     "@aws-sdk/client-s3": "^3.428.0",
     "@aws-sdk/s3-request-presigner": "^3.428.0",
     "@pinecone-database/pinecone": "^1.1.1",
+    "@rollup/plugin-typescript": "^11.1.5",
     "@smithy/node-http-handler": "^2.1.7",
     "@xenova/transformers": "^2.6.2",
+    "esm": "^3.2.25",
     "express": "^4.18.2",
+    "fluent-ffmpeg": "^2.1.2",
     "kafkajs": "^2.2.4",
     "redis": "^4.6.10",
-    "sharp": "^0.32.6"
+    "sharp": "^0.32.6",
+    "ts-node": "^10.9.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.19",

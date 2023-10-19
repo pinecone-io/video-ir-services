@@ -29,6 +29,8 @@ export const getAwsS3Client: () => Promise<S3Client> = async () => {
     maxSockets: 50,
     maxFreeSockets: 10,
     timeout: 60000,
+    noDelay: false,
+
   });
 
   const requestHandler = new NodeHttpHandler({
@@ -54,6 +56,10 @@ export const getAwsS3Client: () => Promise<S3Client> = async () => {
   return awsS3Client;
 };
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export const generateS3Url = (path: string) =>
   `https://${AWS_S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${path}`;
 
@@ -76,7 +82,7 @@ async function getObject(
   return new Promise<Buffer>(async (resolve, reject) => {
     try {
       const response = await client.send(getObjectCommand);
-
+      await sleep(1000);
       if (!response.Body) {
         reject(new Error("No response body"));
       }

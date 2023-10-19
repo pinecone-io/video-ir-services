@@ -96,10 +96,14 @@ const routes: Route[] = [
       )
         .then((response) => response.json())
         .catch((error) => error);
-
+      const indexerApi = await fetch(
+        "http://video-ir-dev-indexer:3002/api/health"
+      )
+        .then((response) => response.json())
+        .catch((error) => error);
       res
         .status(200)
-        .json([{ message: "App Backend server is healthy :)" }, downloaderApi]);
+        .json([{ message: "App Backend server is healthy :) 01" }, downloaderApi, indexerApi]);
     },
   },
 ];

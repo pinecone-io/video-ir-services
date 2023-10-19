@@ -8,7 +8,7 @@ export default defineConfig({
   root: __dirname,
   server: {
     strictPort: true,
-    port: 3000,
+    port: 3002,
   },
   optimizeDeps: {
     exclude: ['fsevents']
@@ -40,7 +40,7 @@ export default defineConfig({
     }),
   ],
   build: {
-    outDir: "../dist/server",
+    outDir: "./dist/server",
     emptyOutDir: true,
     target: "node18.17.1",
   },

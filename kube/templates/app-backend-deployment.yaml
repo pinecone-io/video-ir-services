@@ -16,19 +16,14 @@ spec:
         app.kubernetes.io/name: {{ .Release.Name }}-app-backend
     spec:
       containers:
-      - name: redis
-        image: redis:latest
-        ports:
-        - containerPort: 6379
-        volumeMounts:
-        - mountPath: /srv/www
-          name: redis-storage
       - name: app-backend
         image: video-recognition_api
         # TODO remove next line when we have AWS ECR
         imagePullPolicy: Never
         ports:
         - containerPort: 3000
-      volumes:
-      - name: redis-storage
-        emptyDir: {}
+        env:
+        - name: REDIS_HOST
+          value: "{{ .Release.Name }}-redis"
+        - name: REDIS_PORT
+          value: "6379"

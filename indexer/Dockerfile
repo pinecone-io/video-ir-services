@@ -1,20 +1,27 @@
 # Use an official Node.js runtime as a parent image
-FROM node:14-alpine
+FROM node:18.17.1
 
-# Set the working directory to /app
-WORKDIR /app
+# Set the working directory to /downloader
+WORKDIR /indexer
 
-# Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
+# Install pnpm
+RUN npm install -g pnpm@8.6.12
+
+# Copy package.json and pnpm-lock.yaml to the working directory
+COPY package.json ./
+COPY pnpm-lock.yaml ./
 
 # Install app dependencies
-RUN npm install
+RUN pnpm install --frozen-lockfile
 
 # Copy the rest of the app's source code to the working directory
 COPY . .
 
-# Expose port 3000 for the app to listen on
-EXPOSE 3000
+# Build everything
+RUN pnpm build
+
+# Expose port 3001 for the app to listen on
+EXPOSE 3002
 
 # Start the app
-CMD [ "npm", "start" ]
+CMD [ "pnpm", "start" ]

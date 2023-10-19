@@ -238,7 +238,7 @@ async function embedAndUpsert({
           await ns.upsert(filteredEmbeddings);
         } catch (e) {
           console.error(
-            "error chunked upsert",
+            "error chunked upsert", e,
             embeddings.map((x) => x.id),
           );
         }
@@ -252,6 +252,7 @@ async function embedAndUpsert({
 await embedder.init(modelName);
 
 const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: number; filesList?: string[]; }) => {
+  console.log("indexing images");
   const client = await getAwsS3Client();
   let list: string[] = []
   if (!filesList && name) {
@@ -271,7 +272,7 @@ const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: 
     list = filesList;
   }
 
-  console.log("Processing files: ", list.length, console.time())
+  console.log("Processing files: ", list.length)
 
   for (const fileName of list) {
     try {
@@ -283,6 +284,7 @@ const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: 
       console.error(`Error processing file ${fileName}: ${error}`);
     }
   }
+  return;
 };
 
 export { indexImages };
