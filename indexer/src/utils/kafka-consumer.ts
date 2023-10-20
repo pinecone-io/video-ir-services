@@ -3,7 +3,7 @@ import { Kafka, Consumer, KafkaMessage } from "kafkajs";
 async function createKafkaConsumer(topic: string, messageHandler: (message: KafkaMessage) => void): Promise<Consumer> {
     const kafka = new Kafka({
         clientId: "my-app",
-        brokers: ["localhost:9093"],
+        brokers: ["video-ir-kafka:9092"],
     });
 
     const consumer = kafka.consumer({ groupId: "test-group-3" });

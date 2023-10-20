@@ -20,6 +20,5 @@ spec:
             - name: KAFKA_CLUSTERS_0_NAME
               value: local
             - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
-              value: kafka:9092
-            - name: KAFKA_CLUSTERS_0_ZOOKEEPER
-              value: zookeeper:2181
+              value: video-ir-kafka:9092
+

@@ -7,7 +7,7 @@ class KafkaProducer {
     constructor(topic: string) {
         const kafka = new Kafka({
             clientId: 'my-app',
-            brokers: ['localhost:9093']
+            brokers: ['video-ir-kafka:9092']
         });
 
         this.producer = kafka.producer({

@@ -35,10 +35,13 @@ kubectl exec -n dev -it {pod-name} -- /bin/bash
 apt update
 ### curl to test urls
 apt install curl -y
-### this one is usefull to debug dns eg. nslookup redis to se how name is resolved
-apt-get install dnsutils
+### this one is usefull to debug dns eg. nslookup redis to see how name is resolved
+apt-get install dnsutils -y
 ### redis client to test connection
 apt-get install redis
+### qucly check connection
+telnet redis-master 6379
+telnet video-ir-kafka 9092
 
 
 

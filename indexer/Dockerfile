@@ -20,7 +20,7 @@ COPY . .
 # Build everything
 RUN pnpm build
 
-# Expose port 3001 for the app to listen on
+# Expose port 3002 for the app to listen on
 EXPOSE 3002
 
 # Start the app

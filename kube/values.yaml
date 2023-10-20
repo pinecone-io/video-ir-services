@@ -6,3 +6,6 @@ redis:
     replicaCount: 0
   auth:
     enabled: false
+kafka:
+  controller:
+    replicaCount: 1
