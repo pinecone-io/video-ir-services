@@ -44,7 +44,7 @@ cd ../downloader &&
 pnpm docker:build &&
 cd ../indexer
 pnpm docker:build &&
-cd
+cd ..
 
 
 #########

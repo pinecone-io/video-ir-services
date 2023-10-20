@@ -72,4 +72,11 @@ app.use("/data", express.static(join(__dirname, PINECONE_DATA_DIR_PATH)));
 app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)));
 app.get("/ping", (req, res) => res.send("pong2"));
 
+if (IS_PROD) {
+  const port = 3002;
+  app.listen(port, () => {
+    console.log(`Server started on ${port} port`);
+  });
+}
+
 export const viteNodeApp = app;

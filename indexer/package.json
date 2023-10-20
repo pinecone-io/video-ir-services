@@ -10,7 +10,9 @@
     "maintance:depcheck": "pnpm dlx depcheck",
     "maintance:outdated": "pnpm outdated",
     "start": "node dist/server",
-    "test": "vitest run --config vite.config.ts  --coverage --retry 5"
+    "test": "vitest run --config vite.config.ts  --coverage --retry 5",
+    "docker:build": "docker build -t video-recognition_indexer .",
+    "docker:run": "docker run -p 3002:3002 video-recognition_indexer"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
