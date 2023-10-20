@@ -11,7 +11,6 @@ helm install --dry-run --debug video-ir ./kube -f kube/values.yaml --create-name
 # Install/Upgrade
 helm upgrade --install video-ir ./kube -f kube/values.yaml --create-namespace --namespace dev
 
-
 # Delete all
 helm ls -n dev --all --short | xargs -L1 helm -n dev delete
 
@@ -33,7 +32,15 @@ kubectl delete all --all -n {namespace}
 kubectl exec -n dev -it {pod-name} -- /bin/bash
 
 ## In case someting is missing in pod eg. curl we can install it
-apt update && apt install curl -y
+apt update
+### curl to test urls
+apt install curl -y
+### this one is usefull to debug dns eg. nslookup redis to se how name is resolved
+apt-get install dnsutils
+### redis client to test connection
+apt-get install redis
+
+
 
 #########
 # Rebuild dockers

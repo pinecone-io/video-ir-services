@@ -24,6 +24,6 @@ spec:
         - containerPort: 3000
         env:
         - name: REDIS_HOST
-          value: "{{ .Release.Name }}-redis"
+          value: "redis-master"
         - name: REDIS_PORT
           value: "6379"

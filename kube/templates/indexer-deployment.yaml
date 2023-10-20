@@ -24,6 +24,6 @@ spec:
         - containerPort: 3002
         env:
         - name: REDIS_HOST
-          value: "{{ .Release.Name }}-redis.{{ .Release.Namespace }}.svc.cluster.local"
+          value: "redis-master"
         - name: REDIS_PORT
           value: "6379"
