@@ -4,9 +4,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-downloader
 spec:
+  type: LoadBalancer
   selector:
     app.kubernetes.io/name: {{ .Release.Name }}-downloader
   ports:
     - protocol: TCP
       port: 3001
       targetPort: 3001
+      nodePort: 30001

@@ -3,6 +3,7 @@
 #######
 
 # Install all dependecies
+cd kube
 helm dependency update
 
 # Debug and see the generated tamplates

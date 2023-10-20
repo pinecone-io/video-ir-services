@@ -20,5 +20,4 @@ spec:
             - name: KAFKA_CLUSTERS_0_NAME
               value: local
             - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
-              value: video-ir-kafka:9092
-
+              value: kafka:9092

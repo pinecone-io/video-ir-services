@@ -6,6 +6,7 @@ import { resolvers } from "./routes";
 import {
   PINECONE_DATA_DIR_PATH,
   PINECONE_OUTPUT_DIR_PATH,
+  IS_PROD,
 } from "./utils/environment";
 import { initIndex } from "./utils/pinecone";
 import { KafkaMessage } from "kafkajs";

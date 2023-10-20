@@ -1,21 +1,32 @@
-import { Kafka, Consumer, KafkaMessage } from "kafkajs";
+import { Kafka, Consumer, KafkaMessage, logLevel } from "kafkajs";
+
+
+const KAFKA_BROKER = "kafka"
 
 async function createKafkaConsumer(topic: string, messageHandler: (message: KafkaMessage) => void): Promise<Consumer> {
     const kafka = new Kafka({
-        clientId: "my-app",
-        brokers: ["video-ir-kafka:9092"],
+        clientId: "consumer-service",
+        brokers: [`${KAFKA_BROKER}:9092`],
+        logLevel: logLevel.DEBUG
     });
 
     const consumer = kafka.consumer({ groupId: "test-group-3" });
 
-    await consumer.connect();
-    await consumer.subscribe({ topic, fromBeginning: false });
-    await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-            console.log("Received message")
-            messageHandler(message);
-        },
-    });
+    console.log("KAFKA CONSUMER", kafka)
+    console.log("CONSUMER", consumer)
+
+    try {
+        await consumer.connect();
+        await consumer.subscribe({ topic, fromBeginning: false });
+        await consumer.run({
+            eachMessage: async ({ topic, partition, message }) => {
+                console.log("Received message")
+                messageHandler(message);
+            },
+        });
+    } catch (e) {
+        console.log("Failed connecting to Kafka", e)
+    }
     return consumer;
 }
 

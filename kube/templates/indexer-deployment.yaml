@@ -23,6 +23,8 @@ spec:
         ports:
         - containerPort: 3002
         env:
+        - name: IS_PROD
+          value: "true"
         - name: REDIS_HOST
           value: "redis-master"
         - name: REDIS_PORT

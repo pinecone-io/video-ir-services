@@ -1,11 +1,7 @@
-# For more options look https://github.com/bitnami/charts/tree/main/bitnami/redis#common-parameters
-redis:
+redis:  
   fullnameOverride: redis
   usePassword: false
   replica:
     replicaCount: 0
   auth:
     enabled: false
-kafka:
-  controller:
-    replicaCount: 1

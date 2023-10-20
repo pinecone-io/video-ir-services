@@ -19,3 +19,5 @@ export const AWS_ACCESS_KEY_ID = getEnv("VITE_AWS_ACCESS_KEY_ID");
 export const AWS_SECRET_ACCESS_KEY = getEnv("VITE_AWS_SECRET_ACCESS_KEY");
 export const AWS_S3_BUCKET = getEnv("VITE_AWS_S3_BUCKET");
 export const IS_PROD = import.meta.env.PROD;
+
+// export const KAFKA_BROKER = getEnv("KAFKA_BROKER");

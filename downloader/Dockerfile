@@ -7,6 +7,10 @@ WORKDIR /downloader
 # Install pnpm
 RUN npm install -g pnpm@8.6.12
 
+RUN apt-get update && \
+    apt-get install -y ffmpeg
+
+
 # Copy package.json and pnpm-lock.yaml to the working directory
 COPY package.json ./
 COPY pnpm-lock.yaml ./

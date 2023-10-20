@@ -26,7 +26,4 @@ appVersion: "1.16.0"
 dependencies:
   - name: redis
     version: 18.1.5
-    repository: https://charts.bitnami.com/bitnami
-  - name: kafka
-    version: 26.1.0
-    repository: https://charts.bitnami.com/bitnami 
+    repository: https://charts.bitnami.com/bitnami  
