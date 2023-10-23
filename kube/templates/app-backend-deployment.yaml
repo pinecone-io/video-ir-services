@@ -15,6 +15,11 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}-app-backend
     spec:
+      initContainers:
+      - name: wait-for-redis
+        image: goodsmileduck/redis-cli
+        imagePullPolicy: IfNotPresent
+        args: [ 'sh', '-c', 'until redis-cli -h redis-master -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
       containers:
       - name: app-backend
         image: video-recognition_api
