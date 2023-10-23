@@ -18,7 +18,7 @@ metadata:
   name: kafka-dev
 spec:
   serviceName: kafka-dev
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: kafka-dev
@@ -39,5 +39,7 @@ spec:
               value: "1"
             - name: KAFKA_ZOOKEEPER_CONNECT
               value: zookeeper:2181
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
           ports:
             - containerPort: 9092

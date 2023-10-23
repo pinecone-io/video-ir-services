@@ -5,12 +5,13 @@ const KAFKA_BROKER = "kafka-dev"
 class KafkaProducer {
     private producer: Producer;
     private topic: string;
+    private isConnected: boolean;
 
     constructor(topic: string) {
         const kafka = new Kafka({
             clientId: 'producer-service',
             brokers: [`${KAFKA_BROKER}:9092`],
-            logLevel: logLevel.DEBUG
+            logLevel: logLevel.INFO
         });
 
         this.producer = kafka.producer({
@@ -18,12 +19,15 @@ class KafkaProducer {
         });
 
         this.topic = topic;
-        this.connect();
+        this.isConnected = false;
+
     }
 
     private async connect() {
         try {
             await this.producer.connect();
+            this.isConnected = true; // Update after successful connection
+            console.log("Connected to Kafka")
         } catch (error) {
             console.error('Error connecting to Kafka:', error);
         }
@@ -31,6 +35,11 @@ class KafkaProducer {
 
     async sendMessages(messages: string[]) {
         try {
+            // Check if the producer is connected before sending messages
+            if (!this.isConnected) {
+                await this.connect();
+            }
+
             await this.producer.send({
                 topic: this.topic,
                 messages: messages.map((message: string) => ({
@@ -38,6 +47,7 @@ class KafkaProducer {
                     key: message
                 })),
             });
+            console.log("sent messages", messages)
         } catch (error) {
             console.error('Error sending messages to Kafka:', error);
         }

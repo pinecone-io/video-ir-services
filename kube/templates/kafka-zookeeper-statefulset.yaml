@@ -17,6 +17,7 @@ spec:
       labels:
         app: zookeeper
     spec:
+      terminationGracePeriodSeconds: 30
       initContainers:
         - command:
             - /bin/sh
