@@ -16,7 +16,7 @@ const routes: Route[] = [
                 const target = req.body.target as string;
                 const fps = req.body.fps as number;
                 const name = req.body.name as string;
-                console.log(target, fps, name);
+                console.log(`Downloading ${target}`)
                 await downloadS3(target, name, fps);
                 res.json({ message: "Downloaded" });
             } catch (error) {

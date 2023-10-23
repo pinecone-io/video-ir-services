@@ -14,7 +14,7 @@ const unlinkAsync = promisify(fs.unlink);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const client = await getAwsS3Client();
-const producer = new KafkaProducer("unprocessed-files-3");
+const producer = new KafkaProducer("unprocessed-files-4");
 
 const extractFrames = async (videoPath: string, name: string, fps: number): Promise<string[]> =>
     new Promise((resolve, reject) => {
@@ -34,8 +34,6 @@ const extractFrames = async (videoPath: string, name: string, fps: number): Prom
             .seek(15)
             .setDuration(2)
             .on("end", async () => {
-                console.log("END");
-
                 for (let i = 1; i <= frameCount; i += 1) {
                     const outputFilePath = join(outputFolder, `${i}.png`);
                     const fileBuffer = fs.readFileSync(outputFilePath);

@@ -28,7 +28,7 @@ const messageQueue: KafkaMessage[] = [];
 
 const messageEvent = new EventEmitter();
 
-const consumer = await createKafkaConsumer("unprocessed-files-3", async (message: KafkaMessage) => {
+const consumer = await createKafkaConsumer("unprocessed-files-4", async (message: KafkaMessage) => {
   messageQueue.push(message);
   messageEvent.emit('newMessage');
 });
