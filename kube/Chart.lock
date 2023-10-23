@@ -2,8 +2,5 @@ dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 18.1.5
-- name: kafka
-  repository: https://charts.bitnami.com/bitnami
-  version: 26.1.0
-digest: sha256:61f57727fad7971419c93bad413054bada983b202c5d0fdb71664e7b823a3945
-generated: "2023-10-20T17:31:22.263784+02:00"
+digest: sha256:59bc9bc7e892b3fd9fd7eafc44c09b1856e965246c9489ac0c92aa2ad88f9921
+generated: "2023-10-23T09:03:49.527558+02:00"
