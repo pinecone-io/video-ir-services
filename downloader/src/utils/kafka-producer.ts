@@ -5,10 +5,10 @@ const KAFKA_BROKER = "kafka-dev"
 class KafkaProducer {
     private producer: Producer;
     private admin: Admin;
-    private topic: string;
+    private topics: string[];
     private isConnected: boolean;
 
-    constructor(topic: string) {
+    constructor() {
         const kafka = new Kafka({
             clientId: 'producer-service',
             brokers: [`${KAFKA_BROKER}:9092`],
@@ -19,26 +19,24 @@ class KafkaProducer {
             createPartitioner: Partitioners.LegacyPartitioner
         });
         this.admin = kafka.admin();
-        this.topic = topic;
+        this.topics = ["topic-0", "topic-1"];
         this.isConnected = false;
-
     }
 
-    private async createTopic() {
+    private async createTopics() {
         console.log("creating topics")
         await this.admin.connect();
-        await this.admin.createTopics({
-            topics: [{ topic: this.topic, numPartitions: 3 }],
-        });
-
-        const topicMetadata = await this.admin.fetchTopicMetadata({ topics: [this.topic] });
-        console.log(topicMetadata);
+        for (const topic of this.topics) {
+            await this.admin.createTopics({
+                topics: [{ topic, numPartitions: 3 }],
+            });
+        }
         await this.admin.disconnect();
     }
 
     private async connect() {
         try {
-            await this.createTopic();
+            await this.createTopics();
             await this.producer.connect();
             this.isConnected = true; // Update after successful connection
             console.log("Connected to Kafka")
@@ -56,13 +54,13 @@ class KafkaProducer {
 
             for (let i = 0; i < messages.length; i++) {
                 const message = messages[i];
-                const key = `key-${i}`; // Change this to assign messages to specific partitions
-
+                const index = i % this.topics.length;
+                const topic = this.topics[index];
+                console.log(`Message index: ${i}, Topic index: ${index}, Topic: ${topic}`);
                 await this.producer.send({
-                    topic: this.topic,
+                    topic: topic!,
                     messages: [{
                         value: message!,
-                        key: key
                     }],
                 });
                 console.log("sent message", message)

@@ -14,7 +14,7 @@ const unlinkAsync = promisify(fs.unlink);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const client = await getAwsS3Client();
-const producer = new KafkaProducer("unprocessed-files-4");
+const producer = new KafkaProducer();
 
 const extractFrames = async (videoPath: string, name: string, fps: number): Promise<string[]> =>
     new Promise((resolve, reject) => {
