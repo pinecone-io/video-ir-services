@@ -1,7 +1,7 @@
 import { Kafka, Consumer, KafkaMessage, logLevel } from "kafkajs";
 
 
-const KAFKA_BROKER = "localhost"
+const KAFKA_BROKER = "kafka-dev"
 
 async function createKafkaConsumer(topic: string, messageHandler: (message: KafkaMessage) => void): Promise<Consumer> {
     const kafka = new Kafka({
