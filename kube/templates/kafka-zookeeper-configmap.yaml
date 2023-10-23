@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zookeeper-config
+  namespace: dev
+data:
+  ZOO_DATA_LOG_DIR: "/datalog"
+  ZOO_DATA_DIR: "/data"
+  ZOO_CONF_DIR: "/conf"
+  ZOO_SERVERS: "server.1=zookeeper-0.zookeeper:2888:3888;2181 server.2=zookeeper-1.zookeeper:2888:3888;2181 server.3=zookeeper-2.zookeeper:2888:3888;2181"

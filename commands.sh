@@ -45,7 +45,7 @@ telnet redis-master 6379
 telnet video-ir-kafka 9092
 
 # Port forwarding 
-kubectl port-forward service/kafka  9092:9092 -n dev
+kubectl port-forward service/kafka-dev  9092:9092 -n dev
 kubectl port-forward service/video-ir-rabbitmq 15672:15672 -n dev
 
 # Get password for kafka

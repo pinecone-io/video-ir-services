@@ -1,6 +1,6 @@
 import { Kafka, Partitioners, Producer, logLevel } from 'kafkajs';
 
-const KAFKA_BROKER = "kafka"
+const KAFKA_BROKER = "kafka-dev"
 
 class KafkaProducer {
     private producer: Producer;
