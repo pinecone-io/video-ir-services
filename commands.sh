@@ -51,6 +51,9 @@ kubectl port-forward service/video-ir-rabbitmq 15672:15672 -n dev
 # Get password for kafka
 kubectl get secret video-ir-kafka-user-passwords --namespace dev -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d , -f 1
 
+# Delete volumes
+kubectl delete pvc --all -n dev 
+
 
 #########
 # Rebuild dockers
