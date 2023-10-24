@@ -73,7 +73,7 @@ cd ..
 
 curl --location 'http://localhost:5173/api/resetDB'
 
-curl --location 'http://video-ir-dev-downloader:3001/api/download' \
+curl --location 'http://localhost:3001/api/download' \
 --header 'Content-Type: application/json' \
 --data '{
     "name": "highway-surveillance",
