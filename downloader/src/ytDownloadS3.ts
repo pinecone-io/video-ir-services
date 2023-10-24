@@ -47,7 +47,7 @@ const extractFrames = async (videoPath: string, name: string, fps: number): Prom
                     await unlinkAsync(outputFilePath);
 
                     // Send for indexing
-                    await producer.sendMessages([filePath]);
+                    await producer.sendMessage(filePath);
 
                 }
                 console.log("Frames extraction completed.");

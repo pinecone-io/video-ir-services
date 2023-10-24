@@ -16,7 +16,7 @@ class KafkaProducer {
         });
 
         this.producer = kafka.producer({
-            createPartitioner: Partitioners.LegacyPartitioner
+            createPartitioner: Partitioners.DefaultPartitioner
         });
         this.admin = kafka.admin();
         this.topics = ["topic-0", "topic-1"];
@@ -45,26 +45,23 @@ class KafkaProducer {
         }
     }
 
-    async sendMessages(messages: string[]) {
+    async sendMessage(message: string) {
+        // Generate a random key
+        const key = Math.random().toString(36).substring(2);
         try {
             // Check if the producer is connected before sending messages
             if (!this.isConnected) {
                 await this.connect();
             }
+            const topic = this.topics[0];
 
-            for (let i = 0; i < messages.length; i++) {
-                const message = messages[i];
-                const index = i % this.topics.length;
-                const topic = this.topics[index];
-                console.log(`Message index: ${i}, Topic index: ${index}, Topic: ${topic}`);
-                await this.producer.send({
-                    topic: topic!,
-                    messages: [{
-                        value: message!,
-                    }],
-                });
-                console.log("sent message", message)
-            }
+            await this.producer.send({
+                topic: topic!,
+                messages: [{
+                    value: message!,
+                    key
+                }],
+            });
         } catch (error) {
             console.error('Error sending messages to Kafka:', error);
         }
