@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: downloader
-        image: video-recognition_downloader
+        image: registry.digitalocean.com/devrel-registry/video-ir-downloader:0.0.1
         # TODO remove next line when we have AWS ECR
         imagePullPolicy: Never       
         ports:
@@ -29,3 +29,5 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+      imagePullSecrets:
+        - name: devrel-registry

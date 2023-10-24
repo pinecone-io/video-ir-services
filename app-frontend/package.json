@@ -26,8 +26,8 @@
     "maintance:outdated": "pnpm outdated",
     "start": "node dist",
     "test": "vitest run  --coverage --retry 5",
-    "docker:build": "docker build -t video-recognition_app-frontend .",
-    "docker:run": "docker run -p 3005:80 video-recognition_app-frontend"
+    "docker:build": "docker build -t roieki/video-ir-app-frontend:0.0.1 .",
+    "docker:run": "docker run -p 3005:80 roieki/video-ir-app-frontend:0.0.1"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",

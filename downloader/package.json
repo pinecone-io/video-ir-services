@@ -10,8 +10,8 @@
     "format:server": "eslint . --fix",
     "lint": "tsc --p . && eslint .",
     "start": "node dist",
-    "docker:build": "docker build -t video-recognition_downloader .",
-    "docker:run": "docker run -p 3001:3001 video-recognition_downloader"
+    "docker:build": "docker build -t roieki/video-ir-downloader:0.0.1 .",
+    "docker:run": "docker run -p 3001:3001 roieki/video-ir-downloader:0.0.1"
   },
   "devDependencies": {
     "typescript": "^5.0.2",
