@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import { getAwsS3Client, saveToS3Bucket } from "./utils/awsS3";
 import { AWS_S3_BUCKET } from "./utils/environment";
 import { KafkaProducer } from "./utils/kafka-producer";
+import { log } from "./utils/logger";
 const unlinkAsync = promisify(fs.unlink);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -45,12 +46,12 @@ const extractFrames = async (videoPath: string, name: string, fps: number): Prom
                     files.push(filePath);
                     // Delete the local file
                     await unlinkAsync(outputFilePath);
-
                     // Send for indexing
                     await producer.sendMessage(filePath);
 
                 }
                 console.log("Frames extraction completed.");
+                await log(`Extracted ${frameCount} frames.`);
                 resolve(files);
             })
             .on("progress", (progressData) => {

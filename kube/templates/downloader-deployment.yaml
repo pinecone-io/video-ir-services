@@ -25,3 +25,7 @@ spec:
         env:
         - name: KAFKA_BROKER
           value: kafka-service.dev.svc.cluster.local
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name

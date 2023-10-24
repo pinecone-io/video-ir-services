@@ -29,6 +29,7 @@ import {
   getS3SignedUrl,
   saveToS3Bucket,
 } from "./utils/awsS3";
+import { completeFile, log } from "./utils/logger";
 
 const modelName = "Xenova/clip-vit-large-patch14";
 const namespace = PINECONE_NAMESPACE;
@@ -236,6 +237,7 @@ async function embedAndUpsert({
             (x) => x.values.length > 0,
           );
           await ns.upsert(filteredEmbeddings);
+          log(`Done saving batch`);
         } catch (e) {
           console.error(
             "error chunked upsert", e,
@@ -252,7 +254,6 @@ async function embedAndUpsert({
 await embedder.init(modelName);
 
 const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: number; filesList?: string[]; }) => {
-  console.log("indexing images");
   const client = await getAwsS3Client();
   let list: string[] = []
   if (!filesList && name) {
@@ -272,14 +273,12 @@ const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: 
     list = filesList;
   }
 
-  console.log("Processing files: ", list.length)
-
   for (const fileName of list) {
     try {
-      console.log("LIST", list.length);
       const segmentedFiles = (await segmentImage(fileName || ""))?.filter(x => x) || [];
-      console.log("Segmented files: ", segmentedFiles)
       await embedAndUpsert({ imagePaths: segmentedFiles, chunkSize: 100 });
+      await log(`Done indexing ${fileName}`);
+      await completeFile(fileName);
     } catch (error) {
       console.error(`Error processing file ${fileName}: ${error}`);
     }

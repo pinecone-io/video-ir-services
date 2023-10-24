@@ -1,4 +1,5 @@
 import { Admin, Kafka, Partitioners, Producer, logLevel } from 'kafkajs';
+import { log, trackFile } from './logger';
 
 const KAFKA_BROKER = "kafka-dev"
 
@@ -54,7 +55,8 @@ class KafkaProducer {
                 await this.connect();
             }
             const topic = this.topics[0];
-
+            await log(`Sending message: ${message}`);
+            await trackFile(message)
             await this.producer.send({
                 topic: topic!,
                 messages: [{
