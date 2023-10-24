@@ -32,8 +32,6 @@ const extractFrames = async (videoPath: string, name: string, fps: number): Prom
         ffmpeg(videoPath)
             .outputOptions([`-vf fps=${fps}`])
             .output(join(outputFolder, "%d.png"))
-            .seek(15)
-            .setDuration(2)
             .on("end", async () => {
                 for (let i = 1; i <= frameCount; i += 1) {
                     const outputFilePath = join(outputFolder, `${i}.png`);

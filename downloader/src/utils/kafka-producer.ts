@@ -6,7 +6,7 @@ const KAFKA_BROKER = "kafka-dev"
 class KafkaProducer {
     private producer: Producer;
     private admin: Admin;
-    private topics: string[];
+    private topic: string;
     private isConnected: boolean;
 
     constructor() {
@@ -20,18 +20,16 @@ class KafkaProducer {
             createPartitioner: Partitioners.DefaultPartitioner
         });
         this.admin = kafka.admin();
-        this.topics = ["topic-0", "topic-1"];
+        this.topic = "topic-0";
         this.isConnected = false;
     }
 
     private async createTopics() {
         console.log("creating topics")
         await this.admin.connect();
-        for (const topic of this.topics) {
-            await this.admin.createTopics({
-                topics: [{ topic, numPartitions: 3 }],
-            });
-        }
+        await this.admin.createTopics({
+            topics: [{ topic: this.topic, numPartitions: 3 }],
+        });
         await this.admin.disconnect();
     }
 
@@ -54,7 +52,7 @@ class KafkaProducer {
             if (!this.isConnected) {
                 await this.connect();
             }
-            const topic = this.topics[0];
+            const topic = this.topic;
             await log(`Sending message: ${message}`);
             await trackFile(message)
             await this.producer.send({

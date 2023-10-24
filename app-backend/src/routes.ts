@@ -142,15 +142,13 @@ const routes: Route[] = [
       res.setHeader('Connection', 'keep-alive');
 
       // Function to send data every second
-      const sendUpdates = progressTracker.startProgressPolling((data) => {
-        console.log("SUPPOSED TO SEND UPDATE")
-        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      progressTracker.startProgressPolling((data: { val: number, ratio: string }) => {
+        res.write(`progress: ${data.val} (${data.ratio})`);
+      }, () => {
+        setTimeout(() => {
+          res.end();
+        }, 3000)
       })
-
-      // When the client closes the connection, stop sending updates
-      req.on('close', () => {
-        clearInterval(sendUpdates);
-      });
     },
   },
 
