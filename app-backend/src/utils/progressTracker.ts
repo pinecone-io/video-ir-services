@@ -47,12 +47,15 @@ class ProgressTracker {
     }
 
     startProgressPolling(fn: (payload: { val: number, ratio: string }) => void, onDone: () => void): void {
+        console.log("Starting polling");
         this.eventEmitter.on('filesToProcessChanged', () => {
-            const progress = this.getProgress()
+            const progress = this.getProgress();
+            console.log('filesToProcessChanged', progress)
             fn(progress);
         });
         this.eventEmitter.on('processedFilesChanged', () => {
             const progress = this.getProgress();
+            console.log('processedFilesChanged', progress)
             fn(progress);
             if (progress.val === 100) {
                 onDone();

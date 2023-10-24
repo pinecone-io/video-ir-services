@@ -143,11 +143,13 @@ const routes: Route[] = [
 
       // Function to send data every second
       progressTracker.startProgressPolling((data: { val: number, ratio: string }) => {
-        res.write(`progress: ${data.val} (${data.ratio})`);
+        console.log(`Before writing ${data.val}`)
+        res.write(`progress: ${data.ratio} (${data.val}%)\n\n`);
       }, () => {
-        setTimeout(() => {
-          res.end();
-        }, 3000)
+        console.log("Processing complete.")
+        // setTimeout(() => {
+        //   res.end();
+        // }, 3000)
       })
     },
   },
