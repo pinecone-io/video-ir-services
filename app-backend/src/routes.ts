@@ -141,16 +141,22 @@ const routes: Route[] = [
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
 
+      let count = 1;
+      setInterval(()=>{
+        res.write(`progress: ${count++}\n`);
+        console.log(count)
+      }, 1000)
+
       // Function to send data every second
-      progressTracker.startProgressPolling((data: { val: number, ratio: string }) => {
-        console.log(`Before writing ${data.val}`)
-        res.write(`progress: ${data.ratio} (${data.val}%)\n\n`);
-      }, () => {
-        console.log("Processing complete.")
-        // setTimeout(() => {
-        //   res.end();
-        // }, 3000)
-      })
+      // progressTracker.startProgressPolling((data: { val: number, ratio: string }) => {
+      //   console.log(`Before writing ${data.val}`)
+      //   res.write(`progress: ${data.ratio} (${data.val}%)\n\n`);
+      // }, () => {
+      //   console.log("Processing complete.")
+      //   // setTimeout(() => {
+      //   //   res.end();
+      //   // }, 3000)
+      // })
     },
   },
 
