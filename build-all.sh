@@ -1,9 +1,9 @@
 cd app-backend &&
-pnpm docker:build &&
-cd app-frontend &&
-pnpm docker:build &&
+pnpm docker &&
+cd ../app-frontend &&
+pnpm docker &&
 cd ../downloader &&
-pnpm docker:build &&
+pnpm docker &&
 cd ../indexer
-pnpm docker:build &&
+pnpm docker &&
 cd ..
