@@ -21,4 +21,4 @@ spec:
         # TODO remove next line when we have AWS ECR
         imagePullPolicy: Never
         ports:
-        - containerPort: 80
+        - containerPort: 3005
