@@ -73,15 +73,15 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: hostpath
+        storageClassName: do-block-storage
         resources:
           requests:
-            storage: 100Mi
+            storage: 1Gi
     - metadata:
         name: datalog
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: hostpath
+        storageClassName: do-block-storage
         resources:
           requests:
-            storage: 100Mi
+            storage: 1Gi

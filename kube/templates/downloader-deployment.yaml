@@ -17,9 +17,7 @@ spec:
     spec:
       containers:
       - name: downloader
-        image: video-recognition_downloader
-        # TODO remove next line when we have AWS ECR
-        imagePullPolicy: Never       
+        image: registry.digitalocean.com/devrel-registry/video-recognition_downloader      
         ports:
         - containerPort: 3001
         env:

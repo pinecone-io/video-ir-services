@@ -22,9 +22,7 @@ spec:
         args: [ 'sh', '-c', 'until redis-cli -h redis-master -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
       containers:
       - name: indexer
-        image: video-recognition_indexer
-        # TODO remove next line when we have AWS ECR
-        imagePullPolicy: Never
+        image: registry.digitalocean.com/devrel-registry/video-recognition_indexer
         ports:
         - containerPort: 3002
         env:
