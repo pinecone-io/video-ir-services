@@ -3,8 +3,11 @@ import { labelBoxes, negativeLabel } from "./label";
 import { getImages, queryBox } from "./query";
 import { resetDB } from "./reset";
 import { ProgressTracker } from './utils/progressTracker'
+import { IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
 
 const progressTracker = new ProgressTracker();
+const indexerInstancesTracker = new IndexerInstanceTracker()
+const indexerInstancesTrackerListener = indexerInstancesTracker.getAllInstancesReadyEmitter()
 
 interface Route {
   route: string;
@@ -153,26 +156,54 @@ const routes: Route[] = [
       })
     },
   },
+  {
+    route: "/registerIndexer",
+    method: "post",
+    handler: (req, res) => {
 
+      const { id, status } = req.body
+      console.log("registering instance", id, status)
+      indexerInstancesTracker.updateInstance(id, status)
+      res.status(200).send('success')
+    }
+  },
   {
     route: "/health",
     method: "get",
-    handler: async (req, res) => {
-      const downloaderApi = await fetch(
-        "http://video-ir-dev-downloader:3001/api/health"
-      )
-        .then((response) => response.json())
-        .catch((error) => error);
+    handler: (req, res) => {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
 
-      const indexerApi = await fetch(
-        "http://video-ir-dev-indexer:3002/api/health"
-      )
-        .then((response) => response.json())
-        .catch((error) => error);
+      indexerInstancesTrackerListener.on('instancesUpdated', (data) => {
+        if (!res.writableFinished) {
+          res.write(`${JSON.stringify(data)}\n\n`)
+        }
+      })
 
-      res
-        .status(200)
-        .json([{ message: "App Backend server is healthy :)" }, downloaderApi, indexerApi]);
+      indexerInstancesTrackerListener.on('allInstancesReady', () => {
+        if (!res.writableFinished) {
+          res.write(`ready\n\n`);
+          res.end();
+        }
+      })
+
+
+      //   const downloaderApi = await fetch(
+      //     "http://video-ir-dev-downloader:3001/api/health"
+      //   )
+      //     .then((response) => response.json())
+      //     .catch((error) => error);
+
+      //   const indexerApi = await fetch(
+      //     "http://video-ir-dev-indexer:3002/api/health"
+      //   )
+      //     .then((response) => response.json())
+      //     .catch((error) => error);
+
+      //   res
+      //     .status(200)
+      //     .json([{ message: "App Backend server is healthy :)" }, downloaderApi, indexerApi]);
     },
   },
 ];

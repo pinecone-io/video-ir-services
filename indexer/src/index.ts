@@ -22,6 +22,23 @@ const app: Express = express();
 // Ensure that Pinecone index exist
 await initIndex();
 
+(async () => {
+  console.log(`Registering pod ${process.env.POD_NAME}`)
+  // Your code here
+  const response = await fetch('http://video-ir-dev-app-backend:3000/api/registerIndexer', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ id: process.env.POD_NAME, status: false })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to register instance: ${response.statusText}`);
+  }
+})();
+
+
+
 
 let isProcessing = false;
 const messageQueue: KafkaMessage[] = [];
@@ -75,8 +92,19 @@ app.get("/ping", (req, res) => res.send("pong2"));
 
 if (IS_PROD) {
   const port = 3002;
-  app.listen(port, () => {
+  app.listen(port, async () => {
     console.log(`Server started on ${port} port`);
+    console.log(`Pod ${process.env.POD_NAME} is ready.`)
+    const response = await fetch('http://video-ir-dev-app-backend:3000/api/registerIndexer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: process.env.POD_NAME, status: true })
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to register instance: ${response.statusText}`);
+    }
   });
 }
 

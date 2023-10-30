@@ -40,7 +40,7 @@ COPY --from=builder /app-frontend/dist .
 COPY --from=builder /app-frontend/nginx.conf /etc/nginx
 
 # Expose 80 port
-EXPOSE 80
+EXPOSE 9000
 
 # Start nginx 
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

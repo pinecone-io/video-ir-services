@@ -12,7 +12,7 @@ type TFormInput = {
 
 const IndexingPage: React.FC = () => {
   const [serverError, setServerError] = useState();
-  const [progressMasseges, setProgressMessages] = useState("");
+  const [progressMessages, setProgressMessages] = useState("");
 
   useEffect(() => {
     trackProgress((evt) => {
@@ -27,7 +27,9 @@ const IndexingPage: React.FC = () => {
     formState: { isSubmitting, isValid },
   } = useForm<TFormInput>({
     defaultValues: {
-      fps: 30,
+      youtubeUrl: "https://www.youtube.com/watch?v=PJ5xXXcfuTc",
+      name: "highway-surveillance",
+      fps: 1,
     },
   });
 
@@ -103,7 +105,7 @@ const IndexingPage: React.FC = () => {
 
           <div className="p-4 mb-4 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[300px] whitespace-pre-line overflow-auto">
             <b>Progress console</b> <br />
-            {`${progressMasseges}`}
+            {`${progressMessages}`}
           </div>
         </form>
       </div>

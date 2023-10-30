@@ -1,6 +1,6 @@
 cd app-backend &&
 pnpm docker:build &&
-cd app-frontend &&
+cd ../app-frontend &&
 pnpm docker:build &&
 cd ../downloader &&
 pnpm docker:build &&

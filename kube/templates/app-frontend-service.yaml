@@ -9,5 +9,5 @@ spec:
     app.kubernetes.io/name: {{ .Release.Name }}-app-frontend
   ports:
     - protocol: TCP
-      port: 3005
-      targetPort: 80
+      port: 9000
+      targetPort: 9000
