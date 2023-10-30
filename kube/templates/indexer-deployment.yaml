@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Release.Name }}-indexer
 spec:
-  replicas: 4
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Release.Name }}-indexer
@@ -25,6 +25,14 @@ spec:
         image: registry.digitalocean.com/devrel-registry/video-recognition_indexer
         ports:
         - containerPort: 3002
+        # Consider adding in future
+        # resources:
+        #   requests:
+        #     memory: "1Gi"
+        #     cpu: "500m"
+        #   limits:
+        #     memory: "2Gi"
+        #     cpu: "1"
         env:
         - name: IS_PROD
           value: "true"
