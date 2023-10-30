@@ -25,8 +25,6 @@ spec:
         image: registry.digitalocean.com/devrel-registry/video-recognition_app-backend
         ports:
         - containerPort: 3000
-        env:
-        - name: REDIS_HOST
-          value: "redis-master"
-        - name: REDIS_PORT
-          value: "6379"
+        envFrom:
+        - secretRef:
+            name: app-backend-env
