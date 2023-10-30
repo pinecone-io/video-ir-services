@@ -22,25 +22,8 @@ COPY . .
 # Build everything
 RUN pnpm build
 
-############################################################
+# Expose port 3005 for the app to listen on
+EXPOSE 3005
 
-# STAGE 2
-FROM nginx:1.19.0
-
-# Set working dir
-WORKDIR /usr/share/nginx/html
-
-# Remove existing public files
-RUN rm -rf ./*
-
-# Copy React build files
-COPY --from=builder /app-frontend/dist .
-
-# Copy nginx configuration
-COPY --from=builder /app-frontend/nginx.conf /etc/nginx
-
-# Expose 80 port
-EXPOSE 9000
-
-# Start nginx 
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+# Start the app
+CMD [ "pnpm", "start" ]

@@ -55,6 +55,12 @@ kubectl get secret video-ir-kafka-user-passwords --namespace dev -o jsonpath='{.
 kubectl delete pvc --all -n dev 
 
 
+# Context
+kubectl config get-contexts
+kubectl config use-context do-sfo3-viral-cluster-0
+
+
+
 #########
 # Rebuild dockers
 ########
