@@ -26,6 +26,16 @@ resolvers.forEach((resolver) => {
 });
 app.use(express.json());
 
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+
 app.use("/api", router);
 
 app.use("/data", express.static(join(__dirname, PINECONE_DATA_DIR_PATH)));
