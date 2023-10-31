@@ -18,7 +18,7 @@
     "docker:run": "docker run -p 3000:3000 video-recognition_app-backend",
     "docker:local": "pnpm docker:local:build && pnpm docker:local:tag",
     "docker:local:build": "docker build -t video-recognition_app-backend .",
-    "docker:local:tag": "docker tag video-recognition_app-backend video-recognition_app-backend:latest"
+    "docker:local:tag": "docker tag video-recognition_app-backend video-recognition_app-backend:local"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

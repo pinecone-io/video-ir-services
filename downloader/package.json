@@ -14,7 +14,10 @@
     "docker:build": "docker build --platform=linux/amd64 -t video-recognition_downloader .",
     "docker:tag": "docker tag video-recognition_downloader registry.digitalocean.com/devrel-registry/video-recognition_downloader",
     "docker:push": "docker push registry.digitalocean.com/devrel-registry/video-recognition_downloader",
-    "docker:run": "docker run -p 3001:3001 video-recognition_downloader"
+    "docker:run": "docker run -p 3001:3001 video-recognition_downloader",
+    "docker:local": "pnpm docker:local:build && pnpm docker:local:tag",
+    "docker:local:build": "docker build -t video-recognition_downloader .",
+    "docker:local:tag": "docker tag video-recognition_downloader video-recognition_downloader:local"
   },
   "devDependencies": {
     "typescript": "^5.0.2",

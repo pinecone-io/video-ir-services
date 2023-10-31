@@ -15,7 +15,10 @@
     "docker:build": "docker build --platform=linux/amd64 -t video-recognition_indexer .",
     "docker:tag": "docker tag video-recognition_indexer registry.digitalocean.com/devrel-registry/video-recognition_indexer",
     "docker:push": "docker push registry.digitalocean.com/devrel-registry/video-recognition_indexer",
-    "docker:run": "docker run -p 3002:3002 video-recognition_indexer"
+    "docker:run": "docker run -p 3002:3002 video-recognition_indexer",
+    "docker:local": "pnpm docker:local:build && pnpm docker:local:tag",
+    "docker:local:build": "docker build -t video-recognition_indexer .",
+    "docker:local:tag": "docker tag video-recognition_indexer video-recognition_indexer:local"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

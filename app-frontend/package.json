@@ -30,7 +30,10 @@
     "docker:build": "docker build --platform=linux/amd64 -t video-recognition_app-frontend .",
     "docker:tag": "docker tag video-recognition_app-frontend registry.digitalocean.com/devrel-registry/video-recognition_app-frontend",
     "docker:push": "docker push registry.digitalocean.com/devrel-registry/video-recognition_app-frontend",
-    "docker:run": "docker run -p 3005:3005 video-recognition_app-frontend"
+    "docker:run": "docker run -p 3005:3005 video-recognition_app-frontend",
+    "docker:local": "pnpm docker:local:build && pnpm docker:local:tag",
+    "docker:local:build": "docker build -t video-recognition_app-frontend .",
+    "docker:local:tag": "docker tag video-recognition_app-frontend video-recognition_app-frontend:local"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
