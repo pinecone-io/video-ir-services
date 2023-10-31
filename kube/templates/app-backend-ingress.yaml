@@ -3,12 +3,15 @@ kind: Ingress
 metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
+  ingressClassName: nginx
   rules:
   - http:
       paths:
-      - pathType: Prefix
-        path: "/"
+      - pathType: ImplementationSpecific
+        path: "/api/(.*)"
         backend:
           service:
             name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend

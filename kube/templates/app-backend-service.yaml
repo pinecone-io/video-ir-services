@@ -4,10 +4,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend
 spec:
-  type: LoadBalancer
   selector:
     app.kubernetes.io/name: {{ .Release.Name }}-app-backend
   ports:
-    - protocol: TCP
+    - name: http
       port: 3000
       targetPort: 3000

@@ -4,6 +4,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-frontend-ingress
 spec:
+  ingressClassName: nginx
   rules:
   - http:
       paths:
