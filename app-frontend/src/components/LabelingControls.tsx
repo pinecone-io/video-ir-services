@@ -24,11 +24,12 @@ interface DropResult {
 const ImageComponent: React.FC<ImageProps> = ({ labeledImage, onClick }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.BOX,
-    item: { name },
+    item: { name, labeledImage },
     end: (item, monitor) => {
       const dropResult = monitor.getDropResult<DropResult>();
       if (item && dropResult) {
-        alert(`You dropped ${item.name} into ${dropResult.name}!`);
+        console.log(`DROP RESULT`, item)
+        // alert(`You dropped ${item.name} into ${dropResult.name}!`);
       }
     },
     collect: (monitor) => ({
@@ -89,6 +90,16 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
   const [images, setImages] = useState<
     Array<{ boxId: string; path: string; label: string }>
   >([]);
+
+
+  const [imagesToLabel, setImagesToLabel] = useState<
+    Array<{ boxId: string; path: string; label: string }>
+  >([]);
+
+  const [imagesToNegativeLabel, setImagesToNegativeLabel] = useState<
+    Array<{ boxId: string; path: string; label: string }>
+  >([]);
+
   const [labelValue, setLabelValue] = useState<string>("");
 
   const handleDelete = async (selectedBox: string, boxId: string) => {
@@ -96,6 +107,25 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
     // Remove the image from the state
     // setImagePaths((prev) => prev.filter((image) => image.boxId !== boxId));
   };
+
+
+  const addToLabel = (boxId: string) => {
+    const image = { ...images.find((image) => image.boxId === boxId) };
+    if (!image) return;
+
+    const imageCopy = JSON.parse(JSON.stringify(image));
+
+    setImagesToLabel((prev) => [...prev, imageCopy]);
+    setImages((prev) => prev.filter((image) => image.boxId !== boxId));
+  }
+
+  const addToNegativeLabel = (boxId: string) => {
+    const image = images.find((image) => image.boxId === boxId);
+    if (!image) return;
+
+    const imageCopy = JSON.parse(JSON.stringify(image));
+    setImagesToNegativeLabel((prev) => [...prev, imageCopy]);
+  }
 
   useEffect(() => {
     //Async function to queryBoxImages
@@ -132,7 +162,11 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
 
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: ItemTypes.BOX,
-    drop: () => ({ name: "Dustbin" }),
+    drop: (item: { name: string, labeledImage: { boxId: string } }) => {
+      console.log(`IN DROP`, item)
+      addToNegativeLabel(item.labeledImage.boxId);
+      return { item };
+    },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
@@ -142,7 +176,11 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
   const [{ canDrop: canDropSecond, isOver: isOverSecond }, dropSecond] =
     useDrop(() => ({
       accept: ItemTypes.BOX,
-      drop: () => ({ name: "Dustbin" }),
+      drop: (item: { name: string, labeledImage: { boxId: string } }) => {
+        console.log(`IN DROP`, item)
+        addToLabel(item.labeledImage.boxId);
+        return { item };
+      },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
@@ -191,6 +229,15 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
           data-testid="dustbin"
         >
           {isActive ? "Release to drop" : "Drag a box here"}
+          {imagesToNegativeLabel.map((labeledImage) => {
+            return (
+              <ImageComponent
+                key={labeledImage.boxId}
+                labeledImage={labeledImage}
+                onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
+              />
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
@@ -213,6 +260,15 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
           data-testid="dustbin"
         >
           {isActiveSecond ? "Release to drop" : "Drag a box here"}
+          {imagesToLabel.map((labeledImage) => {
+            return (
+              <ImageComponent
+                key={labeledImage.boxId}
+                labeledImage={labeledImage}
+                onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
