@@ -6,12 +6,12 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/use-regex: {{ .Values.appBackend.ingress.useRegex | quote }}
 spec:
-  {{ if .Values.appBackend.ingress.ingressClassName }}ingressClassName: {{ .Values.appBackend.ingress.ingressClassName}} {{ end }}
+  {{ if .Values.appBackend.ingress.ingressClassName }}ingressClassName: {{ .Values.appBackend.ingress.ingressClassName}}{{ end }}
   rules:
   - http:
       paths:
       - pathType: {{ .Values.appBackend.ingress.pathType }}
-        path: {{ .Values.appBackend.ingress.path }}
+        path: {{ .Values.appBackend.ingress.path | quote }}
         backend:
           service:
             name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend

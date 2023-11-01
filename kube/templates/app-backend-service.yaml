@@ -8,4 +8,4 @@ spec:
   selector:
     app.kubernetes.io/name: {{ .Release.Name }}-app-backend
   ports:
-    {{ toYaml .Values.appBackend.service.ports }}
+    {{ .Values.appBackend.service.ports | toYaml | indent 4 | trim }}
