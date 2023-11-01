@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: app-frontend
-        image: registry.digitalocean.com/devrel-registry/video-recognition_app-frontend
+        image: {{ .Values.appFronend.deployment.image }}
         ports:
         - containerPort: 3005

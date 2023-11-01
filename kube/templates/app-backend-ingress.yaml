@@ -4,14 +4,14 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend-ingress
   annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/use-regex: {{ .Values.appBackend.ingress.useRegex | quote }}
 spec:
-  ingressClassName: nginx
+  {{ if .Values.appBackend.ingress.ingressClassName }}ingressClassName: {{ .Values.appBackend.ingress.ingressClassName}} {{ end }}
   rules:
   - http:
       paths:
-      - pathType: ImplementationSpecific
-        path: "/api/(.*)"
+      - pathType: {{ .Values.appBackend.ingress.pathType }}
+        path: {{ .Values.appBackend.ingress.path }}
         backend:
           service:
             name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend
