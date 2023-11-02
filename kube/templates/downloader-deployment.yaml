@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: downloader
-        image: {{ .Values.downloader.deployment.image }}      
+        image: {{ .Values.downloader.deployment.image }}
+        imagePullPolicy: {{ .Values.downloader.deployment.imagePullPolicy }}        
         ports:
         - containerPort: 3001
         env:

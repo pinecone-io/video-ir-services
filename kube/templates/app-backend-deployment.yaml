@@ -25,7 +25,7 @@ spec:
       containers:
       - name: app-backend
         image: {{ .Values.appBackend.deployment.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.appBackend.deployment.imagePullPolicy }}
         ports:
         - containerPort: 3000
         envFrom:

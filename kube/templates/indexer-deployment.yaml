@@ -23,6 +23,7 @@ spec:
       containers:
       - name: indexer
         image: {{ .Values.indexer.deployment.image }}
+        imagePullPolicy: {{ .Values.indexer.deployment.imagePullPolicy }}  
         ports:
         - containerPort: 3002
         # Consider adding in future

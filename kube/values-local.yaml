@@ -9,6 +9,7 @@ redis:
 appBackend:
   deployment:
     image: video-recognition_app-backend:local
+    imagePullPolicy: Never
   ingress:
     ingressClassName: null
     useRegex: false
@@ -24,13 +25,16 @@ appBackend:
 appFronend:
   deployment:
     image: video-recognition_app-frontend:local
+    imagePullPolicy: Never
   ingress:
     ingressClassName: null
 
 downloader:
   deployment:
     image: "video-recognition_downloader:local"
+    imagePullPolicy: Never
 
 indexer:
   deployment:
     image: "video-recognition_indexer:local"
+    imagePullPolicy: Never

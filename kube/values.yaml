@@ -9,6 +9,7 @@ redis:
 appBackend:
   deployment:
     image: registry.digitalocean.com/devrel-registry/video-recognition_app-backend
+    imagePullPolicy: Always
   ingress:
     useRegex: true
     ingressClassName: "nginx"
@@ -23,13 +24,16 @@ appBackend:
 appFronend:
   deployment:
     image: registry.digitalocean.com/devrel-registry/video-recognition_app-frontend
+    imagePullPolicy: Always
   ingress:
     ingressClassName: nginx
 
 downloader:
   deployment:
     image: "registry.digitalocean.com/devrel-registry/video-recognition_downloader"
+    imagePullPolicy: Always
 
 indexer:
   deployment:
     image: "registry.digitalocean.com/devrel-registry/video-recognition_indexer"
+    imagePullPolicy: Always

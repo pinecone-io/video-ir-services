@@ -57,7 +57,7 @@ kubectl delete pvc --all -n dev
 
 # Context
 kubectl config get-contexts
-kubectl config use-context do-sfo3-viral-cluster-0
+kubectl config use-context do-sfo2-virtal-cluster-1
 kubectl config use-context docker-desktop
 
 
