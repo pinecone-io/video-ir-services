@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import Loading from "../components/Loading";
 import { download } from "../services/downloadService.ts";
 import { trackProgress } from "../services/trackProgress.ts";
+import io from "socket.io-client";
 
 type TFormInput = {
   fps: number;
@@ -13,13 +14,27 @@ type TFormInput = {
 const IndexingPage: React.FC = () => {
   const [serverError, setServerError] = useState();
   const [progressMessages, setProgressMessages] = useState("");
+  const socket = io('http://167.172.8.153/', {
+    path: '/app-sockets/sockets/',
+    reconnection: false,
+    secure: true,
+    transports: ['websocket'],
+  }); // replace with your server URL
 
   useEffect(() => {
     trackProgress((evt) => {
       const response = evt.event.target.responseText;
       setProgressMessages(response);
     });
-  }, []);
+
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+  }, [socket]);
 
   const {
     register,

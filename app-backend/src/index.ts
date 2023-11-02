@@ -1,7 +1,8 @@
 import express, { Express, Router } from "express";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { createServer } from "vite";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 import { resolvers } from "./routes";
 import {
@@ -15,7 +16,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app: Express = express();
-
+const server = createServer(app);
+const io = new Server(server, {
+  path: "/app-sockets/sockets",
+  cors: {
+    origin: "*", // Allow all origins
+    methods: ["GET", "POST"], // Allow GET and POST methods    
+  },
+  transports: ["websocket"]
+});
 // Ensure that Pinecone index exist
 await initIndex();
 
@@ -41,6 +50,11 @@ app.use("/api", router);
 app.use("/data", express.static(join(__dirname, PINECONE_DATA_DIR_PATH)));
 app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)));
 app.get("/ping", (req, res) => res.send("pong2"));
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  // handle socket events here
+});
 
 if (IS_PROD) {
   const port = 3000;
