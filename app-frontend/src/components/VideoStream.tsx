@@ -132,9 +132,8 @@ const VideoStream: React.FC<VideoStramProps> = (props) => {
             >
               <FontAwesomeIcon
                 size="2x"
-                className={`text-white p-controlsPlayBtn ${
-                  !isPlaying ? "ml-[6px]" : ""
-                }`}
+                className={`text-white p-controlsPlayBtn ${!isPlaying ? "ml-[6px]" : ""
+                  }`}
                 icon={isPlaying ? faPause : faPlay}
               />
             </button>
@@ -152,11 +151,11 @@ const VideoStream: React.FC<VideoStramProps> = (props) => {
           </div>
         </div>
       </div>
-      <div className="flex justify-center bg-primary-1000 w-full mt-[100px]">
+      <div className="flex justify-center bg-primary-1000 w-full mt-[100px] min-h-[300px]">
         <LabelingControls selectedBox={selectedBox} />
       </div>
-      <footer className="text-center text-black p-footer">
-        <p>All Rights Reserved by Pinecone</p>
+      <footer className="text-center text-black p-smallFooter fixed bottom-0 w-full bg-white z-50">
+        <p className="p-2">All Rights Reserved by Pinecone</p>
       </footer>
     </>
   );

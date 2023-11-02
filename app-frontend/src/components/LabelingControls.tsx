@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import { labelBoxes } from "../services/labelBoxesService";
 import { queryBox } from "../services/boxService";
 import { negativeLabel } from "../services/negativeLabelService";
@@ -16,6 +16,8 @@ type ImageProps = {
   };
   onClick: () => void;
 };
+
+type LabeledImage = { boxId: string; path: string; label: string }
 
 interface DropResult {
   name: string;
@@ -88,16 +90,17 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage, onClick }) => {
 const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
   //tailwind 10px padding
   const [images, setImages] = useState<
-    Array<{ boxId: string; path: string; label: string }>
+    Array<LabeledImage>
   >([]);
+  const imagesRef = useRef(images);
 
 
   const [imagesToLabel, setImagesToLabel] = useState<
-    Array<{ boxId: string; path: string; label: string }>
+    Array<LabeledImage>
   >([]);
 
   const [imagesToNegativeLabel, setImagesToNegativeLabel] = useState<
-    Array<{ boxId: string; path: string; label: string }>
+    Array<LabeledImage>
   >([]);
 
   const [labelValue, setLabelValue] = useState<string>("");
@@ -109,23 +112,36 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
   };
 
 
-  const addToLabel = (boxId: string) => {
-    const image = { ...images.find((image) => image.boxId === boxId) };
-    if (!image) return;
+  const addToLabel = async (boxId: string) => {
+    return new Promise((resolve) => {
+      setImagesToLabel((prev) => {
+        const image = images.find((image) => image.boxId === boxId);
+        if (!image) return prev
 
-    const imageCopy = JSON.parse(JSON.stringify(image));
+        const imageCopy = JSON.parse(JSON.stringify(image));
+        setImages((prevImages) => prevImages.filter((image) => image.boxId !== boxId));
 
-    setImagesToLabel((prev) => [...prev, imageCopy]);
-    setImages((prev) => prev.filter((image) => image.boxId !== boxId));
-  }
+        return [...prev, imageCopy];
+      });
+      resolve(null)
+    })
+  };
 
-  const addToNegativeLabel = (boxId: string) => {
-    const image = images.find((image) => image.boxId === boxId);
-    if (!image) return;
+  const addToNegativeLabel = async (boxId: string) => {
+    return new Promise((resolve) => {
+      setImagesToNegativeLabel((prev) => {
+        const image = images.find((image) => image.boxId === boxId);
+        if (!image) return prev
 
-    const imageCopy = JSON.parse(JSON.stringify(image));
-    setImagesToNegativeLabel((prev) => [...prev, imageCopy]);
-  }
+        const imageCopy = JSON.parse(JSON.stringify(image));
+        setImages((prevImages) => prevImages.filter((image) => image.boxId !== boxId));
+
+        return [...prev, imageCopy];
+      });
+      resolve(null)
+    })
+  };
+
 
   useEffect(() => {
     //Async function to queryBoxImages
@@ -146,8 +162,8 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
   };
 
   const style: CSSProperties = {
-    height: "17.81rem",
-    width: "17.81rem",
+    // height: "17.81rem",
+    // width: "17.81rem",
     color: "white",
     padding: "1rem",
     display: "flex",
@@ -163,7 +179,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: ItemTypes.BOX,
     drop: (item: { name: string, labeledImage: { boxId: string } }) => {
-      console.log(`IN DROP`, item)
+      console.log(`IN DROP NEGATIVE`, item.labeledImage.boxId)
       addToNegativeLabel(item.labeledImage.boxId);
       return { item };
     },
@@ -171,21 +187,21 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
     }),
-  }));
+  }), [images]);
 
   const [{ canDrop: canDropSecond, isOver: isOverSecond }, dropSecond] =
     useDrop(() => ({
       accept: ItemTypes.BOX,
-      drop: (item: { name: string, labeledImage: { boxId: string } }) => {
-        console.log(`IN DROP`, item)
-        addToLabel(item.labeledImage.boxId);
-        return { item };
+      drop: async (item: { name: string, labeledImage: { boxId: string } }) => {
+        console.log(`IN DROP POSITIVE`, item.labeledImage.boxId)
+        await addToLabel(item.labeledImage.boxId);
+        return { item, name: "label" };
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
       }),
-    }));
+    }), [images]);
 
   const isActive = canDrop && isOver;
   const isActiveSecond = canDropSecond && isOverSecond;
@@ -201,7 +217,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
   };
 
   return (
-    <div className="container mt-mt93 p-labelsControls">
+    <div className="container p-labelsControls h-full">
       <div className="mb-mx40 flex items-center">
         <input
           type="text"
@@ -219,56 +235,79 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
           Submit
         </button>
       </div>
-      <div className="flex justify-between pb-40">
-        <div
-          ref={drop}
-          style={{
-            ...style,
-            backgroundColor: getBackgroundColor(canDrop, isOver),
-          }}
-          data-testid="dustbin"
-        >
-          {isActive ? "Release to drop" : "Drag a box here"}
-          {imagesToNegativeLabel.map((labeledImage) => {
-            return (
-              <ImageComponent
-                key={labeledImage.boxId}
-                labeledImage={labeledImage}
-                onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
-              />
-            );
-          })}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5 border-2 border-gray-300 rounded-md p-4 mb-3">
+        {images.length > 0 ? images.map((labeledImage) => {
+          return (
+            <ImageComponent
+              key={labeledImage.boxId}
+              labeledImage={labeledImage}
+              onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
+            />
+          );
+        }) : <p className="w-full text-center text-gray-500 col-span-full">No images available. Click an identified object to populate.</p>}
+      </div>
+      <div className="flex justify-between pb-40 h-full">
+        <div className="w-1/2 mr-2">
+          <h2>Negative Label</h2>
+
+          <div
+            ref={drop}
+            style={{
+              ...style,
+              backgroundColor: getBackgroundColor(canDrop, isOver),
+              height: '100%',
+            }}
+            className="relative"
+            data-testid="dustbin"
+          >
+            <div className="absolute top-2 left-2">
+              {isActive ? "Release to drop" : "Drag a box here"}
+            </div>
+            <div className="relative">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-4 mb-3">
+                {imagesToNegativeLabel.map((labeledImage) => {
+                  return (
+                    <ImageComponent
+                      key={labeledImage.boxId}
+                      labeledImage={labeledImage}
+                      onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
-          {images.map((labeledImage) => {
-            return (
-              <ImageComponent
-                key={labeledImage.boxId}
-                labeledImage={labeledImage}
-                onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
-              />
-            );
-          })}
-        </div>
-        <div
-          ref={dropSecond}
-          style={{
-            ...style,
-            backgroundColor: getBackgroundColor(canDropSecond, isOverSecond),
-          }}
-          data-testid="dustbin"
-        >
-          {isActiveSecond ? "Release to drop" : "Drag a box here"}
-          {imagesToLabel.map((labeledImage) => {
-            return (
-              <ImageComponent
-                key={labeledImage.boxId}
-                labeledImage={labeledImage}
-                onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
-              />
-            );
-          })}
+        <div className="w-1/2 ml-2">
+          <h2>Positive Label</h2>
+          <div
+            ref={dropSecond}
+            style={{
+              ...style,
+              backgroundColor: getBackgroundColor(canDropSecond, isOverSecond),
+              height: '100%',
+            }}
+            className="relative"
+            data-testid="dustbin"
+          >
+            <div className="absolute top-2 left-2">
+              {isActive ? "Release to drop" : "Drag a box here"}
+            </div>
+            <div className="relative">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-4 mb-3">
+                {imagesToLabel.map((labeledImage) => {
+                  return (
+                    <ImageComponent
+                      key={labeledImage.boxId}
+                      labeledImage={labeledImage}
+                      onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
