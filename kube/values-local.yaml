@@ -10,6 +10,7 @@ appBackend:
   deployment:
     image: video-recognition_app-backend:local
   ingress:
+    ingressClassName: null
     useRegex: false
     pathType: "Prefix"
     path: "/"
@@ -23,6 +24,8 @@ appBackend:
 appFronend:
   deployment:
     image: video-recognition_app-frontend:local
+  ingress:
+    ingressClassName: null
 
 downloader:
   deployment:

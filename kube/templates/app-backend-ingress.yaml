@@ -3,8 +3,10 @@ kind: Ingress
 metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend-ingress
+  {{ if .Values.appBackend.ingress.useRegex }}
   annotations:
     nginx.ingress.kubernetes.io/use-regex: {{ .Values.appBackend.ingress.useRegex | quote }}
+  {{ end }}
 spec:
   {{ if .Values.appBackend.ingress.ingressClassName }}ingressClassName: {{ .Values.appBackend.ingress.ingressClassName}}{{ end }}
   rules:
