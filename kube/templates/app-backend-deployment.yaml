@@ -12,6 +12,8 @@ spec:
       app.kubernetes.io/name: {{ .Release.Name }}-app-backend
   template:
     metadata:
+      annotations:
+        updateTimestamp: {{ now | quote }}
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}-app-backend
     spec:
@@ -23,6 +25,7 @@ spec:
       containers:
       - name: app-backend
         image: {{ .Values.appBackend.deployment.image }}
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         envFrom:

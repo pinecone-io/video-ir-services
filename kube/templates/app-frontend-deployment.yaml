@@ -12,11 +12,14 @@ spec:
       app.kubernetes.io/name: {{ .Release.Name }}-app-frontend
   template:
     metadata:
+      annotations:
+        updateTimestamp: {{ now | quote }}
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}-app-frontend
     spec:
       containers:
       - name: app-frontend
         image: {{ .Values.appFronend.deployment.image }}
+        imagePullPolicy: Always
         ports:
         - containerPort: 3005
