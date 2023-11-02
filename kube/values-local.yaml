@@ -1,0 +1,36 @@
+redis:  
+  fullnameOverride: redis
+  usePassword: false
+  replica:
+    replicaCount: 0
+  auth:
+    enabled: false
+
+appBackend:
+  deployment:
+    image: video-recognition_app-backend:local
+  ingress:
+    ingressClassName: null
+    useRegex: false
+    pathType: "Prefix"
+    path: "/"
+  service:
+    type: "LoadBalancer"
+    ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+
+appFronend:
+  deployment:
+    image: video-recognition_app-frontend:local
+  ingress:
+    ingressClassName: null
+
+downloader:
+  deployment:
+    image: "video-recognition_downloader:local"
+
+indexer:
+  deployment:
+    image: "video-recognition_indexer:local"

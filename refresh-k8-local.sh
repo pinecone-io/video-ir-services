@@ -9,4 +9,4 @@ kubectl delete secret app-backend-env -n dev
 kubectl create secret generic app-backend-env --from-env-file=./env/.env.app-backend -n dev
 
 # Install chart
-helm upgrade --install video-ir ./kube-local -f kube-local/values.yaml --create-namespace --namespace dev
+helm upgrade --install video-ir ./kube -f kube/values-local.yaml --create-namespace --namespace dev
