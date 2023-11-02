@@ -10,7 +10,7 @@ async function createKafkaConsumer(messageHandler: (message: KafkaMessage) => vo
         logLevel: logLevel.INFO
 
     });
-    const topic = "topic-0";
+    const topic = "topic-2";
     const consumerGroupId = "group-1"; // This has to be the same for all consumers
     const consumer = kafka.consumer({ groupId: consumerGroupId });
 

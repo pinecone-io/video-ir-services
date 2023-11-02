@@ -20,7 +20,7 @@ class KafkaProducer {
             createPartitioner: Partitioners.DefaultPartitioner
         });
         this.admin = kafka.admin();
-        this.topic = "topic-0";
+        this.topic = "topic-2";
         this.isConnected = false;
     }
 
@@ -28,7 +28,7 @@ class KafkaProducer {
         console.log("creating topics")
         await this.admin.connect();
         await this.admin.createTopics({
-            topics: [{ topic: this.topic, numPartitions: 3 }],
+            topics: [{ topic: this.topic, numPartitions: 6 }],
         });
         await this.admin.disconnect();
     }

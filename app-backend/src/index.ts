@@ -11,19 +11,20 @@ import {
   PINECONE_OUTPUT_DIR_PATH,
 } from "./utils/environment";
 import { initIndex } from "./utils/pinecone";
-
+import { indexerInstancesTrackerListener, progressTrackerListener } from './routes'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app: Express = express();
 const server = createServer(app);
+
 const io = new Server(server, {
-  path: "/app-sockets/sockets",
+  path: "/app-sockets/socket",
   cors: {
     origin: "*", // Allow all origins
     methods: ["GET", "POST"], // Allow GET and POST methods    
   },
-  transports: ["websocket"]
+  transports: ["polling", "websocket"]
 });
 // Ensure that Pinecone index exist
 await initIndex();
@@ -53,12 +54,21 @@ app.get("/ping", (req, res) => res.send("pong2"));
 
 io.on("connection", (socket) => {
   console.log("a user connected");
-  // handle socket events here
+  indexerInstancesTrackerListener.on('instancesUpdated', (data) => {
+    socket.emit('instancesUpdated', data)
+  })
+
+  progressTrackerListener.on('filesToProcessChanged', (data) => {
+    socket.emit('filesToProcessChanged', data)
+  })
+  progressTrackerListener.on('processedFilesChanged', (data) => {
+    socket.emit('processedFilesChanged', data)
+  })
 });
 
 if (IS_PROD) {
   const port = 3000;
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Server started on ${port} port`);
   });
 }

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Loading from "../components/Loading";
 import { download } from "../services/downloadService.ts";
-import { trackProgress } from "../services/trackProgress.ts";
 import io from "socket.io-client";
 
 type TFormInput = {
@@ -13,23 +12,37 @@ type TFormInput = {
 
 const IndexingPage: React.FC = () => {
   const [serverError, setServerError] = useState();
-  const [progressMessages, setProgressMessages] = useState("");
-  const socket = io('http://167.172.8.153/', {
-    path: '/app-sockets/sockets/',
+  const [progress, setProgress] = useState(0);
+  const [filesToProcess, setFileToProcess] = useState(0);
+  const [processedFiles, setProcessedFiles] = useState(0);
+  const socket = io('/', {
+    path: '/app-sockets/socket',
     reconnection: false,
     secure: true,
     transports: ['websocket'],
   }); // replace with your server URL
 
   useEffect(() => {
-    trackProgress((evt) => {
-      const response = evt.event.target.responseText;
-      setProgressMessages(response);
-    });
 
     socket.on('connect', () => {
       console.log('Connected to server');
     });
+
+    socket.on('instancesUpdated', (data): void => {
+      console.log('data', data)
+    })
+
+    socket.on('filesToProcessChanged', (data): void => {
+      const { numberOfFilesToProcess } = data
+      setFileToProcess(numberOfFilesToProcess)
+
+    })
+
+    socket.on('processedFilesChanged', (data): void => {
+      const { progress, numberOfFilesProcessed } = data
+      setProcessedFiles(numberOfFilesProcessed)
+      setProgress(progress.val)
+    })
 
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
@@ -118,9 +131,28 @@ const IndexingPage: React.FC = () => {
             </div>
           )}
 
-          <div className="p-4 mb-4 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[300px] whitespace-pre-line overflow-auto">
-            <b>Progress console</b> <br />
-            {`${progressMessages}`}
+
+          <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-3">
+            <div className="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{ "width": `${progress}%` }}>{progress}%</div>
+          </div>
+
+          <div className="p-4 mb-4 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto">
+            <table style={{ width: '100%' }}>
+              <tbody>
+                <tr>
+                  <td style={{ width: '90%' }}><b>Files to process</b></td>
+                  <td>{filesToProcess}</td>
+                </tr>
+                <tr>
+                  <td style={{ width: '90%' }}><b>Processed files</b></td>
+                  <td>{processedFiles}</td>
+                </tr>
+                <tr>
+                  <td style={{ width: '90%' }}><b>Total files</b></td>
+                  <td>{processedFiles + filesToProcess}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </form>
       </div>

@@ -4,6 +4,7 @@ class ProgressTracker {
     private _filesToProcess: string[] = [];
     private _processedFiles: string[] = [];
     private eventEmitter = new EventEmitter();
+    private externalEventEmitter = new EventEmitter();
 
     get filesToProcess(): string[] {
         return this._filesToProcess;
@@ -44,6 +45,29 @@ class ProgressTracker {
         const totalFiles = this.filesToProcess.length + this.processedFiles.length;
         const progress = totalFiles === 0 ? 0 : Math.floor((this.processedFiles.length / totalFiles) * 100);
         return { val: progress, ratio: `${this.processedFiles.length}/${totalFiles}` }
+    }
+
+    getEmitter(): EventEmitter {
+        this.eventEmitter.on('filesToProcessChanged', () => {
+            const progress = this.getProgress();
+            this.externalEventEmitter.emit('filesToProcessChanged', {
+                numberOfFilesToProcess: this.filesToProcess.length,
+                progress
+            });
+        });
+        this.eventEmitter.on('processedFilesChanged', () => {
+            const progress = this.getProgress();
+            console.log('processedFilesChanged', progress)
+            this.externalEventEmitter.emit('processedFilesChanged', {
+                numberOfFilesProcessed: this.processedFiles.length,
+                progress
+            })
+            if (progress.val === 100) {
+                this.filesToProcess = [];
+                this.processedFiles = [];
+            }
+        });
+        return this.externalEventEmitter;
     }
 
     startProgressPolling(fn: (payload: { val: number, ratio: string }) => void, onDone: () => void): void {

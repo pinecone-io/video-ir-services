@@ -15,7 +15,8 @@ helm upgrade --install video-ir ./kube -f kube/values.yaml --create-namespace --
 # Delete all
 helm ls -n dev --all --short | xargs -L1 helm -n dev delete
 
-
+# CRITICAL to allow ngingx setup
+kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission -n dev
 ########
 # kubectl
 #######
