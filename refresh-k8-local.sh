@@ -1,3 +1,10 @@
+clusterName="$(kubectl config view --minify -o jsonpath='{.clusters[].name}')" 
+
+if [[ $clusterName =~ ^do- ]]; then
+    echo "Please change your cluster. You are working on remote claster:" $clusterName
+    exit;
+fi
+
 # Uninstall video-ir
 helm uninstall video-ir -n dev
 
