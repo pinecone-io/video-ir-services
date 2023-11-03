@@ -55,8 +55,8 @@ const IndexingPage: React.FC = () => {
     formState: { isSubmitting, isValid },
   } = useForm<TFormInput>({
     defaultValues: {
-      youtubeUrl: "https://www.youtube.com/watch?v=PJ5xXXcfuTc",
-      name: "highway-surveillance",
+      youtubeUrl: "https://www.youtube.com/watch?v=ADs8tvU2xDc",
+      name: "car-race",
       fps: 1,
     },
   });

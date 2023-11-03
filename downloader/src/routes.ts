@@ -12,6 +12,9 @@ const routes: Route[] = [
         route: "/download",
         method: "post",
         handler: async (req, res) => {
+            res.setTimeout(360000, () => {
+                res.status(500).json({ error: "Request timed out" })
+            })
             try {
                 const target = req.body.target as string;
                 const fps = req.body.fps as number;
