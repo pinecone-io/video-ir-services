@@ -14,12 +14,15 @@ import { generateS3Url } from "./utils/awsS3";
 
 type Vector = number[];
 
+const modelName = "Xenova/clip-vit-large-patch14";
 const namespace = PINECONE_NAMESPACE;
 const pineconeClient = await new Pinecone({
   environment: getEnv("VITE_PINECONE_ENVIRONMENT"),
   apiKey: getEnv("VITE_PINECONE_API_KEY"),
   projectId: getEnv("VITE_PINECONE_PROJECT_ID"),
 });
+
+await embedder.init(modelName);
 
 const calculateAverageVector = (
   vectors: Vector[],
@@ -58,8 +61,9 @@ const calculateAverageVector = (
 
 const confidence = 0.95;
 
-const queryBox: (boxId: string) => Promise<BoxResult[] | Error> = async (
+const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Error> = async (
   boxId: string,
+  focused: boolean = false
 ) => {
   try {
     const indexName = PINECONE_INDEX;
@@ -68,6 +72,8 @@ const queryBox: (boxId: string) => Promise<BoxResult[] | Error> = async (
     const ns = index.namespace(namespace);
 
     const imageUrl = JSON.parse((await redis.hGet("bbox", boxId)) || "{}")!.src;
+
+    console.log(`imageUrl`, imageUrl)
 
     const vector = await embedder.embed(imageUrl);
 
@@ -103,8 +109,6 @@ const queryBox: (boxId: string) => Promise<BoxResult[] | Error> = async (
       (match) => match.values,
     ) as Vector[];
 
-    const averageVector = calculateAverageVector(vectors, true);
-
     // detect whether one of the "label" values on queryResult is not undefined
     let possibleLabel: string | undefined;
     if (result) {
@@ -114,81 +118,84 @@ const queryBox: (boxId: string) => Promise<BoxResult[] | Error> = async (
       }
     }
 
-    let labeledBoxed: BoxResult[] = [];
-    if (possibleLabel) {
-      const vector = Array.from({ length: 768 }, () => 0) as number[];
-
-      const labelQueryResult = await ns.query({
-        vector,
-        filter: {
-          label: possibleLabel,
-          negativeLabel: {
-            $ne: boxId,
-          },
-        },
-        topK: 1000,
-        includeMetadata: true,
-      });
-      labeledBoxed = labelQueryResult.matches
-        ?.filter((match) => match)
-        .map((match) => ({
-          boxId: (match.metadata as Metadata).boxId,
-          label: (match.metadata as Metadata).label,
-          path: (match.metadata as Metadata).imagePath,
-        })) as BoxResult[];
-    }
-
-    let additionalBoxes: BoxResult[][] | undefined;
-
-    if (queryResult && queryResult.matches) {
-      additionalBoxes = await Promise.all(
-        queryResult.matches.map(async (match) => {
-          const res = await ns.query({
-            vector: averageVector,
-            topK: 10,
-            includeMetadata: true,
-            filter: {
-              negativeLabel: {
-                $ne: boxId,
-              },
-            },
-          });
-          const resultBatch = res.matches
-            ?.filter((match) => match)
-            ?.filter((match) => match.score && match.score > confidence)
-            .map((match) => ({
-              boxId: (match.metadata as Metadata).boxId,
-              label: (match.metadata as Metadata).label,
-              path: (match.metadata as Metadata).imagePath,
-            })) as BoxResult[];
-          return resultBatch;
-        }),
-      );
-    }
-
     let finalResult: BoxResult[] = [];
 
     if (result) {
       finalResult.push(...result);
     }
 
-    if (additionalBoxes) {
-      const flattenedBoxIds = additionalBoxes
-        .flat()
-        .filter((x) => x) as BoxResult[];
-      finalResult.push(...flattenedBoxIds);
-    }
+    if (!focused) {
+      const averageVector = calculateAverageVector(vectors, true);
+      let labeledBoxed: BoxResult[] = [];
+      if (possibleLabel) {
+        const vector = Array.from({ length: 768 }, () => 0) as number[];
 
-    if (labeledBoxed) {
-      finalResult.push(...labeledBoxed);
-    }
+        const labelQueryResult = await ns.query({
+          vector,
+          filter: {
+            label: possibleLabel,
+            negativeLabel: {
+              $ne: boxId,
+            },
+          },
+          topK: 1000,
+          includeMetadata: true,
+        });
+        labeledBoxed = labelQueryResult.matches
+          ?.filter((match) => match)
+          .map((match) => ({
+            boxId: (match.metadata as Metadata).boxId,
+            label: (match.metadata as Metadata).label,
+            path: (match.metadata as Metadata).imagePath,
+          })) as BoxResult[];
+      }
 
-    if (!result && !additionalBoxes && !labeledBoxed) {
-      finalResult = [];
-    }
+      let additionalBoxes: BoxResult[][] | undefined;
 
-    if (labeledBoxed && result && labeledBoxed.length / result.length > 0.5) {
-      return finalResult.map((x) => ({ ...x, label: possibleLabel }));
+      if (queryResult && queryResult.matches) {
+        additionalBoxes = await Promise.all(
+          queryResult.matches.map(async (match) => {
+            const res = await ns.query({
+              vector: averageVector,
+              topK: 10,
+              includeMetadata: true,
+              filter: {
+                negativeLabel: {
+                  $ne: boxId,
+                },
+              },
+            });
+            const resultBatch = res.matches
+              ?.filter((match) => match)
+              ?.filter((match) => match.score && match.score > confidence)
+              .map((match) => ({
+                boxId: (match.metadata as Metadata).boxId,
+                label: (match.metadata as Metadata).label,
+                path: (match.metadata as Metadata).imagePath,
+              })) as BoxResult[];
+            return resultBatch;
+          }),
+        );
+      }
+
+      if (additionalBoxes) {
+        const flattenedBoxIds = additionalBoxes
+          .flat()
+          .filter((x) => x) as BoxResult[];
+        finalResult.push(...flattenedBoxIds);
+      }
+
+      if (labeledBoxed) {
+        finalResult.push(...labeledBoxed);
+      }
+
+      if (!result && !additionalBoxes && !labeledBoxed) {
+        finalResult = [];
+      }
+
+      // if (labeledBoxed && result && labeledBoxed.length / result.length > 0.5) {
+      //   return finalResult.map((x) => ({ ...x, label: possibleLabel }));
+      // }
     }
 
     const getUniqueByBoxId = (array: BoxResult[]): BoxResult[] => {

@@ -17,21 +17,23 @@ const CANVAS_HEIGHT = 707;
 // const CANVAS_WIDTH = 500;
 // const CANVAS_HEIGHT = 250;
 
-const FPS = 30;
+const FPS = 1;
 
-type VideoStramProps = {
+type VideoStreamProps = {
   imagePaths: GetImagesDTO;
   loadedImages: HTMLImageElement[];
 };
 
-const VideoStream: React.FC<VideoStramProps> = (props) => {
+const VideoStream: React.FC<VideoStreamProps> = (props) => {
   const [labeledBoundingBox, setLabeledBoundingBox] = useState<
     LabeledBoundingBox[]
   >([]);
+
   const [frameIndex, setFrameIndex] = useState<number>(0);
   const [isPlaying, setPlay] = useState<boolean>(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedBox, setSelectedBox] = useState<string>("");
+  const [selectedBoxes, setSelectedBoxes] = useState<Array<{ boxId: string; label: string }>>([]);
 
   const drawFrame = (frame: number) => {
     // Ensure that canvas exists
@@ -106,6 +108,7 @@ const VideoStream: React.FC<VideoStramProps> = (props) => {
         {labeledBoundingBox && (
           <BoundingBoxes
             labeledBoundingBox={labeledBoundingBox}
+            selectedBoxes={selectedBoxes}
             onBoxSelected={(boxId: string) => {
               console.log("click", boxId);
               setSelectedBox(boxId);
@@ -156,7 +159,7 @@ const VideoStream: React.FC<VideoStramProps> = (props) => {
         </div>
       </div>
       <div className="flex justify-center bg-primary-1000 w-full mt-[100px] min-h-[300px]">
-        <LabelingControls selectedBox={selectedBox} />
+        <LabelingControls selectedBox={selectedBox} setSelectedBoxes={setSelectedBoxes} />
       </div>
       <footer className="text-center text-black p-smallFooter fixed bottom-0 w-full bg-white z-50">
         <p className="p-2">All Rights Reserved by Pinecone</p>

@@ -1,19 +1,20 @@
 import * as d3 from "d3";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, } from "react";
 import { LabeledBoundingBox } from "../types/Box";
-import { queryBox } from "../services/boxService";
+// import { queryBox } from "../services/boxService";
 
 // TODO @rschwabco maybe we should store this data in ImageWithBoundingBoxes object
-const IMAGE_WIDTH = 1280;
-const IMAGE_HEIGHT = 720;
+const IMAGE_WIDTH = 640;
+const IMAGE_HEIGHT = 360;
 
 const BoundingBoxes: React.FC<{
   labeledBoundingBox: LabeledBoundingBox[];
   onBoxSelected: (boxId: string) => void;
+  selectedBoxes?: Array<{ boxId: string; label: string }>;
 }> = (props) => {
-  const [selectedBoxes, setSelectedBoxes] = useState<
-    Array<{ boxId: string; label: string }>
-  >([]);
+  // const [selectedBoxes, setSelectedBoxes] = useState<
+  //   Array<{ boxId: string; label: string }>
+  // >([]);
   const boxesRef = useRef<SVGSVGElement | null>(null);
   const svg = d3.select(boxesRef.current);
   const boundingClientRect = boxesRef.current?.getBoundingClientRect();
@@ -26,7 +27,7 @@ const BoundingBoxes: React.FC<{
     return ((boundingClientRect?.height || 0) * y) / IMAGE_HEIGHT;
   };
 
-  // Drow binding boxes
+  // Draw binding boxes
   useEffect(() => {
     // Bind Data
     const rectGroups = svg
@@ -52,28 +53,30 @@ const BoundingBoxes: React.FC<{
       .attr("width", (d) => calculateX(d.box.width))
       .attr("height", (d) => calculateY(d.box.height))
       .attr("stroke-width", 4)
-      .attr("stroke", (d) =>
-        selectedBoxes.map((x) => x.boxId).includes(d.boxId)
+      .attr("stroke", (d) => {
+        return props.selectedBoxes?.map((x) => x.boxId).includes(d.boxId)
           ? "#9ADD66"
           : "#FF1717"
+      }
       )
       .attr("fill-opacity", 0)
       .on("click", (_, d) => {
+        console.log("box selected", d.boxId)
         props.onBoxSelected(d.boxId);
 
         (async () => {
-          const response = await queryBox(d.boxId);
+          // const response = await queryBox(d.boxId);
 
-          // Find boxes and update them
-          updatedGroups
-            .selectAll("rect")
-            .attr("stroke", (d) =>
-              response.data.map((x) => x.boxId).includes(d.boxId)
-                ? "#9ADD66"
-                : "#FF1717"
-            );
+          // // Find boxes and update them
+          // updatedGroups
+          //   .selectAll("rect")
+          //   .attr("stroke", (d) =>
+          //     response?.map((x) => x.boxId).includes(d.boxId)
+          //       ? "#9ADD66"
+          //       : "#FF1717"
+          //   );
 
-          setSelectedBoxes(response.data);
+          // setSelectedBoxes(response?.data);
         })();
       });
 
@@ -97,17 +100,17 @@ const BoundingBoxes: React.FC<{
 
     // Update rects
     updatedGroups
-      .selectAll("rect")
+      .selectAll<SVGGElement, LabeledBoundingBox>("rect")
       .attr("width", (d) => calculateX(d.box.width))
       .attr("height", (d) => calculateY(d.box.height))
       .attr("stroke", (d) =>
-        selectedBoxes.map((x) => x.boxId).includes(d.boxId)
+        props.selectedBoxes?.map((x) => x.boxId).includes(d.boxId)
           ? "#9ADD66"
           : "#FF1717"
       );
 
     // Update text
-    updatedGroups.selectAll("text").text((d) => d?.label || "");
+    updatedGroups.selectAll<SVGGElement, LabeledBoundingBox>("text").text((d) => d?.label || "");
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.labeledBoundingBox]);

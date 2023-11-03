@@ -44,11 +44,12 @@ const routes: Route[] = [
 
   {
     route: "/queryBox",
-    method: "get",
+    method: "post",
     handler: async (req, res) => {
-      const boxId = req.query.boxId as string;
+      const boxId = req.body.boxId as string;
+      const focused = req.body.focused as boolean ?? false;
       try {
-        const matches = await queryBox(boxId);
+        const matches = await queryBox(boxId, focused);
 
         res.json(matches);
       } catch (error) {
@@ -80,10 +81,9 @@ const routes: Route[] = [
     method: "post",
     handler: async (req, res) => {
       const originalBoxId = req.body.originalBoxId as string;
-      const targetBoxId = req.body.targetBoxId as string;
+      const targetBoxIds = req.body.targetBoxIds as string[];
       try {
-        await negativeLabel(originalBoxId, targetBoxId);
-
+        await negativeLabel(originalBoxId, targetBoxIds);
         res.json({ message: "Labelled" });
       } catch (error) {
         res.status(500).json({ error: "Error labeling", message: error });

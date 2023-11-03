@@ -19,6 +19,7 @@ const producer = new KafkaProducer();
 
 const extractFrames = async (videoPath: string, name: string, fps: number): Promise<string[]> =>
     new Promise((resolve, reject) => {
+        console.log("Extracting frames...");
         let frameCount = 0;
         const files: string[] = [];
         const outputFolder = join(__dirname, `temp_files/${name}`);
@@ -54,6 +55,7 @@ const extractFrames = async (videoPath: string, name: string, fps: number): Prom
             })
             .on("progress", (progressData) => {
                 frameCount = progressData.frames;
+                console.log('Frame count: ', frameCount)
             })
             .on("error", (error: Error) => {
                 const err = `Error occurred: ${error.message}`;
@@ -63,13 +65,24 @@ const extractFrames = async (videoPath: string, name: string, fps: number): Prom
     });
 
 const downloadS3 = async (target = "", name = "video", fps = 1) => {
-    console.time("Download");
-    return new Promise<void>((resolve, reject) => {
+
+    return new Promise<void>(async (resolve, reject) => {
+
+        console.time(`Attempting to download ${target}`);
+        console.log("First, attempting to connect to Kafka")
+        await producer.connect();
         const videoPath = `${name}.mp4`;
         const writable = createWriteStream(videoPath);
         const videoStream = ytdl(
             target || "https://www.youtube.com/watch?v=PIScf2rif5Q",
+            {
+                filter: 'videoonly',
+                quality: 'highestvideo'
+
+            }
         );
+
+
 
         videoStream.pipe(writable);
 

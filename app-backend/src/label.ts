@@ -1,4 +1,4 @@
-import { Pinecone } from "@pinecone-database/pinecone";
+import { Pinecone, PineconeRecord } from "@pinecone-database/pinecone";
 import { PINECONE_INDEX, getEnv, PINECONE_NAMESPACE } from "./utils/environment";
 import { Metadata } from "./types";
 
@@ -14,29 +14,26 @@ const index = pineconeClient.index<Metadata>(indexName);
 const ns = index.namespace(namespace);
 
 const labelBoxes = async (label: string, boxIds: string[]) => {
-    await Promise.all(
-        boxIds.map(async (boxId) => {
-            await ns.update({
-                id: boxId,
-                metadata: {
-                    label,
-                },
-            });
-        }),
-    );
+    for (const boxId of boxIds) {
+        console.log("BOXID", boxId, label);
+        await ns.update({
+            id: boxId,
+            metadata: {
+                label,
+            },
+        });
+    }
 };
 
-const negativeLabel = async (originalBoxId: string, targetBoxId: string) => {
+const negativeLabel = async (originalBoxId: string, targetBoxIds: string[]) => {
     try {
-        console.log("original", originalBoxId, "target", targetBoxId);
-        const entries = await ns.fetch([targetBoxId]);
+        console.log("original", originalBoxId, "target", targetBoxIds);
+        const entries = await ns.fetch(targetBoxIds);
         if (entries.records) {
-            const record = entries.records[0];
-
-            if (record) {
+            for (const record of Object.values(entries.records)) {
                 const { metadata } = record;
                 await ns.update({
-                    id: targetBoxId,
+                    id: record.id,
                     metadata: {
                         negativeLabel: [originalBoxId, ...(metadata?.negativeLabel || [])],
                     },
@@ -47,7 +44,7 @@ const negativeLabel = async (originalBoxId: string, targetBoxId: string) => {
                     topK: 50,
                     filter: {
                         negativeLabel: {
-                            $ne: targetBoxId,
+                            $ne: record.id,
                         },
                     },
                     includeMetadata: true,
@@ -70,7 +67,7 @@ const negativeLabel = async (originalBoxId: string, targetBoxId: string) => {
                                 id: match.id,
                                 metadata: {
                                     negativeLabel: [
-                                        targetBoxId,
+                                        record.id,
                                         ...(metadata?.negativeLabel || []),
                                     ],
                                 },
@@ -79,6 +76,8 @@ const negativeLabel = async (originalBoxId: string, targetBoxId: string) => {
                     );
                 }
             }
+
+
         }
     } catch (e) {
         console.log(e);

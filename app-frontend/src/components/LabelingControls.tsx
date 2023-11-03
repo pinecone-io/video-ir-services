@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useRef, useState } from "react";
+import React, { CSSProperties, useEffect, useState } from "react";
 import { labelBoxes } from "../services/labelBoxesService";
 import { queryBox } from "../services/boxService";
 import { negativeLabel } from "../services/negativeLabelService";
@@ -7,6 +7,10 @@ import { ItemTypes } from "./ItemTypes";
 
 interface LabelingControlsProps {
   selectedBox: string;
+  setSelectedBoxes: React.Dispatch<React.SetStateAction<{
+    boxId: string;
+    label: string;
+  }[]>>
 }
 
 type ImageProps = {
@@ -14,7 +18,6 @@ type ImageProps = {
     path: string;
     label?: string;
   };
-  onClick: () => void;
 };
 
 type LabeledImage = { boxId: string; path: string; label: string }
@@ -23,7 +26,7 @@ interface DropResult {
   name: string;
 }
 
-const ImageComponent: React.FC<ImageProps> = ({ labeledImage, onClick }) => {
+const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.BOX,
     item: { name, labeledImage },
@@ -58,7 +61,6 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage, onClick }) => {
       {/* Semi-transparent layer */}
       <div
         className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 opacity-0  cursor-pointer"
-        onClick={onClick}
       >
         {/* Trash Icon */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100">
@@ -87,12 +89,12 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage, onClick }) => {
   );
 };
 
-const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
+const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSelectedBoxes }) => {
   //tailwind 10px padding
   const [images, setImages] = useState<
     Array<LabeledImage>
   >([]);
-  const imagesRef = useRef(images);
+
 
 
   const [imagesToLabel, setImagesToLabel] = useState<
@@ -105,12 +107,10 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
 
   const [labelValue, setLabelValue] = useState<string>("");
 
-  const handleDelete = async (selectedBox: string, boxId: string) => {
-    // await negativeLabel(selectedBox, boxId);
-    // Remove the image from the state
-    // setImagePaths((prev) => prev.filter((image) => image.boxId !== boxId));
-  };
-
+  const getMoreImagesAsLabel = async (boxId: string) => {
+    const moreBoxes = await queryBox(boxId, true);
+    console.log(moreBoxes)
+  }
 
   const addToLabel = async (boxId: string) => {
     return new Promise((resolve) => {
@@ -119,6 +119,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
         if (!image) return prev
 
         const imageCopy = JSON.parse(JSON.stringify(image));
+
         setImages((prevImages) => prevImages.filter((image) => image.boxId !== boxId));
 
         return [...prev, imageCopy];
@@ -148,17 +149,21 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
     const getBoxImages = async () => {
       if (!selectedBox) return;
       const response = await queryBox(selectedBox);
-      const result = await response.data;
+      const result = await response?.json();
+      console.log(result)
+      setSelectedBoxes(result)
       setImages(result);
     };
     getBoxImages();
-  }, [selectedBox]);
+  }, [selectedBox, setSelectedBoxes]);
 
   const submitLabel = async () => {
     await labelBoxes(
       labelValue,
-      images.map((image) => image.boxId)
+      imagesToLabel.map((image) => image.boxId)
     );
+
+    await negativeLabel(selectedBox, imagesToNegativeLabel.map((image) => image.boxId));
   };
 
   const style: CSSProperties = {
@@ -204,7 +209,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
     }), [images]);
 
   const isActive = canDrop && isOver;
-  const isActiveSecond = canDropSecond && isOverSecond;
+  // const isActiveSecond = canDropSecond && isOverSecond;
 
   const getBackgroundColor = (canDrop: boolean, isActive: boolean) => {
     let backgroundColor = "#202A37";
@@ -241,7 +246,6 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
             <ImageComponent
               key={labeledImage.boxId}
               labeledImage={labeledImage}
-              onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
             />
           );
         }) : <p className="w-full text-center text-gray-500 col-span-full">No images available. Click an identified object to populate.</p>}
@@ -270,7 +274,6 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
                     <ImageComponent
                       key={labeledImage.boxId}
                       labeledImage={labeledImage}
-                      onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
                     />
                   );
                 })}
@@ -301,7 +304,6 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox }) => {
                     <ImageComponent
                       key={labeledImage.boxId}
                       labeledImage={labeledImage}
-                      onClick={() => handleDelete(selectedBox, labeledImage.boxId)}
                     />
                   );
                 })}

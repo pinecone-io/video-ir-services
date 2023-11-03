@@ -10,13 +10,14 @@ async function createKafkaConsumer(messageHandler: (message: KafkaMessage) => vo
         logLevel: logLevel.INFO
 
     });
-    const topic = "topic-2";
+    const topic = "topic-3";
     const consumerGroupId = "group-1"; // This has to be the same for all consumers
     const consumer = kafka.consumer({ groupId: consumerGroupId });
 
     try {
         await consumer.connect();
         await consumer.subscribe({ topic, fromBeginning: false });
+        console.log("Connected and subscribed to Kafka")
         await consumer.run({
             eachBatch: async ({ batch, resolveOffset, heartbeat, isRunning, isStale }) => {
                 for (let message of batch.messages) {

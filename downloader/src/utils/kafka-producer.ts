@@ -20,7 +20,7 @@ class KafkaProducer {
             createPartitioner: Partitioners.DefaultPartitioner
         });
         this.admin = kafka.admin();
-        this.topic = "topic-2";
+        this.topic = "topic-3";
         this.isConnected = false;
     }
 
@@ -33,7 +33,7 @@ class KafkaProducer {
         await this.admin.disconnect();
     }
 
-    private async connect() {
+    async connect() {
         try {
             await this.createTopics();
             await this.producer.connect();
@@ -50,6 +50,7 @@ class KafkaProducer {
         try {
             // Check if the producer is connected before sending messages
             if (!this.isConnected) {
+                console.log("It seems like the producer is not connected, trying to connect...");
                 await this.connect();
             }
             const topic = this.topic;
