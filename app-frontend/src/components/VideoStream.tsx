@@ -11,11 +11,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import LabelingControls from "./LabelingControls";
 
-// const CANVAS_WIDTH = 1269;
-// const CANVAS_HEIGHT = 707;
+const CANVAS_WIDTH = 1269;
+const CANVAS_HEIGHT = 707;
 
-const CANVAS_WIDTH = 500;
-const CANVAS_HEIGHT = 250;
+// const CANVAS_WIDTH = 500;
+// const CANVAS_HEIGHT = 250;
 
 const FPS = 30;
 

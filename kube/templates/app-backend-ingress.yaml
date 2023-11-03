@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend-ingress
-  {{ if .Values.appBackend.ingress.useRegex }}
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"    
     nginx.ingress.kubernetes.io/websocket-services: "{{ .Release.Name }}-{{ .Release.Namespace }}-app-backend"
@@ -22,7 +21,7 @@ metadata:
     nginx.ingress.kubernetes.io/upstream-hash-by: "$client_ip"
 
 spec:
-  {{ if .Values.appBackend.ingress.ingressClassName }}ingressClassName: {{ .Values.appBackend.ingress.ingressClassName}}{{ end }}
+  ingressClassName: nginx
   rules:
   - http:
       paths:
