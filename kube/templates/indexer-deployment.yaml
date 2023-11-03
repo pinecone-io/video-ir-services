@@ -22,8 +22,8 @@ spec:
         args: [ 'sh', '-c', 'until redis-cli -h redis-master -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
       containers:
       - name: indexer
-        image: registry.digitalocean.com/devrel-registry/video-recognition_indexer
-        imagePullPolicy: Always
+        image: {{ .Values.indexer.deployment.image }}
+        imagePullPolicy: {{ .Values.indexer.deployment.imagePullPolicy }}  
         ports:
         - containerPort: 3002
         # Consider adding in future

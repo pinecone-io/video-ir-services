@@ -24,8 +24,8 @@ spec:
         args: [ 'sh', '-c', 'until redis-cli -h redis-master -p 6379  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
       containers:
       - name: app-backend
-        image: registry.digitalocean.com/devrel-registry/video-recognition_app-backend
-        imagePullPolicy: Always
+        image: {{ .Values.appBackend.deployment.image }}
+        imagePullPolicy: {{ .Values.appBackend.deployment.imagePullPolicy }}
         ports:
         - containerPort: 3000
         envFrom:

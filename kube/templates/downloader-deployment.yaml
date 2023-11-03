@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: downloader
-        image: registry.digitalocean.com/devrel-registry/video-recognition_downloader
-        imagePullPolicy: Always      
+        image: {{ .Values.downloader.deployment.image }}
+        imagePullPolicy: {{ .Values.downloader.deployment.imagePullPolicy }}        
         ports:
         - containerPort: 3001
         env:

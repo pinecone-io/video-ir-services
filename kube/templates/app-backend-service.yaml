@@ -4,9 +4,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend
 spec:
+  {{ if .Values.appBackend.service.type }}type: {{ .Values.appBackend.service.type }}{{end}}
   selector:
     app.kubernetes.io/name: {{ .Release.Name }}-app-backend
   ports:
-    - name: http
-      port: 3000
-      targetPort: 3000
+    {{ .Values.appBackend.service.ports | toYaml | indent 4 | trim }}

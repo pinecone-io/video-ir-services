@@ -13,13 +13,13 @@ spec:
   template:
     metadata:
       annotations:
-          updateTimestamp: {{ now | quote }}
+        updateTimestamp: {{ now | quote }}
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}-app-frontend
     spec:
       containers:
       - name: app-frontend
-        image: registry.digitalocean.com/devrel-registry/video-recognition_app-frontend
-        imagePullPolicy: Always
+        image: {{ .Values.appFronend.deployment.image }}
+        imagePullPolicy: {{ .Values.appFronend.deployment.imagePullPolicy }}
         ports:
         - containerPort: 3005

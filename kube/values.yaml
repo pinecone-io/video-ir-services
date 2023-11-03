@@ -5,3 +5,35 @@ redis:
     replicaCount: 0
   auth:
     enabled: false
+
+appBackend:
+  deployment:
+    image: registry.digitalocean.com/devrel-registry/video-recognition_app-backend
+    imagePullPolicy: Always
+  ingress:
+    useRegex: true
+    ingressClassName: "nginx"
+    pathType: "ImplementationSpecific"
+    path: "/api/(.*)"
+  service:
+    ports:
+      - name: http
+        port: 3000
+        targetPort: 3000
+
+appFronend:
+  deployment:
+    image: registry.digitalocean.com/devrel-registry/video-recognition_app-frontend
+    imagePullPolicy: Always
+  ingress:
+    ingressClassName: nginx
+
+downloader:
+  deployment:
+    image: "registry.digitalocean.com/devrel-registry/video-recognition_downloader"
+    imagePullPolicy: Always
+
+indexer:
+  deployment:
+    image: "registry.digitalocean.com/devrel-registry/video-recognition_indexer"
+    imagePullPolicy: Always
