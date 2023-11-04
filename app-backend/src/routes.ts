@@ -4,11 +4,14 @@ import { getImages, queryBox } from "./query";
 import { resetDB } from "./reset";
 import { ProgressTracker } from './utils/progressTracker'
 import { IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
+import { LogTracker } from "./utils/logTracker";
 
 const progressTracker = new ProgressTracker();
 const progressTrackerListener = progressTracker.getEmitter();
 const indexerInstancesTracker = new IndexerInstanceTracker()
 const indexerInstancesTrackerListener = indexerInstancesTracker.getAllInstancesReadyEmitter()
+const logTracker = new LogTracker()
+const logTrackerListener = logTracker.getLogsEventEmitter()
 
 interface Route {
   route: string;
@@ -118,7 +121,7 @@ const routes: Route[] = [
     handler: async (req, res) => {
       const message = req.body.message;
       console.log(message);
-      // process.stdout.write(".");
+      logTracker.log(message);
       res.status(200).json({ message: "Message logged successfully" });
     },
   },
@@ -140,26 +143,26 @@ const routes: Route[] = [
       res.status(200).json({ message: "completed file" });
     },
   },
-  {
-    route: "/trackProgress",
-    method: "post",
-    handler: (req, res) => {
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
+  // {
+  //   route: "/trackProgress",
+  //   method: "post",
+  //   handler: (req, res) => {
+  //     res.setHeader('Content-Type', 'text/event-stream');
+  //     res.setHeader('Cache-Control', 'no-cache');
+  //     res.setHeader('Connection', 'keep-alive');
 
-      // Function to send data every second
-      progressTracker.startProgressPolling((data: { val: number, ratio: string }) => {
-        console.log(`Before writing ${data.val}`)
-        res.write(`progress: ${data.ratio} (${data.val}%)\n\n`);
-      }, () => {
-        console.log("Processing complete.")
-        // setTimeout(() => {
-        //   res.end();
-        // }, 3000)
-      })
-    },
-  },
+  //     // Function to send data every second
+  //     progressTracker.startProgressPolling((data: { val: number, ratio: string }) => {
+  //       console.log(`Before writing ${data.val}`)
+  //       res.write(`progress: ${data.ratio} (${data.val}%)\n\n`);
+  //     }, () => {
+  //       console.log("Processing complete.")
+  //       // setTimeout(() => {
+  //       //   res.end();
+  //       // }, 3000)
+  //     })
+  //   },
+  // },
   {
     route: "/registerIndexer",
     method: "post",
@@ -171,45 +174,7 @@ const routes: Route[] = [
       res.status(200).send('success')
     }
   },
-  // {
-  //   route: "/health",
-  //   method: "get",
-  //   handler: (req, res) => {
-  //     res.setHeader('Content-Type', 'text/event-stream');
-  //     res.setHeader('Cache-Control', 'no-cache');
-  //     res.setHeader('Connection', 'keep-alive');
 
-  //     indexerInstancesTrackerListener.on('instancesUpdated', (data) => {
-  //       if (!res.writableFinished) {
-  //         res.write(`${JSON.stringify(data)}\n\n`)
-  //       }
-  //     })
-
-  //     indexerInstancesTrackerListener.on('allInstancesReady', () => {
-  //       if (!res.writableFinished) {
-  //         res.write(`ready\n\n`);
-  //         res.end();
-  //       }
-  //     })
-
-
-  //     //   const downloaderApi = await fetch(
-  //     //     "http://video-ir-dev-downloader:3001/api/health"
-  //     //   )
-  //     //     .then((response) => response.json())
-  //     //     .catch((error) => error);
-
-  //     //   const indexerApi = await fetch(
-  //     //     "http://video-ir-dev-indexer:3002/api/health"
-  //     //   )
-  //     //     .then((response) => response.json())
-  //     //     .catch((error) => error);
-
-  //     //   res
-  //     //     .status(200)
-  //     //     .json([{ message: "App Backend server is healthy :)" }, downloaderApi, indexerApi]);
-  //   },
-  // },
 ];
 
-export { routes as resolvers, indexerInstancesTrackerListener, progressTrackerListener };
+export { routes as resolvers, indexerInstancesTrackerListener, progressTrackerListener, logTrackerListener };

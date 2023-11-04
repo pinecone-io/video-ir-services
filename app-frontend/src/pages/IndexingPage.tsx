@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Loading from "../components/Loading";
 import { download } from "../services/downloadService.ts";
-import io from "socket.io-client";
+import { socket } from '../utils/socket'
 
 type TFormInput = {
   fps: number;
@@ -10,44 +10,60 @@ type TFormInput = {
   name: string;
 };
 
+type LogLine = { ts: Date, message: string }
+
 const IndexingPage: React.FC = () => {
   const [serverError, setServerError] = useState();
   const [progress, setProgress] = useState(0);
   const [filesToProcess, setFileToProcess] = useState(0);
   const [processedFiles, setProcessedFiles] = useState(0);
-  const socket = io('/', {
-    path: '/app-sockets/socket',
-    reconnection: false,
-    secure: true,
-    transports: ['websocket'],
-  }); // replace with your server URL
+  const [logs, setLogs] = useState<LogLine[]>([]);
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  // replace with your server URL
+
+  const handleFilesToBeProcessedChanged = (data: { numberOfFilesToProcess: number }): void => {
+    const { numberOfFilesToProcess } = data
+    setFileToProcess(numberOfFilesToProcess)
+  }
+
+  const handleProcessedFilesChanged = (data: { progress: { val: number }, numberOfFilesProcessed: number }): void => {
+    const { progress, numberOfFilesProcessed } = data
+    setProcessedFiles(numberOfFilesProcessed)
+    setProgress(progress.val)
+  }
+
+  const handleLogUpdated = (data: LogLine): void => {
+    setLogs([...logs, data])
+  }
 
   useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
+    }
 
-    socket.on('connect', () => {
-      console.log('Connected to server');
-    });
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
 
     socket.on('instancesUpdated', (data): void => {
       console.log('data', data)
     })
 
-    socket.on('filesToProcessChanged', (data): void => {
-      const { numberOfFilesToProcess } = data
-      setFileToProcess(numberOfFilesToProcess)
+    socket.on('filesToProcessChanged', handleFilesToBeProcessedChanged)
+    socket.on('processedFilesChanged', handleProcessedFilesChanged)
+    socket.on('logUpdated', handleLogUpdated)
 
-    })
-
-    socket.on('processedFilesChanged', (data): void => {
-      const { progress, numberOfFilesProcessed } = data
-      setProcessedFiles(numberOfFilesProcessed)
-      setProgress(progress.val)
-    })
-
-    socket.on('disconnect', () => {
-      console.log('Disconnected from server');
-    });
-  }, [socket]);
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('filesToProcessChanged', handleFilesToBeProcessedChanged)
+      socket.off('processedFilesChanged', handleProcessedFilesChanged)
+      socket.off('logUpdated', handleLogUpdated)
+    }
+  });
 
   const {
     register,
@@ -68,6 +84,14 @@ const IndexingPage: React.FC = () => {
         .finally(() => resolve(true));
     });
   };
+
+  const endOfMessages = useRef<null | HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (endOfMessages.current) {
+      endOfMessages.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs]);
 
   return (
     <div className="min-h-screen bg-white text-primary-100 w-full">
@@ -154,7 +178,31 @@ const IndexingPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+
         </form>
+      </div>
+      <div className="p-4 m-10 mr-40 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[400px] whitespace-pre-line overflow-auto w-4/5" >
+        <div style={{ overflow: 'auto', width: '100%', fontFamily: 'Courier New, monospace' }}>
+          <table style={{ width: '100%' }}>
+            <tbody>
+              {logs.map((entry, index) => {
+                return (
+                  <tr key={index}>
+
+                    <td>{entry.message}</td>
+                  </tr>
+                )
+              })}
+              <tr>
+                <td ref={endOfMessages}>
+
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
       </div>
     </div>
   );

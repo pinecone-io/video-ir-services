@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
-import { resolvers } from "./routes";
+import { logTrackerListener, resolvers } from "./routes";
 import {
   IS_PROD,
   PINECONE_DATA_DIR_PATH,
@@ -63,6 +63,10 @@ io.on("connection", (socket) => {
   })
   progressTrackerListener.on('processedFilesChanged', (data) => {
     socket.emit('processedFilesChanged', data)
+  })
+
+  logTrackerListener.on('logUpdated', (data) => {
+    socket.emit('logUpdated', data)
   })
 });
 
