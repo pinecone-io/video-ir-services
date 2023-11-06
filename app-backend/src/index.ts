@@ -53,7 +53,7 @@ app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)));
 app.get("/ping", (req, res) => res.send("pong2"));
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  console.log("A client has connect:", socket.id);
   indexerInstancesTrackerListener.on('instancesUpdated', (data) => {
     socket.emit('instancesUpdated', data)
   })
@@ -63,6 +63,10 @@ io.on("connection", (socket) => {
   })
   progressTrackerListener.on('processedFilesChanged', (data) => {
     socket.emit('processedFilesChanged', data)
+  })
+
+  progressTrackerListener.on('complete', (data) => {
+    socket.emit('complete', data)
   })
 
   logTrackerListener.on('logUpdated', (data) => {

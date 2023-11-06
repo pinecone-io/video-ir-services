@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-splitter
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}-splitter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-splitter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-splitter
+    spec:
+      containers:
+      - name: splitter
+        image: {{ .Values.splitter.deployment.image }}
+        imagePullPolicy: {{ .Values.splitter.deployment.imagePullPolicy }}        
+        ports:
+        - containerPort: 3007
+        env:
+        - name: KAFKA_BROKER
+          value: kafka-service.dev.svc.cluster.local
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name

@@ -14,60 +14,60 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const producer = new KafkaProducer();
 
-const extractFrames = async (
-  videoPath: string,
-  name: string,
-  fps: number
-): Promise<string[]> =>
-  new Promise((resolve, reject) => {
-    let frameCount = 0;
-    const files: string[] = [];
-    const outputFolder = join(__dirname, `temp_files/${name}`);
+// const extractFrames = async (
+//   videoPath: string,
+//   name: string,
+//   fps: number
+// ): Promise<string[]> =>
+//   new Promise((resolve, reject) => {
+//     let frameCount = 0;
+//     const files: string[] = [];
+//     const outputFolder = join(__dirname, `temp_files/${name}`);
 
-    // Create the folder if it doesn't exist
-    if (!existsSync(outputFolder)) {
-      mkdirSync(outputFolder, { recursive: true });
-    }
-    
-    // Use fluent-ffmpeg to extract frames
-    ffmpeg(videoPath)
-      .outputOptions([`-vf fps=${fps}`])
-      .output(join(outputFolder, "%d.png"))
-      .on("end", async () => {
-        await log(`Total frames: ${frameCount}`)
-        for (let i = 1; i <= frameCount; i += 1) {
-          const outputFilePath = join(outputFolder, `${i}.png`);
-          const fileBuffer = fs.readFileSync(outputFilePath);
-          const filePath = `${name}/frame/${i}.png`;
-          await saveToS3Bucket(filePath, fileBuffer);
-          files.push(filePath);
-          // Delete the local file
-          await unlinkAsync(outputFilePath);
-          // Send for indexing
-          await log(`Sending message: ${filePath}}`)
-                    await producer.sendMessage(filePath);
+//     // Create the folder if it doesn't exist
+//     if (!existsSync(outputFolder)) {
+//       mkdirSync(outputFolder, { recursive: true });
+//     }
 
-        }
-        await log("Frames extraction completed.");
-        await await log(`Extracted ${frameCount} frames.`);
-        resolve(files);
-      })
-      .on("progress", async (progressData) => {
-        frameCount = progressData.frames;
-        console.log(".")
-                await log(`Frames extracted: ${frameCount}`)
-      })
-      .on("error", (error: Error) => {
-        const err = `Error occurred: ${error.message}`;
-        reject(err);
-      })
-      .run();
-  });
+//     // Use fluent-ffmpeg to extract frames
+//     ffmpeg(videoPath)
+//       .outputOptions([`-vf fps=${fps}`])
+//       .output(join(outputFolder, "%d.png"))
+//       .on("end", async () => {
+//         await log(`Total frames: ${frameCount}`)
+//         for (let i = 1; i <= frameCount; i += 1) {
+//           const outputFilePath = join(outputFolder, `${i}.png`);
+//           const fileBuffer = fs.readFileSync(outputFilePath);
+//           const filePath = `${name}/frame/${i}.png`;
+//           await saveToS3Bucket(filePath, fileBuffer);
+//           files.push(filePath);
+//           // Delete the local file
+//           await unlinkAsync(outputFilePath);
+//           // Send for indexing
+//           await log(`Sending message: ${filePath}}`)
+//                     await producer.sendMessage(filePath);
 
-const downloadS3 = async (target = "", name = "video", fps = 1, chunkDuration=5, videoLimit=Number.MAX_SAFE_INTEGER) => {
+//         }
+//         await log("Frames extraction completed.");
+//         await await log(`Extracted ${frameCount} frames.`);
+//         resolve(files);
+//       })
+//       .on("progress", async (progressData) => {
+//         frameCount = progressData.frames;
+//         console.log(".")
+//                 await log(`Frames extracted: ${frameCount}`)
+//       })
+//       .on("error", (error: Error) => {
+//         const err = `Error occurred: ${error.message}`;
+//         reject(err);
+//       })
+//       .run();
+//   });
+
+const downloadAndSplit = async (target = "", name = "video", fps = 1, chunkDuration = 5, videoLimit = Number.MAX_SAFE_INTEGER) => {
   return new Promise<void>(async (resolve, reject) => {
-    
-        await log(`Attempting to download ${target}. \nFirst, attempting to connect to Kafka`);
+
+    await log(`Attempting to download and split ${target}. \nFirst, attempting to connect to Kafka`);
     await producer.connect();
     const videoPath = `${name}.mp4`;
     const writable = createWriteStream(videoPath);
@@ -86,18 +86,30 @@ const downloadS3 = async (target = "", name = "video", fps = 1, chunkDuration=5,
     writable.on("finish", async () => {
       await log("Download completed.");
       try {
-        await log("Extracting frames...");
+        await log("Splitting video...");
         const videos = await split(videoPath, name, fps, chunkDuration, videoLimit);
+        await log(`Split video into ${videos.length} parts.`);
 
-        // Extract frames for each video cut
-        await Promise.all(
-          videos.map((videoPath, i) =>
-            extractFrames(videoPath, `${name}_${i}`, fps)
-          )
-        );
-        
+        videos.forEach(async (videoPath) => {
+
+          const filePath = `${name}/video/${videoPath}`;
+          const videoBuffer = await fs.promises.readFile(videoPath);
+          await log(`Saving to S3: ${videoPath}`)
+          await saveToS3Bucket(filePath, videoBuffer);
+          await unlinkAsync(videoPath);
+          await log(`Sending message: ${videoPath}`)
+          await producer.sendMessage(JSON.stringify({
+            videoPath,
+            name,
+            fps,
+            chunkDuration,
+            videoLimit
+          }));
+        });
+
+
         // Remove processed videos
-        await Promise.all(videos.map((videoPath) => unlinkAsync(videoPath)));
+        // await Promise.all(videos.map((videoPath) => unlinkAsync(videoPath)));
 
         resolve();
       } catch (error) {
@@ -205,4 +217,4 @@ const cutVideo = (
       .run();
   });
 
-export { downloadS3 };
+export { downloadAndSplit };

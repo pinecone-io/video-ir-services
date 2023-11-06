@@ -8,7 +8,7 @@ export default defineConfig({
   root: __dirname,
   server: {
     strictPort: true,
-    port: 3003,
+    port: 3001,
   },
   optimizeDeps: {
     exclude: ['fsevents']

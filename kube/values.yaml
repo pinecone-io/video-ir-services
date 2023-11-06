@@ -33,6 +33,11 @@ downloader:
     image: "registry.digitalocean.com/devrel-registry/video-recognition_downloader"
     imagePullPolicy: Always
 
+splitter:
+  deployment:
+    image: "registry.digitalocean.com/devrel-registry/video-recognition_splitter"
+    imagePullPolicy: Always
+
 indexer:
   deployment:
     image: "registry.digitalocean.com/devrel-registry/video-recognition_indexer"

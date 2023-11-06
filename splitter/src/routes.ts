@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { downloadFromYoutube } from "./download";
+import { downloadAndSplit } from "./downloadAndSplit";
 
 interface Route {
     route: string;
@@ -9,7 +9,7 @@ interface Route {
 
 const routes: Route[] = [
     {
-        route: "/download",
+        route: "/downloadAndSplit",
         method: "post",
         handler: async (req, res) => {
             res.setTimeout(360000, () => {
@@ -19,12 +19,11 @@ const routes: Route[] = [
                 const target = req.body.target as string;
                 const fps = req.body.fps as number;
                 const name = req.body.name as string;
-                const cunkDuration = req.body.chunkDuration as number;
+                const chunkDuration = req.body.chunkDuration as number;
                 const videoLimit = req.body.videoLimit as number;
 
                 console.log(`Downloading ${target}`)
-                await downloadFromYoutube
-                downloadFromYoutube(target, name, fps, cunkDuration, videoLimit);
+                await downloadAndSplit(target, name, fps, chunkDuration, videoLimit);
                 res.json({ message: "Downloaded" });
             } catch (error) {
                 res.status(500).json({ error: "Error downloading", message: error });

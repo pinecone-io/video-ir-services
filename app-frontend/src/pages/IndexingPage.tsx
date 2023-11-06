@@ -15,23 +15,38 @@ type TFormInput = {
 type LogLine = { ts: Date, message: string }
 
 const IndexingPage: React.FC = () => {
+  const [started, setStarted] = useState(false);
   const [serverError, setServerError] = useState();
   const [progress, setProgress] = useState(0);
   const [filesToProcess, setFileToProcess] = useState(0);
   const [processedFiles, setProcessedFiles] = useState(0);
   const [logs, setLogs] = useState<LogLine[]>([]);
   const [isConnected, setIsConnected] = useState(socket.connected);
-  // replace with your server URL
+  const [completed, setCompleted] = useState({ numberOfFilesProcessed: 0, executionTime: '', status: false })
+
+  const resetProgress = (): void => {
+    setProgress(0);
+    setFileToProcess(0);
+    setProcessedFiles(0);
+    setCompleted({ numberOfFilesProcessed: 0, executionTime: '', status: false })
+    setLogs([]);
+    setStarted(false)
+  }
+
 
   const handleFilesToBeProcessedChanged = (data: { numberOfFilesToProcess: number }): void => {
     const { numberOfFilesToProcess } = data
     setFileToProcess(numberOfFilesToProcess)
   }
 
-  const handleProcessedFilesChanged = (data: { progress: { val: number }, numberOfFilesProcessed: number }): void => {
+  const handleProcessedFilesChanged = (data: { progress: { val: number }, numberOfFilesProcessed: number, executionTime?: string }): void => {
     const { progress, numberOfFilesProcessed } = data
     setProcessedFiles(numberOfFilesProcessed)
     setProgress(progress.val)
+  }
+
+  const handleCompleted = (data: { numberOfFilesProcessed: number, executionTime: string, status: boolean }): void => {
+    setCompleted(data)
   }
 
   const handleLogUpdated = (data: LogLine): void => {
@@ -44,6 +59,7 @@ const IndexingPage: React.FC = () => {
     }
 
     function onDisconnect() {
+      console.log("Socket disconnected")
       setIsConnected(false);
     }
 
@@ -53,6 +69,8 @@ const IndexingPage: React.FC = () => {
     socket.on('instancesUpdated', (data): void => {
       console.log('data', data)
     })
+
+    socket.on('complete', handleCompleted)
 
     socket.on('filesToProcessChanged', handleFilesToBeProcessedChanged)
     socket.on('processedFilesChanged', handleProcessedFilesChanged)
@@ -64,6 +82,7 @@ const IndexingPage: React.FC = () => {
       socket.off('filesToProcessChanged', handleFilesToBeProcessedChanged)
       socket.off('processedFilesChanged', handleProcessedFilesChanged)
       socket.off('logUpdated', handleLogUpdated)
+      socket.off('complete', handleCompleted)
     }
   });
 
@@ -82,19 +101,22 @@ const IndexingPage: React.FC = () => {
 
   const onSubmit: SubmitHandler<TFormInput> = (data) => {
     return new Promise((resolve) => {
+      resetProgress();
+      setStarted(true)
       download(data.youtubeUrl, data.name, data.fps, data.chunkDuration, data.videoLimit)
         .catch((e) => setServerError(e.toString()))
         .finally(() => resolve(true));
     });
   };
 
-  const endOfMessages = useRef<null | HTMLDivElement>(null);
+  const endOfMessages = useRef<HTMLTableCellElement | null>(null);
 
   useEffect(() => {
     if (endOfMessages.current) {
       endOfMessages.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [logs]);
+
 
   return (
     <div className="min-h-screen bg-white text-primary-100 w-full">
@@ -175,6 +197,9 @@ const IndexingPage: React.FC = () => {
               className="border focus:border-primary-400 bg-white text-sm rounded-lg p-2.5 inline-block grow"
             />
           </div>
+          <div>
+            {isConnected ? <span className="flex w-3 h-3 bg-green-200 rounded-full"></span> : <span className="flex w-3 h-3 bg-red3-200 rounded-full"></span>}
+          </div>
           <button
             disabled={!isValid || isSubmitting}
             type="submit"
@@ -190,29 +215,34 @@ const IndexingPage: React.FC = () => {
           )}
 
 
-          <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-3">
+          {(started || completed.status) && <><div className="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-3">
             <div className="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{ "width": `${progress}%` }}>{progress}%</div>
           </div>
 
-          <div className="p-4 mb-4 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto">
-            <table style={{ width: '100%' }}>
-              <tbody>
-                <tr>
-                  <td style={{ width: '90%' }}><b>Files to process</b></td>
-                  <td>{filesToProcess}</td>
-                </tr>
-                <tr>
-                  <td style={{ width: '90%' }}><b>Processed files</b></td>
-                  <td>{processedFiles}</td>
-                </tr>
-                <tr>
-                  <td style={{ width: '90%' }}><b>Total files</b></td>
-                  <td>{processedFiles + filesToProcess}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            <div className="p-4 mb-4 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto">
+              <table style={{ width: '100%' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '90%' }}><b>Files to process</b></td>
+                    <td>{filesToProcess}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ width: '90%' }}><b>Processed files</b></td>
+                    <td>{processedFiles}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ width: '90%' }}><b>Total files</b></td>
+                    <td>{processedFiles + filesToProcess}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div></>}
 
+          {(started || completed.status) && <div className="p-4 mb-4 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto">
+            <div>
+              {completed.status ? "Completed!" : started ? "Processing..." : ''} {(started || completed.status) && <>{completed.numberOfFilesProcessed > 0 && `${completed.numberOfFilesProcessed} files processed`} {completed.executionTime && `in ${completed.executionTime}`}</>}
+            </div>
+          </div>}
 
         </form>
       </div>

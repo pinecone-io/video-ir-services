@@ -107,10 +107,10 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
 
   const [labelValue, setLabelValue] = useState<string>("");
 
-  const getMoreImagesAsLabel = async (boxId: string) => {
-    const moreBoxes = await queryBox(boxId, true);
-    console.log(moreBoxes)
-  }
+  // const getMoreImagesAsLabel = async (boxId: string) => {
+  //   const moreBoxes = await queryBox(boxId, true);
+  //   console.log(moreBoxes)
+  // }
 
   const addToLabel = async (boxId: string) => {
     return new Promise((resolve) => {
