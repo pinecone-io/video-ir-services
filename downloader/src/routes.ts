@@ -19,8 +19,11 @@ const routes: Route[] = [
                 const target = req.body.target as string;
                 const fps = req.body.fps as number;
                 const name = req.body.name as string;
+                const cunkDuration = req.body.chunkDuration as number;
+                const videoLimit = req.body.videoLimit as number;
+
                 console.log(`Downloading ${target}`)
-                await downloadS3(target, name, fps);
+                await downloadS3(target, name, fps,cunkDuration, videoLimit);
                 res.json({ message: "Downloaded" });
             } catch (error) {
                 res.status(500).json({ error: "Error downloading", message: error });

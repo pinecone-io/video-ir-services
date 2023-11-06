@@ -8,6 +8,8 @@ type TFormInput = {
   fps: number;
   youtubeUrl: string;
   name: string;
+  chunkDuration: number,
+  videoLimit: number
 };
 
 type LogLine = { ts: Date, message: string }
@@ -74,12 +76,13 @@ const IndexingPage: React.FC = () => {
       youtubeUrl: "https://www.youtube.com/watch?v=ADs8tvU2xDc",
       name: "car-race",
       fps: 1,
+      chunkDuration: 5
     },
   });
 
   const onSubmit: SubmitHandler<TFormInput> = (data) => {
     return new Promise((resolve) => {
-      download(data.youtubeUrl, data.name, data.fps)
+      download(data.youtubeUrl, data.name, data.fps, data.chunkDuration, data.videoLimit)
         .catch((e) => setServerError(e.toString()))
         .finally(() => resolve(true));
     });
@@ -139,6 +142,37 @@ const IndexingPage: React.FC = () => {
               {...register("fps", { required: true })}
               className="border focus:border-primary-400 bg-white text-sm rounded-lg p-2.5 inline-block grow"
               required
+            />
+          </div>
+          <div className="flex center mt-3">
+            <label
+              htmlFor="chunkDuration"
+              className="w-[85px] text-sm font-medium mr-3 inline-flex self-center"
+            >
+              Chunk Duration:
+            </label>
+            <input
+              type="number"
+              min={1}
+              id="chunkDuration"
+              {...register("chunkDuration", { required: true })}
+              className="border focus:border-primary-400 bg-white text-sm rounded-lg p-2.5 inline-block grow"
+              required
+            />
+          </div>
+          <div className="flex center mt-3">
+            <label
+              htmlFor="videoLimit"
+              className="w-[85px] text-sm font-medium mr-3 inline-flex self-center"
+            >
+              Video Limit:
+            </label>
+            <input
+              type="number"
+              min={1}
+              id="videoLimit"
+              {...register("videoLimit")}
+              className="border focus:border-primary-400 bg-white text-sm rounded-lg p-2.5 inline-block grow"
             />
           </div>
           <button

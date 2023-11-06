@@ -89,7 +89,9 @@ curl --location 'http://localhost:3001/api/download' \
 --data '{
     "name": "highway-surveillance",
     "target": "https://www.youtube.com/watch?v=PJ5xXXcfuTc",
-    "fps": 30
+    "fps": 30,
+    "chunkDuration": 10,
+    "videoLimit": 2
 }'
 
 curl --location 'http://localhost:5173/api/indexImages?name=highway-surveillance'
