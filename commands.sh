@@ -61,6 +61,9 @@ kubectl config get-contexts
 kubectl config use-context do-sfo2-virtal-cluster-1
 kubectl config use-context docker-desktop
 
+# Restart pod
+kubectl rollout restart deployment video-ir-dev-downloader -n dev
+
 
 #########
 # Rebuild dockers

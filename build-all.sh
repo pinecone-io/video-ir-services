@@ -7,7 +7,4 @@ pnpm docker &&
 cd ../splitter &&
 pnpm docker &&
 cd ../indexer
-pnpm docker &&
-cd ../splitter &&
-pnpm docker &&
 cd ..

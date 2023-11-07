@@ -35,7 +35,7 @@ const extractFrames = async (
       .outputOptions([`-vf fps=${fps}`])
       .output(join(outputFolder, "%d.png"))
       .on("end", async () => {
-        await log(`Total frames: ${frameCount}`)
+        await log(`Total frames: ${frameCount}`);
         for (let i = 1; i <= frameCount; i += 1) {
           const outputFilePath = join(outputFolder, `${i}.png`);
           const fileBuffer = fs.readFileSync(outputFilePath);
@@ -45,9 +45,8 @@ const extractFrames = async (
           // Delete the local file
           await unlinkAsync(outputFilePath);
           // Send for indexing
-          await log(`Sending message: ${filePath}}`)
+          await log(`Sending message: ${filePath}}`);
           await producer.sendMessage(filePath);
-
         }
         await log("Frames extraction completed.");
         await await log(`Extracted ${frameCount} frames.`);
@@ -55,8 +54,8 @@ const extractFrames = async (
       })
       .on("progress", async (progressData) => {
         frameCount = progressData.frames;
-        console.log(".")
-        await log(`Frames extracted: ${frameCount}`)
+        console.log(".");
+        await log(`Frames extracted: ${frameCount}`);
       })
       .on("error", (error: Error) => {
         const err = `Error occurred: ${error.message}`;
@@ -65,10 +64,17 @@ const extractFrames = async (
       .run();
   });
 
-const downloadFromYoutube = async (target = "", name = "video", fps = 1, chunkDuration = 5, videoLimit = Number.MAX_SAFE_INTEGER) => {
+const downloadFromYoutube = async (
+  target = "",
+  name = "video",
+  fps = 1,
+  chunkDuration = 5,
+  videoLimit = Number.MAX_SAFE_INTEGER
+) => {
   return new Promise<void>(async (resolve, reject) => {
-
-    await log(`Attempting to download ${target}. \nFirst, attempting to connect to Kafka`);
+    await log(
+      `Attempting to download ${target}. \nFirst, attempting to connect to Kafka`
+    );
     await producer.connect();
     const videoPath = `${name}.mp4`;
     const writable = createWriteStream(videoPath);
@@ -88,7 +94,13 @@ const downloadFromYoutube = async (target = "", name = "video", fps = 1, chunkDu
       await log("Download completed.");
       try {
         await log("Extracting frames...");
-        const videos = await split(videoPath, name, fps, chunkDuration, videoLimit);
+        const videos = await split(
+          videoPath,
+          name,
+          fps,
+          chunkDuration,
+          videoLimit
+        );
 
         // Extract frames for each video cut
         await Promise.all(
@@ -114,57 +126,39 @@ const downloadFromYoutube = async (target = "", name = "video", fps = 1, chunkDu
   });
 };
 
-const downloadFromS3 = async ({ videoPath = "", target = "", name = "video", fps = 1, chunkDuration = 5, videoLimit = Number.MAX_SAFE_INTEGER }) => {
-  return new Promise<void>(async (resolve, reject) => {
-    console.log("what is the what")
-    await log(`What is the Freaking what? ${videoPath}`)
+const downloadFromS3 = async ({
+  videoPath = "",
+  target = "",
+  name = "video",
+  fps = 1,
+  chunkDuration = 5,
+  videoLimit = Number.MAX_SAFE_INTEGER,
+}) => {
+  // await log(`Attempting to download ${target}. \nFirst, attempting to connect to Kafka`);
+  await producer.connect();
+  
 
-    // await log(`Attempting to download ${target}. \nFirst, attempting to connect to Kafka`);
-    await producer.connect();
-    const writable = createWriteStream(videoPath);
+  const videoPathDownload = `${name}.mp4`;
+  await log(`Downloading video part ${videoPathDownload}...`);
 
-    await log(`Downloading video part ${videoPath}...`);
-    // const s3Video = await getS3Object(videoPath);
-    const url = `https://${AWS_S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${videoPath}`
-    await log(`URL: ${url}`)
-    // const response = await fetch(url);
-    // const s3Video = await response.arrayBuffer();
-    // console.log(s3Video)
-    // console.log("s3Video", s3Video.length)
-    // await log(`Size of the video buffer: ${s3Video.byteLength}`);
-    resolve()
-  })
-  //   writable.write(s3Video);
+  const url = generateS3Url(videoPath);
+  await log(`URL: ${url}`);
 
-  //   writable.on("finish", async () => {
-  //     await log("Download completed.");
-  //     try {
-  //       await log("Extracting frames...");
-  //       await extractFrames(videoPath, `${name}`, fps)
-  //       // const videos = await split(videoPath, name, fps, chunkDuration, videoLimit);
+  const response = await fetch(url);
 
-  //       // // Extract frames for each video cut
-  //       // await Promise.all(
-  //       //   videos.map((videoPath, i) =>
-  //       //     extractFrames(videoPath, `${name}_${i}`, fps)
-  //       //   )
-  //       // );
+  const s3Video = await response.arrayBuffer();
 
-  //       // // Remove processed videos
-  //       // await Promise.all(videos.map((videoPath) => unlinkAsync(videoPath)));
+  await new Promise((resolve, reject) => {
+    fs.writeFile(videoPathDownload, Buffer.from(s3Video), async(err) =>{
+      if (err) return reject(err);
+      await log("Download completed.");
+      await extractFrames(videoPathDownload, `${name}`, fps)
 
-  //       resolve();
-  //     } catch (error) {
-  //       console.log(error);
-  //       await log(`Error ${error}`);
-  //       reject(new Error(`Error extracting frames: ${error}`));
-  //     }
-  //   });
+      await unlinkAsync(videoPathDownload);
 
-  //   writable.on("error", (error) => {
-  //     reject(new Error(`Error writing video: ${error}`));
-  //   });
-  // });
+      resolve(true);
+    });
+  });
 };
 
 const videoDuration = (videoPath: string): Promise<number> =>
