@@ -11,6 +11,9 @@ helm uninstall video-ir -n dev
 # Build and publish images for all services to DO
 ./build-all-local.sh
 
+# Crearte namespace
+kubectl create namespace dev
+
 # Create env secrets
 kubectl delete secret app-backend-env -n dev
 kubectl create secret generic app-backend-env --from-env-file=./env/.env.app-backend -n dev

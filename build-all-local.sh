@@ -6,4 +6,6 @@ cd ../downloader &&
 pnpm docker:local &&
 cd ../indexer
 pnpm docker:local &&
+cd ../splitter &&
+pnpm docker:local &&
 cd ..
