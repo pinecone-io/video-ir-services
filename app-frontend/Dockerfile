@@ -1,5 +1,3 @@
-# STAGE 1
-
 # Use an official Node.js runtime as a parent image
 FROM node:18.17.1 as builder
 
@@ -8,6 +6,9 @@ WORKDIR /app-frontend
 
 # Install pnpm
 RUN npm install -g pnpm@8.6.12
+
+# Copy local shared repo
+COPY tmp-shared /shared
 
 # Copy package.json and pnpm-lock.yaml to the working directory
 COPY package.json ./

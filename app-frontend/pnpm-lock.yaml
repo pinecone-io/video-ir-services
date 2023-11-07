@@ -38,6 +38,9 @@ dependencies:
   react-router-dom:
     specifier: ^6.17.0
     version: 6.17.0(react-dom@18.2.0)(react@18.2.0)
+  shared:
+    specifier: file:../shared
+    version: file:../shared
   socket.io-client:
     specifier: ^4.7.2
     version: 4.7.2
@@ -5594,3 +5597,9 @@ packages:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
     dev: true
+
+  file:../shared:
+    resolution: {directory: ../shared, type: directory}
+    name: typescript-example-template
+    engines: {node: 18.17.1, npm: Please use pnpm 8.6.12, pnpm: 8.6.12, yarn: Please use pnpm 8.6.12}
+    dev: false
