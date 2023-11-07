@@ -90,16 +90,17 @@ const downloadAndSplit = async (target = "", name = "video", fps = 1, chunkDurat
         const videos = await split(videoPath, name, fps, chunkDuration, videoLimit);
         await log(`Split video into ${videos.length} parts.`);
 
-        videos.forEach(async (videoPath) => {
-
-          const filePath = `${name}/video/${videoPath}`;
+        videos.forEach(async (videoPath, key) => {
+          const parts = videoPath.split('/');
+          const endOfPath = parts[parts.length - 1];
+          const targetPath = `${name}/video/${endOfPath}`;
           const videoBuffer = await fs.promises.readFile(videoPath);
-          await log(`Saving to S3: ${videoPath}`)
-          await saveToS3Bucket(filePath, videoBuffer);
+          await log(`Saving to S3: ${targetPath}`)
+          await saveToS3Bucket(targetPath, videoBuffer);
           await unlinkAsync(videoPath);
-          await log(`Sending message: ${videoPath}`)
+          await log(`Sending message: ${targetPath}`)
           await producer.sendMessage(JSON.stringify({
-            videoPath,
+            videoPath: targetPath,
             name,
             fps,
             chunkDuration,

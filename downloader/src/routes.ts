@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { downloadFromYoutube } from "./download";
+import { downloadFromS3, downloadFromYoutube } from "./download";
 
 interface Route {
     route: string;
@@ -30,6 +30,14 @@ const routes: Route[] = [
                 res.status(500).json({ error: "Error downloading", message: error });
             }
         },
+    },
+    {
+        route: "/test",
+        method: "get",
+        handler: async (_, res) => {
+            console.log("squanch")
+            await downloadFromS3({ videoPath: "car-race/video/part_0.mp4" });
+        }
     },
     {
         route: "/health",

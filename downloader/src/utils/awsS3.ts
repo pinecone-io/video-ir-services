@@ -16,6 +16,7 @@ import {
   AWS_S3_BUCKET,
   AWS_SECRET_ACCESS_KEY,
 } from "./environment";
+import { log } from "./logger";
 
 let awsS3Client: S3Client | null = null;
 
@@ -106,6 +107,7 @@ async function getObject(
 }
 
 export const getS3Object = async (path: string) => {
+  await log(`Trying to get S3 object ${path}`)
   const client = await getAwsS3Client();
 
   const command = new GetObjectCommand({
