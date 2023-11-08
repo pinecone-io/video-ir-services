@@ -39,11 +39,13 @@ const processMessages = async () => {
     const messageString = message?.value?.toString();
     const messageObject = JSON.parse(messageString!);
 
-    const { videoPath, name, fps, chunkDuration, videoLimit } = messageObject;
+    console.log("MESSAGE", messageObject)
+
+    const { videoPath, index, name, fps, chunkDuration, videoLimit } = messageObject;
 
     if (!isProcessing) {
       isProcessing = true;
-      await downloadFromS3({ videoPath, name, fps, chunkDuration, videoLimit });
+      await downloadFromS3({ videoPath, index: index.toString(), name, fps, chunkDuration, videoLimit });
       isProcessing = false;
     } else {
       process.stdout.write(".");

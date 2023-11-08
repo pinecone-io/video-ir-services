@@ -30,7 +30,7 @@ const routes: Route[] = [
         };
 
         console.log(`Downloading ${target}`);
-        await downloadFromS3({videoPath: a.videoPath, target: "", name: a.name, fps: a.fps, chunkDuration: a.chunkDuration, videoLimit: a.videoLimit});
+        // await downloadFromS3({videoPath: a.videoPath, target: "", name: a.name, fps: a.fps, chunkDuration: a.chunkDuration, videoLimit: a.videoLimit});
         res.json({ message: "Downloaded" });
       } catch (error) {
         res.status(500).json({ error: "Error downloading", message: error });
@@ -42,7 +42,7 @@ const routes: Route[] = [
     method: "get",
     handler: async (_, res) => {
       console.log("squanch");
-      await downloadFromS3({ videoPath: "car-race/video/part_0.mp4" });
+      // await downloadFromS3({ videoPath: "car-race/video/part_0.mp4" });
     },
   },
   {

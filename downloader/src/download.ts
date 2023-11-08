@@ -7,7 +7,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { generateS3Url, getS3Object, saveToS3Bucket } from "./utils/awsS3";
 import { KafkaProducer } from "./utils/kafka-producer";
-import { log } from "./utils/logger";
+import { log, trackFile } from "./utils/logger";
 import { AWS_REGION, AWS_S3_BUCKET } from "./utils/environment";
 const unlinkAsync = promisify(fs.unlink);
 
@@ -18,7 +18,8 @@ const producer = new KafkaProducer();
 const extractFrames = async (
   videoPath: string,
   name: string,
-  fps: number
+  index: string,
+  fps: number,
 ): Promise<string[]> =>
   new Promise((resolve, reject) => {
     let frameCount = 0;
@@ -33,23 +34,29 @@ const extractFrames = async (
     // Use fluent-ffmpeg to extract frames
     ffmpeg(videoPath)
       .outputOptions([`-vf fps=${fps}`])
-      .output(join(outputFolder, "%d.png"))
+      .output(join(outputFolder, `${index}_%d.png`))
       .on("end", async () => {
-        await log(`Total frames: ${frameCount}`);
+        await log(`Total frames: ${frameCount}, ${index}`);
         for (let i = 1; i <= frameCount; i += 1) {
-          const outputFilePath = join(outputFolder, `${i}.png`);
-          const fileBuffer = fs.readFileSync(outputFilePath);
-          const filePath = `${name}/frame/${i}.png`;
-          await saveToS3Bucket(filePath, fileBuffer);
-          files.push(filePath);
-          // Delete the local file
-          await unlinkAsync(outputFilePath);
-          // Send for indexing
-          await log(`Sending message: ${filePath}}`);
-          await producer.sendMessage(filePath);
+          try {
+            const outputFilePath = join(outputFolder, `${index}_${i}.png`);
+            const fileBuffer = fs.readFileSync(outputFilePath);
+            const filePath = `${name}/frame/${index}_${i}.png`;
+            await saveToS3Bucket(filePath, fileBuffer);
+            files.push(filePath);
+            // Delete the local file
+            await unlinkAsync(outputFilePath);
+            // Send for indexing
+            await log(`Sending message: ${filePath}}`);
+            await trackFile(filePath)
+            await producer.sendMessage(filePath);
+          } catch (e) {
+            await log(`Error ${e}`);
+            console.log(`ERROR ${e}`);
+          }
         }
         await log("Frames extraction completed.");
-        await await log(`Extracted ${frameCount} frames.`);
+        await log(`Extracted ${frameCount} frames.`);
         resolve(files);
       })
       .on("progress", async (progressData) => {
@@ -105,7 +112,7 @@ const downloadFromYoutube = async (
         // Extract frames for each video cut
         await Promise.all(
           videos.map((videoPath, i) =>
-            extractFrames(videoPath, `${name}_${i}`, fps)
+            extractFrames(videoPath, `${name}_${i}`, "0", fps)
           )
         );
 
@@ -128,18 +135,27 @@ const downloadFromYoutube = async (
 
 const downloadFromS3 = async ({
   videoPath = "",
+  index,
   target = "",
   name = "video",
   fps = 1,
   chunkDuration = 5,
   videoLimit = Number.MAX_SAFE_INTEGER,
+}: {
+  videoPath?: string,
+  index: string,
+  target?: string,
+  name?: string,
+  fps?: number,
+  chunkDuration?: number,
+  videoLimit?: number,
 }) => {
   // await log(`Attempting to download ${target}. \nFirst, attempting to connect to Kafka`);
   await producer.connect();
-  
+  console.log("INSIDE", index)
 
   const videoPathDownload = `${name}.mp4`;
-  await log(`Downloading video part ${videoPathDownload}...`);
+  await log(`Downloading video part ${videoPathDownload}... ${index}`);
 
   const url = generateS3Url(videoPath);
   await log(`URL: ${url}`);
@@ -149,10 +165,10 @@ const downloadFromS3 = async ({
   const s3Video = await response.arrayBuffer();
 
   await new Promise((resolve, reject) => {
-    fs.writeFile(videoPathDownload, Buffer.from(s3Video), async(err) =>{
+    fs.writeFile(videoPathDownload, Buffer.from(s3Video), async (err) => {
       if (err) return reject(err);
       await log("Download completed.");
-      await extractFrames(videoPathDownload, `${name}`, fps)
+      await extractFrames(videoPathDownload, `${name}`, index, fps)
 
       await unlinkAsync(videoPathDownload);
 

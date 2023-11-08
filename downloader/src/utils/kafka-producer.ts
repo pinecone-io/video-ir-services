@@ -55,7 +55,6 @@ class KafkaProducer {
             }
             const topic = this.topic;
             await log(`Sending message: ${message}`);
-            await trackFile(message)
             await this.producer.send({
                 topic: topic!,
                 messages: [{

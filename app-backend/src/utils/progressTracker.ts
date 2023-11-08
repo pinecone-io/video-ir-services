@@ -25,6 +25,11 @@ class ProgressTracker {
         this.eventEmitter.emit('processedFilesChanged', this._processedFiles);
     }
 
+    resetFiles(): void {
+        this.filesToProcess = [];
+        this.processedFiles = [];
+    }
+
 
     startTimer(): void {
         this.startTime = new Date();
@@ -65,7 +70,7 @@ class ProgressTracker {
                 progress
             });
 
-            if (this.filesToProcess.length === 0) {
+            if (this.filesToProcess.length === 0 && this.processedFiles.length > 0) {
                 this.externalEventEmitter.emit('complete', {
                     numberOfFilesProcessed: this.processedFiles.length,
                     status: true,

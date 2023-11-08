@@ -4,8 +4,8 @@ import { LabeledBoundingBox } from "../types/Box";
 // import { queryBox } from "../services/boxService";
 
 // TODO @rschwabco maybe we should store this data in ImageWithBoundingBoxes object
-const IMAGE_WIDTH = 640;
-const IMAGE_HEIGHT = 360;
+const IMAGE_WIDTH = 3840;
+const IMAGE_HEIGHT = 2160;
 
 const BoundingBoxes: React.FC<{
   labeledBoundingBox: LabeledBoundingBox[];
@@ -34,7 +34,7 @@ const BoundingBoxes: React.FC<{
       .selectAll<SVGGElement, LabeledBoundingBox>("g")
       .data(props.labeledBoundingBox, (d) => d.boxId);
 
-    // Remove all obsolite groups
+    // Remove all obsolete groups
     rectGroups.exit().remove();
 
     // Create new groups

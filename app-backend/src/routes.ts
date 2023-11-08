@@ -101,7 +101,8 @@ const routes: Route[] = [
         res.status(500).json({ error: "Request timed out" })
       })
       try {
-        progressTracker.startTimer()
+        progressTracker.startTimer();
+        progressTracker.resetFiles();
         const response = await fetch("http://video-ir-dev-splitter:3007/api/downloadAndSplit", {
           method: 'POST',
           headers: {

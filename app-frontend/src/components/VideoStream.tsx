@@ -83,7 +83,6 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     const key = Object.keys(props.imagePaths)[frameIndex];
     const boundingBoxes: LabeledBoundingBox[] =
       props.imagePaths[key]?.labeledBoundingBoxes;
-
     setLabeledBoundingBox(boundingBoxes);
   }, [props.imagePaths, frameIndex]);
 

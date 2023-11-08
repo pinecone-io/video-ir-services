@@ -231,8 +231,9 @@ const getImages: () => Promise<ObjectDetectionData> = async () => {
         const parsedValue = JSON.parse(value) as ImageWithBoundingBoxes;
         const boxIds = parsedValue.labeledBoundingBoxes.map((box) => box.boxId);
         allBoxIds = [...allBoxIds, ...boxIds];
-
+        console.log("parsedValue.frameIndex", parsedValue.frameIndex)
         if (parsedValue && typeof parsedValue.frameIndex === "string") {
+
           data[key] = {
             ...parsedValue,
             src: generateS3Url(parsedValue.src),
@@ -313,10 +314,35 @@ const getImages: () => Promise<ObjectDetectionData> = async () => {
 
   // Sort the keys based on frameIndex
   const sortedKeys = Object.keys(data).sort((a, b) => {
-    const aIndex = data[a]?.frameIndex ? parseInt(data[a]!.frameIndex, 10) : -1;
-    const bIndex = data[b]?.frameIndex ? parseInt(data[b]!.frameIndex, 10) : -1;
-    return aIndex - bIndex;
+    const aIndex = data[a]?.frameIndex ? data[a]!.frameIndex : '';
+    const bIndex = data[b]?.frameIndex ? data[b]!.frameIndex : '';
+    return aIndex.localeCompare(bIndex);
   });
+
+  // const sortedKeys = Object.keys(data).sort((a, b) => {
+  //   const aIndices = data[a]?.frameIndex?.split('_').map(Number);
+  //   const bIndices = data[b]?.frameIndex?.split('_').map(Number);
+
+  //   console.log("aIndices", aIndices, "bIndices", bIndices)
+
+  //   if (!aIndices || !bIndices) {
+  //     return 0;
+  //   }
+  //   if (!aIndices[0] || !bIndices[0]) {
+  //     throw new Error('Invalid frame part index')
+  //   }
+  //   // Compare the first part
+  //   if (aIndices[0] !== bIndices[0]) {
+  //     return aIndices[0] - bIndices[0];
+  //   }
+
+  //   if (!aIndices[1] || !bIndices[1]) {
+  //     throw new Error('Invalid frame index')
+  //   }
+
+  //   // If the first parts are equal, compare the second part
+  //   return aIndices[1] - bIndices[1];
+  // });
 
   // Create a new sorted object
   const sortedData: ObjectDetectionData = {};

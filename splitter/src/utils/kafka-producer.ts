@@ -28,7 +28,7 @@ class KafkaProducer {
         console.log("creating topics")
         await this.admin.connect();
         await this.admin.createTopics({
-            topics: [{ topic: this.topic, numPartitions: 3 }],
+            topics: [{ topic: this.topic, numPartitions: 8 }],
         });
         await this.admin.disconnect();
     }
@@ -55,7 +55,6 @@ class KafkaProducer {
             }
             const topic = this.topic;
             await log(`Sending message: ${message}`);
-            await trackFile(message)
             await this.producer.send({
                 topic: topic!,
                 messages: [{
