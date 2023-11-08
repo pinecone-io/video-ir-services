@@ -27,6 +27,20 @@ const BoundingBoxes: React.FC<{
     return ((boundingClientRect?.height || 0) * y) / IMAGE_HEIGHT;
   };
 
+  // Update rect collor
+  useEffect(()=>{
+    svg
+      .selectAll<SVGGElement, LabeledBoundingBox>("rect")
+      .attr("stroke", (d) => {
+        return props.selectedBoxes?.map((x) => x.boxId).includes(d.boxId)
+          ? "#9ADD66"
+          : "#FF1717"
+      }
+      )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.selectedBoxes])
+
+
   // Draw binding boxes
   useEffect(() => {
     // Bind Data
@@ -60,24 +74,9 @@ const BoundingBoxes: React.FC<{
       }
       )
       .attr("fill-opacity", 0)
-      .on("click", (_, d) => {
+      .on("click", (_, d)=>{
         console.log("box selected", d.boxId)
         props.onBoxSelected(d.boxId);
-
-        (async () => {
-          // const response = await queryBox(d.boxId);
-
-          // // Find boxes and update them
-          // updatedGroups
-          //   .selectAll("rect")
-          //   .attr("stroke", (d) =>
-          //     response?.map((x) => x.boxId).includes(d.boxId)
-          //       ? "#9ADD66"
-          //       : "#FF1717"
-          //   );
-
-          // setSelectedBoxes(response?.data);
-        })();
       });
 
     // Create new text

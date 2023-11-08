@@ -11,6 +11,10 @@ helm uninstall video-ir -n dev
 # Build and publish images for all services to DO
 ./build-all.sh
 
+# Wait until everything is indexed and removed
+# Bug: newly compiled image is not puled in k8
+sleep 60
+
 # Crearte namespace
 kubectl create namespace dev
 
