@@ -10,6 +10,7 @@ import { ItemTypes } from "./ItemTypes";
 interface LabelingControlsProps {
   selectedBox: string;
   setSelectedBoxes: React.Dispatch<React.SetStateAction<LabeledImage[]>>
+  refreshImages: () => void;
 }
 
 type ImageProps = {
@@ -98,7 +99,7 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   );
 };
 
-const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSelectedBoxes }) => {
+const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSelectedBoxes, refreshImages }) => {
   //tailwind 10px padding
   const [images, setImages] = useState<
     Array<LabeledImage>
@@ -169,6 +170,8 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
     );
 
     await negativeLabel(selectedBox, imagesToNegativeLabel.map((image) => image.boxId));
+
+    await refreshImages();
   };
 
   const style: CSSProperties = {

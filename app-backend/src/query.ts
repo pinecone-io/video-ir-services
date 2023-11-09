@@ -62,7 +62,8 @@ const calculateAverageVector = (
   return averageVector;
 };
 
-const confidence = 0.95;
+// TODO: Pass confidence factor from UI
+const confidence = 0.90;
 
 const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Error> = async (
   boxId: string,
@@ -75,9 +76,6 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
     const ns = index.namespace(namespace);
 
     const imageUrl = JSON.parse((await redis.hGet("bbox", boxId)) || "{}")!.src;
-
-    console.log(`imageUrl`, imageUrl)
-
     const vector = await embedder.embed(imageUrl);
 
     if (!vector) {
@@ -166,7 +164,7 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
           queryResult.matches.map(async (match) => {
             const res = await ns.query({
               vector: averageVector,
-              topK: 10,
+              topK: 100,
               includeMetadata: true,
               filter: {
                 negativeLabel: {

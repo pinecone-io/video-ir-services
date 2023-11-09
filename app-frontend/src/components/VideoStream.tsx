@@ -163,7 +163,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
         </div>
       </div>
       <div className="flex justify-center bg-primary-1000 w-full mt-[100px] min-h-[300px]">
-        <LabelingControls selectedBox={selectedBox} setSelectedBoxes={setSelectedBoxes} />
+        <LabelingControls selectedBox={selectedBox} setSelectedBoxes={setSelectedBoxes} refreshImages={props.refreshImages} />
       </div>
       <footer className="text-center text-black p-smallFooter fixed bottom-0 w-full bg-white z-50">
         <p className="p-2">All Rights Reserved by Pinecone</p>
