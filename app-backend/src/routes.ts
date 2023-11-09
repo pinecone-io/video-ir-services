@@ -6,6 +6,7 @@ import { ProgressTracker } from './utils/progressTracker'
 import { IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
 import { LogTracker } from "./utils/logTracker";
 import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
+import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
 
 const progressTracker = new ProgressTracker();
 const progressTrackerListener = progressTracker.getEmitter();
@@ -15,6 +16,8 @@ const logTracker = new LogTracker()
 const logTrackerListener = logTracker.getLogsEventEmitter()
 const numberOfObjectsTracker = new NumberOfObjectsTracker()
 const numberOfObjectsTrackerListener = numberOfObjectsTracker.getNumberOfObjectsEventEmitter()
+const numberOfEmbeddingsTracker = new EmbeddingsCountTracker()
+const numberOfEmbeddingsTrackerListener = numberOfEmbeddingsTracker.getNumberOfEmbeddingsEventEmitter()
 
 interface Route {
   route: string;
@@ -107,6 +110,7 @@ const routes: Route[] = [
         progressTracker.startTimer();
         progressTracker.resetFiles();
         numberOfObjectsTracker.clearNumberOfObjects();
+        numberOfEmbeddingsTracker.clearNumberOfEmbeddings();
         const response = await fetch("http://video-ir-dev-splitter:3007/api/downloadAndSplit", {
           method: 'POST',
           headers: {
@@ -127,15 +131,19 @@ const routes: Route[] = [
     handler: async (req, res) => {
       const message = req.body.message;
       const payload = req.body.payload;
-      // console.log("LOG", message, payload);
+      console.log("PAYLOAD", payload)
       logTracker.log(message);
       if (payload && Object.keys(payload).length !== 0) {
-        console.log("PAYLOAD", payload)
         try {
           const eventType = payload.eventType
           switch (eventType) {
             case 'boxCount': {
               numberOfObjectsTracker.addToObjectCount(payload.boxesCount)
+              break;
+            }
+            case 'embeddingCount': {
+              numberOfEmbeddingsTracker.addToEmbeddingsCount(payload.embeddingCount)
+              break;
             }
           }
         } catch (e) {
@@ -198,4 +206,11 @@ const routes: Route[] = [
 
 ];
 
-export { routes as resolvers, indexerInstancesTrackerListener, progressTrackerListener, logTrackerListener, numberOfObjectsTrackerListener };
+export {
+  routes as resolvers,
+  indexerInstancesTrackerListener,
+  progressTrackerListener,
+  logTrackerListener,
+  numberOfObjectsTrackerListener,
+  numberOfEmbeddingsTrackerListener
+};

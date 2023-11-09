@@ -22,6 +22,7 @@ const IndexingPage: React.FC = () => {
   const [filesToProcess, setFileToProcess] = useState(0);
   const [processedFiles, setProcessedFiles] = useState(0);
   const [numberOfObjects, setNumberOfObjects] = useState(0);
+  const [numberOfEmbeddings, setNumberOfEmbeddings] = useState(0);
   const [logs, setLogs] = useState<LogLine[]>([]);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [completed, setCompleted] = useState({ numberOfFilesProcessed: 0, executionTime: '', status: false })
@@ -60,6 +61,11 @@ const IndexingPage: React.FC = () => {
     setNumberOfObjects(data)
   }
 
+  const handleNumberOfEmbeddings = (data: number): void => {
+    console.log("HELLO", data)
+    setNumberOfEmbeddings(data)
+  }
+
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
@@ -83,6 +89,7 @@ const IndexingPage: React.FC = () => {
     socket.on('processedFilesChanged', handleProcessedFilesChanged)
     socket.on('logUpdated', handleLogUpdated)
     socket.on('numberOfObjectsUpdated', handleNumberOfObjects)
+    socket.on('numberOfEmbeddingsUpdated', handleNumberOfEmbeddings)
 
     return () => {
       socket.off('connect', onConnect);
@@ -91,6 +98,8 @@ const IndexingPage: React.FC = () => {
       socket.off('processedFilesChanged', handleProcessedFilesChanged)
       socket.off('logUpdated', handleLogUpdated)
       socket.off('complete', handleCompleted)
+      socket.off('numberOfObjectsUpdated', handleNumberOfObjects)
+      socket.off('numberOfEmbeddingsUpdated', handleNumberOfEmbeddings)
     }
   });
 
@@ -247,6 +256,10 @@ const IndexingPage: React.FC = () => {
                   <tr>
                     <td style={{ width: '90%' }}><b>Objects detected</b></td>
                     <td>{numberOfObjects}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ width: '90%' }}><b>Embeddings</b></td>
+                    <td>{numberOfEmbeddings}</td>
                   </tr>
                 </tbody>
               </table>

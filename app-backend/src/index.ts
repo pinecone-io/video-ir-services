@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
-import { logTrackerListener, numberOfObjectsTrackerListener, resolvers } from "./routes";
+import { logTrackerListener, numberOfEmbeddingsTrackerListener, numberOfObjectsTrackerListener, resolvers } from "./routes";
 import {
   IS_PROD,
   PINECONE_DATA_DIR_PATH,
@@ -75,6 +75,10 @@ io.on("connection", (socket) => {
 
   numberOfObjectsTrackerListener.on('numberOfObjectsUpdated', (data) => {
     socket.emit('numberOfObjectsUpdated', data)
+  })
+
+  numberOfEmbeddingsTrackerListener.on('numberOfEmbeddingsUpdated', (data) => {
+    socket.emit('numberOfEmbeddingsUpdated', data)
   })
 });
 

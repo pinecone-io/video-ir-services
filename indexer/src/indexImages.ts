@@ -88,12 +88,12 @@ const fetchImageAndBoundingBoxes = async (imagePath: string) => {
   }
 };
 
-const generateBoxId = (box: DetectedBoundingBox) =>
-  crypto.createHash("md5").update(JSON.stringify(box)).digest("hex");
+const generateBoxId = (box: DetectedBoundingBox, frameIndex: string) =>
+  crypto.createHash("md5").update(`${frameIndex}_${JSON.stringify(box)}`).digest("hex");
 
-const createLabeledBox = (labeledBox: LabeledDetectedBoundingBox) => ({
+const createLabeledBox = (labeledBox: LabeledDetectedBoundingBox, frameIndex: string) => ({
   box: convertBoundingBox(labeledBox.box),
-  boxId: generateBoxId(labeledBox.box),
+  boxId: generateBoxId(labeledBox.box, frameIndex),
   label: labeledBox.label,
   score: labeledBox.score,
 });
@@ -105,7 +105,7 @@ const createFrameObject = (
 ) => ({
   frameIndex,
   src: imagePath,
-  labeledBoundingBoxes: boundingBoxes.map(createLabeledBox),
+  labeledBoundingBoxes: boundingBoxes.map((labeledBox) => createLabeledBox(labeledBox, frameIndex)),
 });
 
 const writeFrameToRedis = async (
@@ -240,7 +240,10 @@ async function embedAndUpsert({
             (x) => x.values.length > 0,
           );
           await ns.upsert(filteredEmbeddings);
-          log(`Done saving batch`);
+          log(`Done saving batch with ${filteredEmbeddings.length} embeddings}`, {
+            eventType: 'embeddingCount',
+            embeddingCount: filteredEmbeddings.length,
+          });
         } catch (e) {
           console.error(
             "error chunked upsert", e,

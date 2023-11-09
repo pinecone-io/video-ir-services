@@ -5,8 +5,6 @@ import { negativeLabel } from "../services/negativeLabelService";
 import { useDrop, useDrag } from "react-dnd";
 import { ItemTypes } from "./ItemTypes";
 
-
-
 interface LabelingControlsProps {
   selectedBox: string;
   setSelectedBoxes: React.Dispatch<React.SetStateAction<LabeledImage[]>>
@@ -104,8 +102,6 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
   const [images, setImages] = useState<
     Array<LabeledImage>
   >([]);
-
-
 
   const [imagesToLabel, setImagesToLabel] = useState<
     Array<LabeledImage>

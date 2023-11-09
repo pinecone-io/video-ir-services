@@ -13,6 +13,7 @@ import { createHash } from "crypto";
 import { sliceIntoChunks } from "./utils/util";
 import type { Metadata, FileWithReference } from "./types";
 import { getKeyFromS3Url, getS3Object, getS3SignedUrl } from "./utils/awsS3";
+import { log } from "./utils/logger";
 
 function bufferToBlob(buffer: Buffer, mimeType: string): Blob {
   const arrayBuffer = new Uint8Array(buffer).buffer;
@@ -74,6 +75,7 @@ class Embedder {
     } catch (e) {
       console.log(`Error embedding image, ${e}`);
       // Hack to return a dummy embedding
+      log(`Embedder failed to embed image ${imagePath}`)
       return {
         id: "dummy",
         metadata,
@@ -107,6 +109,7 @@ class Embedder {
         );
       } catch (e) {
         console.error("Error running onDoneBatch", embeddings);
+        log(`Error embedding batch: ${e} ${JSON.stringify(imagePaths)}`);
       }
     }
   }
