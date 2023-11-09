@@ -10,18 +10,15 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import LabelingControls from "./LabelingControls";
+import { useFps } from "../hooks/fpsHook";
 
 const CANVAS_WIDTH = 1269;
 const CANVAS_HEIGHT = 707;
 
-// const CANVAS_WIDTH = 500;
-// const CANVAS_HEIGHT = 250;
-
-const FPS = 1;
-
 type VideoStreamProps = {
   imagePaths: GetImagesDTO;
   loadedImages: HTMLImageElement[];
+  refreshImages: () => void;
 };
 
 const VideoStream: React.FC<VideoStreamProps> = (props) => {
@@ -29,11 +26,14 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     LabeledBoundingBox[]
   >([]);
 
+  const { FPS } = useFps();
+
   const [frameIndex, setFrameIndex] = useState<number>(0);
   const [isPlaying, setPlay] = useState<boolean>(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedBox, setSelectedBox] = useState<string>("");
   const [selectedBoxes, setSelectedBoxes] = useState<Array<{ boxId: string; label: string }>>([]);
+  const prevSelectedBox = useRef(selectedBox);
 
   const drawFrame = (frame: number) => {
     // Ensure that canvas exists
@@ -45,6 +45,12 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     ctx?.drawImage(img, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   };
 
+  useEffect(() => {
+    if (prevSelectedBox.current !== selectedBox) {
+      prevSelectedBox.current = selectedBox;
+      props.refreshImages();
+    }
+  }, [selectedBox, prevSelectedBox, props]);
   const moveVideoFrameBy = (x: number) => {
     // In case we are looping backwards
     const newFrameIndex =
@@ -109,7 +115,6 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             labeledBoundingBox={labeledBoundingBox}
             selectedBoxes={selectedBoxes}
             onBoxSelected={(boxId: string) => {
-              console.log("click", boxId);
               setSelectedBox(boxId);
               setPlay(false);
             }}

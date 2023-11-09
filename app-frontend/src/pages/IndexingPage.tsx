@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import Loading from "../components/Loading";
 import { download } from "../services/downloadService.ts";
 import { socket } from '../utils/socket'
+import { useFps } from "../hooks/fpsHook.ts";
 
 type TFormInput = {
   fps: number;
@@ -20,12 +21,14 @@ const IndexingPage: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [filesToProcess, setFileToProcess] = useState(0);
   const [processedFiles, setProcessedFiles] = useState(0);
+  const [numberOfObjects, setNumberOfObjects] = useState(0);
   const [logs, setLogs] = useState<LogLine[]>([]);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [completed, setCompleted] = useState({ numberOfFilesProcessed: 0, executionTime: '', status: false })
-
+  const { FPS, setFps } = useFps()
   const resetProgress = (): void => {
     setProgress(0);
+    setNumberOfObjects(0);
     setFileToProcess(0);
     setProcessedFiles(0);
     setCompleted({ numberOfFilesProcessed: 0, executionTime: '', status: false })
@@ -53,6 +56,10 @@ const IndexingPage: React.FC = () => {
     setLogs([...logs, data])
   }
 
+  const handleNumberOfObjects = (data: number): void => {
+    setNumberOfObjects(data)
+  }
+
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
@@ -75,6 +82,7 @@ const IndexingPage: React.FC = () => {
     socket.on('filesToProcessChanged', handleFilesToBeProcessedChanged)
     socket.on('processedFilesChanged', handleProcessedFilesChanged)
     socket.on('logUpdated', handleLogUpdated)
+    socket.on('numberOfObjectsUpdated', handleNumberOfObjects)
 
     return () => {
       socket.off('connect', onConnect);
@@ -94,7 +102,7 @@ const IndexingPage: React.FC = () => {
     defaultValues: {
       youtubeUrl: "https://www.youtube.com/watch?v=ADs8tvU2xDc",
       name: "car-race",
-      fps: 1,
+      fps: FPS,
       chunkDuration: 5
     },
   });
@@ -103,6 +111,8 @@ const IndexingPage: React.FC = () => {
     return new Promise((resolve) => {
       resetProgress();
       setStarted(true)
+      setFps(data.fps);
+      resolve(true)
       download(data.youtubeUrl, data.name, data.fps, data.chunkDuration, data.videoLimit)
         .catch((e) => setServerError(e.toString()))
         .finally(() => resolve(true));
@@ -219,7 +229,7 @@ const IndexingPage: React.FC = () => {
             <div className="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{ "width": `${progress}%` }}>{progress}%</div>
           </div>
 
-            <div className="p-4 mb-4 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto">
+            <div className="p-4 mb-4 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[150px] whitespace-pre-line overflow-auto">
               <table style={{ width: '100%' }}>
                 <tbody>
                   <tr>
@@ -233,6 +243,10 @@ const IndexingPage: React.FC = () => {
                   <tr>
                     <td style={{ width: '90%' }}><b>Total files</b></td>
                     <td>{processedFiles + filesToProcess}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ width: '90%' }}><b>Objects detected</b></td>
+                    <td>{numberOfObjects}</td>
                   </tr>
                 </tbody>
               </table>

@@ -5,6 +5,7 @@ import { resetDB } from "./reset";
 import { ProgressTracker } from './utils/progressTracker'
 import { IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
 import { LogTracker } from "./utils/logTracker";
+import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
 
 const progressTracker = new ProgressTracker();
 const progressTrackerListener = progressTracker.getEmitter();
@@ -12,6 +13,8 @@ const indexerInstancesTracker = new IndexerInstanceTracker()
 const indexerInstancesTrackerListener = indexerInstancesTracker.getAllInstancesReadyEmitter()
 const logTracker = new LogTracker()
 const logTrackerListener = logTracker.getLogsEventEmitter()
+const numberOfObjectsTracker = new NumberOfObjectsTracker()
+const numberOfObjectsTrackerListener = numberOfObjectsTracker.getNumberOfObjectsEventEmitter()
 
 interface Route {
   route: string;
@@ -103,6 +106,7 @@ const routes: Route[] = [
       try {
         progressTracker.startTimer();
         progressTracker.resetFiles();
+        numberOfObjectsTracker.clearNumberOfObjects();
         const response = await fetch("http://video-ir-dev-splitter:3007/api/downloadAndSplit", {
           method: 'POST',
           headers: {
@@ -122,8 +126,23 @@ const routes: Route[] = [
     method: "post",
     handler: async (req, res) => {
       const message = req.body.message;
-      console.log(message);
+      const payload = req.body.payload;
+      // console.log("LOG", message, payload);
       logTracker.log(message);
+      if (payload && Object.keys(payload).length !== 0) {
+        console.log("PAYLOAD", payload)
+        try {
+          const eventType = payload.eventType
+          switch (eventType) {
+            case 'boxCount': {
+              numberOfObjectsTracker.addToObjectCount(payload.boxesCount)
+            }
+          }
+        } catch (e) {
+          console.log(`Error trying to parse ${payload}`)
+        }
+      }
+
       res.status(200).json({ message: "Message logged successfully" });
     },
   },
@@ -179,4 +198,4 @@ const routes: Route[] = [
 
 ];
 
-export { routes as resolvers, indexerInstancesTrackerListener, progressTrackerListener, logTrackerListener };
+export { routes as resolvers, indexerInstancesTrackerListener, progressTrackerListener, logTrackerListener, numberOfObjectsTrackerListener };

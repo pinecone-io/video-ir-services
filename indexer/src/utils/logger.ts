@@ -1,4 +1,4 @@
-const log = async (message: string) => {
+const log = async (message: string, payload: object = {}) => {
     const podId = process.env.POD_NAME || 'unknown';
     const formattedMessage = `${podId}: ${message}`;
     try {
@@ -7,13 +7,12 @@ const log = async (message: string) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ message: formattedMessage })
+            body: JSON.stringify({ message: formattedMessage, payload })
         });
     } catch (error) {
         console.error('Failed to log message', error);
     }
 }
-
 
 const completeFile = async (file: string) => {
     const podId = process.env.POD_NAME || 'unknown';

@@ -12,6 +12,7 @@ const BoundingBoxes: React.FC<{
   onBoxSelected: (boxId: string) => void;
   selectedBoxes?: Array<{ boxId: string; label: string }>;
 }> = (props) => {
+
   // const [selectedBoxes, setSelectedBoxes] = useState<
   //   Array<{ boxId: string; label: string }>
   // >([]);
@@ -27,8 +28,8 @@ const BoundingBoxes: React.FC<{
     return ((boundingClientRect?.height || 0) * y) / IMAGE_HEIGHT;
   };
 
-  // Update rect collor
-  useEffect(()=>{
+  // Update rect color
+  useEffect(() => {
     svg
       .selectAll<SVGGElement, LabeledBoundingBox>("rect")
       .attr("stroke", (d) => {
@@ -37,7 +38,7 @@ const BoundingBoxes: React.FC<{
           : "#FF1717"
       }
       )
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.selectedBoxes])
 
 
@@ -74,7 +75,7 @@ const BoundingBoxes: React.FC<{
       }
       )
       .attr("fill-opacity", 0)
-      .on("click", (_, d)=>{
+      .on("click", (_, d) => {
         console.log("box selected", d.boxId)
         props.onBoxSelected(d.boxId);
       });
@@ -87,7 +88,7 @@ const BoundingBoxes: React.FC<{
       .attr("font-family", "Arial")
       .attr("font-size", "14px")
       .attr("fill", "white")
-      .text((d) => d?.label || "");
+      .text((d) => `${d?.label} | ${d?.boxId}` || "");
 
     // Update groups
     const updatedGroups = newGroups

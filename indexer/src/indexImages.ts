@@ -127,6 +127,9 @@ const processBoundingBoxes = async (
   obj: Buffer,
 ) => {
   const files: FileWithReference[] = [];
+  await log(`Processing ${boundingBoxes.length} bounding boxes`, { boxesCount: boundingBoxes.length, eventType: 'boxCount' })
+
+
   for (const element of boundingBoxes) {
     const { box, label } = element;
     const boxHash = crypto

@@ -5,22 +5,18 @@ import { negativeLabel } from "../services/negativeLabelService";
 import { useDrop, useDrag } from "react-dnd";
 import { ItemTypes } from "./ItemTypes";
 
+
+
 interface LabelingControlsProps {
   selectedBox: string;
-  setSelectedBoxes: React.Dispatch<React.SetStateAction<{
-    boxId: string;
-    label: string;
-  }[]>>
+  setSelectedBoxes: React.Dispatch<React.SetStateAction<LabeledImage[]>>
 }
 
 type ImageProps = {
-  labeledImage: {
-    path: string;
-    label?: string;
-  };
+  labeledImage: LabeledImage;
 };
 
-type LabeledImage = { boxId: string; path: string; label: string }
+type LabeledImage = { boxId: string; path: string; label: string, category: string, frameIndex: string, score: number; }
 
 interface DropResult {
   name: string;
@@ -30,11 +26,13 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.BOX,
     item: { name, labeledImage },
-    end: (item, monitor) => {
+    end: async (item, monitor) => {
       const dropResult = monitor.getDropResult<DropResult>();
       if (item && dropResult) {
         console.log(`DROP RESULT`, item)
         // alert(`You dropped ${item.name} into ${dropResult.name}!`);
+
+
       }
     },
     collect: (monitor) => ({
@@ -83,7 +81,18 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
 
       {/* Label */}
       <div className="text-center mt-mt10 text-darkLabel font-sm14 capitalize">
-        {labeledImage.label || "no label"}
+        <div>
+          {labeledImage.label || "no label"}
+        </div>
+        <div>
+          {labeledImage.category}
+        </div>
+        <div>
+          {labeledImage.frameIndex}
+        </div>
+        <div>
+          {(labeledImage.score * 100).toFixed(2) + '%'}
+        </div>
       </div>
     </div>
   );
@@ -107,44 +116,40 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
 
   const [labelValue, setLabelValue] = useState<string>("");
 
-  // const getMoreImagesAsLabel = async (boxId: string) => {
-  //   const moreBoxes = await queryBox(boxId, true);
-  //   console.log(moreBoxes)
-  // }
+  const handleLabel = async (boxId: string, setLabelFunction: React.Dispatch<React.SetStateAction<LabeledImage[]>>) => {
+    const similarResult = await queryBox(boxId, true);
+    const similar: LabeledImage[] = await similarResult?.json();
+    const similarBoxIds = similar.map((image) => image.boxId);
 
-  const addToLabel = async (boxId: string) => {
     return new Promise((resolve) => {
-      setImagesToLabel((prev) => {
+      setLabelFunction((prev) => {
         const image = images.find((image) => image.boxId === boxId);
+        const similarImages = images.filter((image) => similarBoxIds.includes(image.boxId));
         if (!image) return prev
 
         const imageCopy = JSON.parse(JSON.stringify(image));
+        const similarImagesCopy = JSON.parse(JSON.stringify(similarImages));
+        setImages((prevImages) => prevImages.filter((image) => ![boxId, ...similarBoxIds].includes(image.boxId)));
 
-        setImages((prevImages) => prevImages.filter((image) => image.boxId !== boxId));
-
-        return [...prev, imageCopy];
+        return [...prev, imageCopy, ...similarImagesCopy];
       });
       resolve(null)
     })
   };
 
+  const addToLabel = async (boxId: string) => {
+    await handleLabel(boxId, setImagesToLabel);
+  };
+
   const addToNegativeLabel = async (boxId: string) => {
-    return new Promise((resolve) => {
-      setImagesToNegativeLabel((prev) => {
-        const image = images.find((image) => image.boxId === boxId);
-        if (!image) return prev
-
-        const imageCopy = JSON.parse(JSON.stringify(image));
-        setImages((prevImages) => prevImages.filter((image) => image.boxId !== boxId));
-
-        return [...prev, imageCopy];
-      });
-      resolve(null)
-    })
+    await handleLabel(boxId, setImagesToNegativeLabel);
   };
 
 
   useEffect(() => {
+    setImagesToLabel([]);
+    setImagesToNegativeLabel([]);
+    setImages([]);
     //Async function to queryBoxImages
     const getBoxImages = async () => {
       if (!selectedBox) return;
@@ -268,7 +273,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
               {isActive ? "Release to drop" : "Drag a box here"}
             </div>
             <div className="relative">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-4 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-4 mb-3 place-items-start">
                 {imagesToNegativeLabel.map((labeledImage) => {
                   return (
                     <ImageComponent
@@ -298,7 +303,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
               {isActive ? "Release to drop" : "Drag a box here"}
             </div>
             <div className="relative">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-4 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-4 mb-3 place-items-start">
                 {imagesToLabel.map((labeledImage) => {
                   return (
                     <ImageComponent

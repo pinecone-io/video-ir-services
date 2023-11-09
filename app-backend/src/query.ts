@@ -22,6 +22,9 @@ const pineconeClient = await new Pinecone({
   projectId: getEnv("VITE_PINECONE_PROJECT_ID"),
 });
 
+type LabeledBoxSetItem = { k: string; v: string };
+
+
 await embedder.init(modelName);
 
 const calculateAverageVector = (
@@ -68,7 +71,7 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
   try {
     const indexName = PINECONE_INDEX;
     const index = pineconeClient.index(indexName);
-    // TODO get namespace dynamicly
+    // TODO get namespace dynamically
     const ns = index.namespace(namespace);
 
     const imageUrl = JSON.parse((await redis.hGet("bbox", boxId)) || "{}")!.src;
@@ -84,7 +87,7 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
 
     const query: QueryOptions = {
       vector: vector.values,
-      topK: 50,
+      topK: 100,
       filter: {
         negativeLabel: {
           $ne: boxId,
@@ -103,6 +106,9 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
         boxId: (match.metadata as Metadata).boxId,
         label: (match.metadata as Metadata).label,
         path: (match.metadata as Metadata).imagePath,
+        frameIndex: (match.metadata as Metadata).frameIndex,
+        score: match.score,
+        category: 'similar',
       })) as BoxResult[];
 
     const vectors = queryResult.matches?.map(
@@ -147,6 +153,9 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
             boxId: (match.metadata as Metadata).boxId,
             label: (match.metadata as Metadata).label,
             path: (match.metadata as Metadata).imagePath,
+            frameIndex: (match.metadata as Metadata).frameIndex,
+            score: match.score,
+            category: 'sameLabel',
           })) as BoxResult[];
       }
 
@@ -172,6 +181,9 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
                 boxId: (match.metadata as Metadata).boxId,
                 label: (match.metadata as Metadata).label,
                 path: (match.metadata as Metadata).imagePath,
+                frameIndex: (match.metadata as Metadata).frameIndex,
+                score: match.score,
+                category: 'similarToAverage',
               })) as BoxResult[];
             return resultBatch;
           }),
@@ -209,7 +221,7 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
     };
 
     const uniqueResults = getUniqueByBoxId(finalResult) as BoxResult[];
-    console.log(uniqueResults);
+    console.log("uniqueResults", uniqueResults.length);
     return uniqueResults;
   } catch (e) {
     console.log("error querying box", e);
@@ -225,13 +237,15 @@ const getImages: () => Promise<ObjectDetectionData> = async () => {
   const data: ObjectDetectionData = {};
   let allBoxIds: string[] = [];
 
+  // This section processes the raw data, extracts box IDs from labeled bounding boxes,
+  // and updates the allBoxIds array. It also checks if the frameIndex is a string,
+  // and if so, it updates the data object with the parsed value and an S3 URL.
   if (rawData) {
     Object.entries(rawData).forEach(async ([key, value]) => {
       if (value) {
         const parsedValue = JSON.parse(value) as ImageWithBoundingBoxes;
         const boxIds = parsedValue.labeledBoundingBoxes.map((box) => box.boxId);
         allBoxIds = [...allBoxIds, ...boxIds];
-        console.log("parsedValue.frameIndex", parsedValue.frameIndex)
         if (parsedValue && typeof parsedValue.frameIndex === "string") {
 
           data[key] = {
@@ -243,106 +257,96 @@ const getImages: () => Promise<ObjectDetectionData> = async () => {
     });
   }
 
-  // console.log(allBoxIds);
+  // Initialize a set to store labeled boxes
   const labeledBoxes: Set<{ k: string; v: string }> = new Set();
 
+  // If there are any box IDs, process them
   if (allBoxIds.length > 0) {
+    // Remove duplicates from the box IDs
     const uniqueBoxIds = [...new Set(allBoxIds)];
-    console.log(uniqueBoxIds.length);
-    const random768dimensionalVector = Array.from({ length: 768 }, () =>
-      Math.random(),
-    );
+    // Set a limit for fetching data
+    const fetchLimit = 1000;
+    // Calculate the number of requests needed based on the fetch limit
+    const numRequests = Math.ceil(uniqueBoxIds.length / fetchLimit);
+    // Initialize an array to store all vectors
+    const allVectors = [];
 
-    console.log(uniqueBoxIds[0]);
-    const embeddedBoxes = await ns.query({
-      topK: 999,
-      vector: random768dimensionalVector,
-      includeMetadata: true,
-      filter: {
-        boxId: {
-          $in: uniqueBoxIds,
-        },
-      },
-    });
-
-    // console.log(embeddedBoxes?.matches);
-    if (embeddedBoxes?.matches && embeddedBoxes?.matches.length > 0) {
-      if (embeddedBoxes.matches) {
-        embeddedBoxes.matches.forEach((match) => {
-          const meta = match.metadata;
-          if (meta) {
-            const { label, boxId } = meta;
-
-            if (label && boxId) {
-              labeledBoxes.add({ k: boxId, v: label });
-            }
-          }
-        });
-      }
+    // Fetch vectors in batches based on the fetch limit
+    for (let i = 0; i < numRequests; i++) {
+      const start = i * fetchLimit;
+      const end = start + fetchLimit;
+      const idsToFetch = uniqueBoxIds.slice(start, end);
+      const vectors = await ns.fetch(idsToFetch);
+      allVectors.push(...Object.values(vectors.records));
     }
+
+    // If no vectors are found, throw an error
+    if (!allVectors) {
+      console.log("No vectors found");
+      throw new Error("No vectors found");
+    }
+
+    // For each vector, if it has metadata, add the box ID and label to the labeled boxes set
+    allVectors.forEach((record) => {
+      if (record) {
+        const { metadata } = record;
+        if (metadata) {
+          const { boxId, label } = metadata;
+          if (boxId && label) {
+            labeledBoxes.add({ k: boxId, v: label });
+          }
+        }
+      }
+    });
   }
 
   const updateData: ObjectDetectionData = {
     ...data,
   };
 
-  // Loop through each frame in updatedExampleData
-  for (const frameKey in updateData) {
-    if (Object.prototype.hasOwnProperty.call(updateData, frameKey)) {
-      const frameData = updateData[frameKey]!;
-      const newLabeledBoundingBoxes = frameData.labeledBoundingBoxes.map(
-        (boundingBox) => {
-          const updatedBox = { ...boundingBox };
-          // Find matching boxId in labeledBoxes
-          for (const labeledBox of labeledBoxes) {
-            if (updatedBox.boxId === labeledBox.k) {
-              updatedBox.label = labeledBox.v;
-              break;
-            }
-          }
-          return updatedBox;
-        },
-      );
+  // Create a map from the labeledBoxes set for easy lookup
+  const labeledBoxesMap = new Map(Array.from(labeledBoxes).map((item: LabeledBoxSetItem) => [item.k, item.v]));
 
-      // Update the labeledBoundingBoxes for the current frame
+  // Iterate over each frame in the updateData
+  Object.keys(updateData).forEach((frameKey) => {
+    const frameData = updateData[frameKey];
+    if (frameData) {
+      // For each bounding box in the frame, add the label from the labeledBoxesMap if it exists
+      const newLabeledBoundingBoxes = frameData.labeledBoundingBoxes.map((boundingBox) => {
+        const label = labeledBoxesMap.get(boundingBox.boxId);
+        return label ? { ...boundingBox, label } : boundingBox;
+      });
+
+      // Update the labeledBoundingBoxes for the current frame with the new labels
       updateData[frameKey] = {
         ...frameData,
         labeledBoundingBoxes: newLabeledBoundingBoxes,
       };
     }
-  }
-
-  // Sort the keys based on frameIndex
-  const sortedKeys = Object.keys(data).sort((a, b) => {
-    const aIndex = data[a]?.frameIndex ? data[a]!.frameIndex : '';
-    const bIndex = data[b]?.frameIndex ? data[b]!.frameIndex : '';
-    return aIndex.localeCompare(bIndex);
   });
 
-  // const sortedKeys = Object.keys(data).sort((a, b) => {
-  //   const aIndices = data[a]?.frameIndex?.split('_').map(Number);
-  //   const bIndices = data[b]?.frameIndex?.split('_').map(Number);
 
-  //   console.log("aIndices", aIndices, "bIndices", bIndices)
+  const sortedKeys = Object.keys(data).sort((a, b) => {
+    const aIndices = data[a]?.frameIndex?.split('_').map(Number);
+    const bIndices = data[b]?.frameIndex?.split('_').map(Number);
 
-  //   if (!aIndices || !bIndices) {
-  //     return 0;
-  //   }
-  //   if (!aIndices[0] || !bIndices[0]) {
-  //     throw new Error('Invalid frame part index')
-  //   }
-  //   // Compare the first part
-  //   if (aIndices[0] !== bIndices[0]) {
-  //     return aIndices[0] - bIndices[0];
-  //   }
+    if (!aIndices || !bIndices) {
+      return 0;
+    }
+    const aIndex1 = aIndices[0] || 0;
+    const bIndex1 = bIndices[0] || 0;
 
-  //   if (!aIndices[1] || !bIndices[1]) {
-  //     throw new Error('Invalid frame index')
-  //   }
+    // Compare the first part
+    if (aIndex1 !== bIndex1) {
+      return aIndex1 - bIndex1;
+    }
 
-  //   // If the first parts are equal, compare the second part
-  //   return aIndices[1] - bIndices[1];
-  // });
+    const aIndex2 = aIndices[1] || 0;
+    const bIndex2 = bIndices[1] || 0;
+
+    // If the first parts are equal, compare the second part
+    return aIndex2 - bIndex2;
+  });
 
   // Create a new sorted object
   const sortedData: ObjectDetectionData = {};

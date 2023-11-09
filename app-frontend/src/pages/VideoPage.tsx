@@ -18,6 +18,12 @@ const VideoPage: React.FC = () => {
       .then(setImagePaths);
   }, []);
 
+  const refreshImages = () => {
+    getImages()
+      .then((response) => response.data)
+      .then(setImagePaths);
+  }
+
   // Preload images
   useEffect(() => {
     const loadedImages: HTMLImageElement[] = [];
@@ -61,7 +67,7 @@ const VideoPage: React.FC = () => {
       <DndProvider backend={HTML5Backend}>
         <div className="min-h-screen bg-white text-black w-full">
           <div className="flex flex-wrap justify-center">
-            <VideoStream imagePaths={imagePaths} loadedImages={loadedImages} />
+            <VideoStream imagePaths={imagePaths} loadedImages={loadedImages} refreshImages={refreshImages} />
           </div>
         </div>
       </DndProvider>
