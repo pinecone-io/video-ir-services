@@ -44,6 +44,8 @@ export type BoxResult = {
   boxId: string;
   label: string | undefined;
   path?: string;
+  score: number;
+  category?: string;
 };
 
 export type FileWithReference = {

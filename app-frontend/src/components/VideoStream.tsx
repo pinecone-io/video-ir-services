@@ -19,6 +19,7 @@ type VideoStreamProps = {
   imagePaths: GetImagesDTO;
   loadedImages: HTMLImageElement[];
   refreshImages: () => void;
+  updateFrameIndex: (frameIndex: number) => void;
 };
 
 const VideoStream: React.FC<VideoStreamProps> = (props) => {
@@ -56,7 +57,10 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     const newFrameIndex =
       frameIndex + x < 0 ? props.loadedImages.length : frameIndex;
 
+    const fi = (newFrameIndex + x) % props.loadedImages.length
+    // console.log(fi)
     setFrameIndex((newFrameIndex + x) % props.loadedImages.length);
+    props.updateFrameIndex(fi);
   };
 
   // Autoplay frames

@@ -64,8 +64,9 @@ class Embedder {
       const { data: embeddings } = image_embeds;
       // Create an id for the image
       const id =
-        metadata?.boxId ?? createHash("md5").update(imagePath).digest("hex");
+        metadata?.boxId ?? imagePath;
 
+      console.log(`Embedding image ${id}`)
       // Return the embedding in a format ready for Pinecone
       return {
         id,

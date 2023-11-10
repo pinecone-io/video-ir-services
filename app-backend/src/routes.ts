@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import { labelBoxes, negativeLabel } from "./label";
-import { getImages, queryBox } from "./query";
+import { createImageDataGenerator, loadImages, queryBox } from "./query";
 import { resetDB } from "./reset";
 import { ProgressTracker } from './utils/progressTracker'
 import { IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
 import { LogTracker } from "./utils/logTracker";
 import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
 import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
+import { ObjectDetectionData } from "./types";
+import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter";
 
 const progressTracker = new ProgressTracker();
 const progressTrackerListener = progressTracker.getEmitter();
@@ -18,6 +20,10 @@ const numberOfObjectsTracker = new NumberOfObjectsTracker()
 const numberOfObjectsTrackerListener = numberOfObjectsTracker.getNumberOfObjectsEventEmitter()
 const numberOfEmbeddingsTracker = new EmbeddingsCountTracker()
 const numberOfEmbeddingsTrackerListener = numberOfEmbeddingsTracker.getNumberOfEmbeddingsEventEmitter()
+const objectDetectionDataEmitter = new ObjectDetectionDataEmitter();
+const objectDetectionDataEmitterListener = objectDetectionDataEmitter.getOdDataEventEmitter();
+
+let imageDataGenerator = createImageDataGenerator()
 
 interface Route {
   route: string;
@@ -39,14 +45,53 @@ const routes: Route[] = [
     },
   },
   {
-    route: "/getImages",
-    method: "get",
+    route: "/resetImages",
+    method: "post",
     handler: async (req, res) => {
+      imageDataGenerator = createImageDataGenerator()
+      res.status(200).json({ message: "Images reset" });
+    }
+  },
+  {
+    route: "/getImages",
+    method: "post",
+    handler: async (req, res) => {
+      await loadImages()
+      const limit = req.body.limit;
       try {
-        const data = await getImages();
-        res.json(data);
+
+        const generator = imageDataGenerator(limit);
+        let result = generator.next();
+        console.log(result.value, result.done)
+        while (!result.done) {
+          Object.entries(result.value).forEach(([key, value]) => {
+            objectDetectionDataEmitter.addEntry({ [key]: value });
+          });
+          result = generator.next();
+        }
+
+        if (result.done) {
+          objectDetectionDataEmitter.markAsComplete();
+        }
+        // console.log(`emittedEntires`, emittedEntires)
+
+        // if (emittedEntires < Object.keys(imageData).length) {
+        //   Object.entries(data).forEach(([key, value]) => {
+        //     console.log(`adding entry ${key}`)
+        //     objectDetectionDataEmitter.addEntry({ [key]: value });
+        //     emittedEntires += 1;
+        //   });
+        // }
+        // else {
+        //   if (Object.keys(imageData).length > 0 && (emittedEntires === Object.keys(imageData).length)) {
+        //     console.log("all done")
+        //     objectDetectionDataEmitter.markAsComplete();
+        //   }
+        // }
+        res.status(200).json({ message: "Images fetched" });
+        // res.json(data);
       } catch (error) {
-        res.status(500).json({ error: "Error fetching images" });
+        res.status(500).json({ error: "Error fetching images", message: error });
       }
     },
   },
@@ -212,5 +257,6 @@ export {
   progressTrackerListener,
   logTrackerListener,
   numberOfObjectsTrackerListener,
-  numberOfEmbeddingsTrackerListener
+  numberOfEmbeddingsTrackerListener,
+  objectDetectionDataEmitterListener
 };

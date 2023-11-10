@@ -44,54 +44,47 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   return (
     <div
       ref={drag}
-      style={{ opacity }}
+      style={{ opacity, fontSize: '0.8em' }}
       data-testid={`box`}
-      className="relative group inline-block"
+      className="relative group inline-block bg-white shadow-md rounded-lg p-4"
     >
+      {/* Grid container */}
+      <div className="grid grid-flow-row auto-rows-max md:grid-cols-3 gap-1 flex-wrap">
+        {/* Label */}
+        <div className="text-center text-darkLabel font-xs capitalize bg-white bg-opacity-50 flex flex-wrap">
+          <div className="bg-gray-200 p-1 rounded">
+            {labeledImage.label || "no label"}
+          </div>
+        </div>
+        {/* Category */}
+        <div className="text-center text-darkLabel font-xxs capitalize bg-white bg-opacity-50 flex flex-wrap">
+          <div className="bg-gray-200 p-1 rounded">
+            {labeledImage.category}
+          </div>
+        </div>
+        {/* Frame Index */}
+        <div className="text-center text-darkLabel font-xs capitalize bg-white bg-opacity-50 flex flex-wrap">
+          <div className="bg-gray-200 p-1 rounded">
+            {labeledImage.frameIndex}
+          </div>
+        </div>
+        {/* Score */}
+        <div className="text-center text-darkLabel font-xs capitalize bg-white bg-opacity-50 flex flex-wrap">
+          <div className="bg-gray-200 p-1 rounded">
+            {(labeledImage.score * 100).toFixed(2) + '%'}
+          </div>
+        </div>
+      </div>
       {/* Image */}
       <img
         src={labeledImage.path}
         alt={labeledImage.label || "no label"}
-        className="w-imageWidth h-imageHeight rounded-xl10"
+        className="w-imageWidth h-imageHeight rounded-xl10 mt-4"
       />
-
       {/* Semi-transparent layer */}
       <div
         className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 opacity-0  cursor-pointer"
       >
-        {/* Trash Icon */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-white"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 2h6a1 1 0 011 1v1a1 1 0 01-1 1H9a1 1 0 01-1-1V3a1 1 0 011-1zm0 4h6a1 1 0 010 2H9a1 1 0 110-2zm1 5a1 1 0 00-1 1v6a1 1 0 001 1h4a1 1 0 001-1v-6a1 1 0 00-1-1h-4zm-1-1a1 1 0 00-1 1v6a1 1 0 001 1h4a1 1 0 001-1v-6a1 1 0 00-1-1h-4zm-3-7h10a1 1 0 011 1v12a1 1 0 01-1 1H6a1 1 0 01-1-1V3a1 1 0 011-1z"
-            />
-          </svg>
-        </div>
-      </div>
-
-      {/* Label */}
-      <div className="text-center mt-mt10 text-darkLabel font-sm14 capitalize">
-        <div>
-          {labeledImage.label || "no label"}
-        </div>
-        <div>
-          {labeledImage.category}
-        </div>
-        <div>
-          {labeledImage.frameIndex}
-        </div>
-        <div>
-          {(labeledImage.score * 100).toFixed(2) + '%'}
-        </div>
       </div>
     </div>
   );
@@ -112,6 +105,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
   >([]);
 
   const [labelValue, setLabelValue] = useState<string>("");
+  const [labeling, setLabeling] = useState<boolean>(false);
 
   const handleLabel = async (boxId: string, setLabelFunction: React.Dispatch<React.SetStateAction<LabeledImage[]>>) => {
     const similarResult = await queryBox(boxId, true);
@@ -160,14 +154,21 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
   }, [selectedBox, setSelectedBoxes]);
 
   const submitLabel = async () => {
+    setLabeling(true);
     await labelBoxes(
       labelValue,
       imagesToLabel.map((image) => image.boxId)
     );
 
+
+
     await negativeLabel(selectedBox, imagesToNegativeLabel.map((image) => image.boxId));
 
     await refreshImages();
+    setImagesToLabel([]);
+    setImagesToNegativeLabel([])
+    setImages([]);
+    setLabeling(false);
   };
 
   const style: CSSProperties = {
@@ -236,7 +237,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
           onChange={(e) => setLabelValue(e.target.value)}
         />
         <button
-          className="ml-2 bg-primary-400 text-base16 text-white p-submitBtn rounded-xl10 "
+          className={`ml-2 bg-primary-400 text-base16 text-white p-submitBtn rounded-xl10 ${labeling ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={() => {
             submitLabel();
           }}
@@ -244,7 +245,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
           Submit
         </button>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5 border-2 border-gray-300 rounded-md p-4 mb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 border-2 border-gray-300 rounded-md p-4 mb-3">
         {images.length > 0 ? images.map((labeledImage) => {
           return (
             <ImageComponent

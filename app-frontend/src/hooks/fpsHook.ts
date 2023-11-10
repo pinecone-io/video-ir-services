@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-let fps = 30;
+let fps = 10;
 
 export const useFps = () => {
     const [FPS, setFps] = useState(fps);

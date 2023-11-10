@@ -132,10 +132,7 @@ const processBoundingBoxes = async (
 
   for (const element of boundingBoxes) {
     const { box, label } = element;
-    const boxHash = crypto
-      .createHash("md5")
-      .update(JSON.stringify(box))
-      .digest("hex");
+    const boxId = generateBoxId(box, frameIndex);
 
     const boundingBox = convertBoundingBox(box);
     const metadata = await sharp(obj).metadata();
@@ -148,23 +145,23 @@ const processBoundingBoxes = async (
     ) {
       const bBoxBuffer = await sharp(obj).png().extract(boundingBox).toBuffer();
 
-      const bboxPath = `${videoName}/bbox/${label}_${boxHash}.png`;
+      const bboxPath = `${videoName}/bbox/${label}_${boxId}.png`;
       await saveToS3Bucket(bboxPath, bBoxBuffer);
 
       const bboxUrl = generateS3Url(bboxPath);
 
-      if (!(await redis.hGet("bbox", boxHash))) {
+      if (!(await redis.hGet("bbox", boxId))) {
         const bbox = {
-          boxId: boxHash,
+          boxId,
           frameIndex,
           src: bboxUrl,
           boundingBox,
         };
-        await redis.hSet("bbox", boxHash, JSON.stringify(bbox));
+        await redis.hSet("bbox", boxId, JSON.stringify(bbox));
       }
 
       files.push({
-        boxId: boxHash,
+        boxId: boxId,
         path: bboxUrl,
         frameIndex: frameIndex.toString(),
       });
