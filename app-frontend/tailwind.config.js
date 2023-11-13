@@ -4,6 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
+        cta: {
+          100: "#1C17FF",
+        },
         primary: {
           100: "#2B2B2B",
           200: "rgba(0, 0, 0, 0.8)",
@@ -14,10 +17,12 @@ export default {
           700: "#01004B",
           800: "#1F2937",
           900: "#BDBDBD",
-          1000: "#FAFAFA"
+          1000: "#FAFAFA",
         },
         gray: {
           100: "#7F7F7G",
+          200: "#F15F5F8",
+          300: "#F1F5F8",
         },
         darkLabel: "#393939",
       },

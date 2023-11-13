@@ -4,10 +4,12 @@ import { queryBox } from "../services/boxService";
 import { negativeLabel } from "../services/negativeLabelService";
 import { useDrop, useDrag } from "react-dnd";
 import { ItemTypes } from "./ItemTypes";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface LabelingControlsProps {
   selectedBox: string;
-  setSelectedBoxes: React.Dispatch<React.SetStateAction<LabeledImage[]>>
+  setSelectedBoxes: React.Dispatch<React.SetStateAction<LabeledImage[]>>;
   refreshImages: () => void;
 }
 
@@ -15,63 +17,109 @@ type ImageProps = {
   labeledImage: LabeledImage;
 };
 
-type LabeledImage = { boxId: string; path: string; label: string, category: string, frameIndex: string, score: number; }
+type LabeledImage = {
+  boxId: string;
+  path: string;
+  label: string;
+  category: string;
+  frameIndex: string;
+  score: number;
+};
 
 interface DropResult {
   name: string;
 }
 
 interface DropdownOption {
-  value: string | null
-  label: string
+  value: string | null;
+  label: string;
 }
 
 interface DropdownOptions {
   options: Array<DropdownOption>;
-  onClick: (val: string | null) => void
+  onClick: (val: string | null) => void;
 }
-
 
 const DropDown: React.FC<DropdownOptions> = ({ options, onClick }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState<string>("Filter");
 
   const onSelect = (val: DropdownOption) => {
-    setSelectedLabel(val.label)
-    onClick(val.value)
-    toggleDropdown()
-  }
+    setSelectedLabel(val.label);
+    onClick(val.value);
+    toggleDropdown();
+  };
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
 
-
-
   return (
     <div className="relative inline-block text-left">
-      <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" onClick={toggleDropdown}>{selectedLabel}<svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-      </svg>
+      <button
+        id="dropdownDefaultButton"
+        data-dropdown-toggle="dropdown"
+        className="text-cta-100  font-medium rounded-[5px] text-sm px-5 py-[15px] text-center inline-flex items-center border-2 border-cta-100 h-[50px]"
+        type="button"
+        onClick={toggleDropdown}
+      >
+        <svg
+          width="17"
+          height="18"
+          viewBox="0 0 17 18"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="mr-[5px]"
+        >
+          <g clip-path="url(#clip0_117_1311)">
+            <path
+              d="M7.08333 13.25H9.91667V11.8333H7.08333V13.25ZM2.125 4.75V6.16667H14.875V4.75H2.125ZM4.25 9.70833H12.75V8.29167H4.25V9.70833Z"
+              fill="#1C17FE"
+            />
+          </g>
+          <defs>
+            <clipPath id="clip0_117_1311">
+              <rect
+                width="17"
+                height="17"
+                fill="white"
+                transform="translate(0 0.5)"
+              />
+            </clipPath>
+          </defs>
+        </svg>
+
+        {selectedLabel}
       </button>
 
       {dropdownVisible && (
-        <div id="dropdown" className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" style={{ zIndex: 9999 }}>
-          <ul className="py-1 text-base leading-6 text-gray-700 ring-1 ring-black ring-opacity-5" aria-labelledby="dropdownDefaultButton">
-            {options.map(option => {
+        <div
+          id="dropdown"
+          className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+          style={{ zIndex: 9999 }}
+        >
+          <ul
+            className="py-1 text-base leading-6 text-gray-700 ring-1 ring-black ring-opacity-5"
+            aria-labelledby="dropdownDefaultButton"
+          >
+            {options.map((option) => {
               return (
                 <li>
-                  <a onClick={() => onSelect(option)} className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.label}</a>
+                  <a
+                    onClick={() => onSelect(option)}
+                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >
+                    {option.label}
+                  </a>
                 </li>
-              )
+              );
             })}
           </ul>
         </div>
       )}
     </div>
-  )
-}
-
+  );
+};
 
 const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -87,62 +135,62 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   return (
     <div
       ref={drag}
-
-      style={{ opacity, fontSize: '0.8em' }}
+      style={{ opacity, fontSize: "0.8em" }}
       data-testid={`box`}
-      className="relative group inline-block bg-white shadow-md rounded-lg p-4"
+      className="relative group inline-block bg-white shadow-md rounded-lg"
     >
       {/* Grid container */}
-      <div className="grid grid-flow-row auto-rows-max md:grid-cols-3 gap-1 flex-wrap">
-        {/* Label */}
-        <div className="text-center text-darkLabel font-xs capitalize bg-white bg-opacity-50 flex flex-wrap">
-          <div className="bg-gray-200 p-1 rounded">
-            {labeledImage.label || "no label"}
-          </div>
+      <div className="flex flex-col">
+        <div className="mb-[21px]">
+          {/* Image */}
+          <img
+            src={labeledImage.path}
+            alt={labeledImage.label || "no label"}
+            className="min-w-[192px] w-full h-[127px] rounded-t-xl10"
+          />
         </div>
-        {/* Category */}
-        <div className="text-center text-darkLabel font-xxs capitalize bg-white bg-opacity-50 flex flex-wrap">
-          <div className="bg-gray-200 p-1 rounded">
-            {labeledImage.category}
+        <div className="flex flex-wrap px-[17px] pb-[27px]">
+          {/* Label */}
+          <div className="text-center text-darkLabel font-xs capitalize mb-[7px] bg-gray-300 flex flex-wrap">
+            <div className="bg-gray-200 py-[5px] px-[10px] rounded-[8px]">
+              {labeledImage.label || "no label"}
+            </div>
           </div>
-        </div>
-        {/* Frame Index */}
-        <div className="text-center text-darkLabel font-xs capitalize bg-white bg-opacity-50 flex flex-wrap">
-          <div className="bg-gray-200 p-1 rounded">
-            {labeledImage.frameIndex}
+          {/* Category */}
+          <div className="text-center text-darkLabel font-xxs capitalize mb-[7px] ml-[5px] bg-gray-300 flex flex-wrap">
+            <div className="bg-gray-200 py-[5px] px-[10px] rounded-[8px]">
+              {labeledImage.category}
+            </div>
           </div>
-        </div>
-        {/* Score */}
-        <div className="text-center text-darkLabel font-xs capitalize bg-white bg-opacity-50 flex flex-wrap">
-          <div className="bg-gray-200 p-1 rounded">
-            {(labeledImage.score * 100).toFixed(2) + '%'}
+          {/* Frame Index */}
+          <div className="text-center text-darkLabel font-xs capitalize mb-[7px] ml-[5px] bg-gray-300 flex flex-wrap">
+            <div className="bg-gray-200 py-[5px] px-[10px] rounded-[8px]">
+              {labeledImage.frameIndex}
+            </div>
+          </div>
+          {/* Score */}
+          <div className="text-center text-darkLabel font-xs capitalize mb-[7px] bg-gray-300 flex flex-wrap">
+            <div className="bg-gray-200 py-[5px] px-[10px] rounded-[8px]">
+              {(labeledImage.score * 100).toFixed(2) + "%"}
+            </div>
           </div>
         </div>
       </div>
-      {/* Image */}
-      <img
-        src={labeledImage.path}
-        alt={labeledImage.label || "no label"}
-        className="w-imageWidth h-imageHeight rounded-xl10 mt-4"
-      />
       {/* Semi-transparent layer */}
-      <div
-        className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 opacity-0  cursor-pointer"
-      >
-      </div>
+      <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 opacity-0  cursor-pointer"></div>
     </div>
   );
 };
 
-const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSelectedBoxes, refreshImages }) => {
+const LabelingControls: React.FC<LabelingControlsProps> = ({
+  selectedBox,
+  setSelectedBoxes,
+  refreshImages,
+}) => {
   //tailwind 10px padding
-  const [images, setImages] = useState<
-    Array<LabeledImage>
-  >([]);
+  const [images, setImages] = useState<Array<LabeledImage>>([]);
 
-  const [imagesToLabel, setImagesToLabel] = useState<
-    Array<LabeledImage>
-  >([]);
+  const [imagesToLabel, setImagesToLabel] = useState<Array<LabeledImage>>([]);
 
   const [imagesToNegativeLabel, setImagesToNegativeLabel] = useState<
     Array<LabeledImage>
@@ -152,7 +200,10 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
   const [labeling, setLabeling] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const handleLabel = async (boxId: string, setLabelFunction: React.Dispatch<React.SetStateAction<LabeledImage[]>>) => {
+  const handleLabel = async (
+    boxId: string,
+    setLabelFunction: React.Dispatch<React.SetStateAction<LabeledImage[]>>
+  ) => {
     const similarResult = await queryBox(boxId, true);
     const similar: LabeledImage[] = await similarResult?.json();
     const similarBoxIds = similar.map((image) => image.boxId);
@@ -160,17 +211,23 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
     return new Promise((resolve) => {
       setLabelFunction((prev) => {
         const image = images.find((image) => image.boxId === boxId);
-        const similarImages = images.filter((image) => similarBoxIds.includes(image.boxId));
-        if (!image) return prev
+        const similarImages = images.filter((image) =>
+          similarBoxIds.includes(image.boxId)
+        );
+        if (!image) return prev;
 
         const imageCopy = JSON.parse(JSON.stringify(image));
         const similarImagesCopy = JSON.parse(JSON.stringify(similarImages));
-        setImages((prevImages) => prevImages.filter((image) => ![boxId, ...similarBoxIds].includes(image.boxId)));
+        setImages((prevImages) =>
+          prevImages.filter(
+            (image) => ![boxId, ...similarBoxIds].includes(image.boxId)
+          )
+        );
 
         return [...prev, imageCopy, ...similarImagesCopy];
       });
-      resolve(null)
-    })
+      resolve(null);
+    });
   };
 
   const addToLabel = async (boxId: string) => {
@@ -180,7 +237,6 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
   const addToNegativeLabel = async (boxId: string) => {
     await handleLabel(boxId, setImagesToNegativeLabel);
   };
-
 
   useEffect(() => {
     setImagesToLabel([]);
@@ -192,7 +248,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
       const response = await queryBox(selectedBox);
       const result = await response?.json();
 
-      setSelectedBoxes(result)
+      setSelectedBoxes(result);
       setImages(result);
     };
     getBoxImages();
@@ -205,13 +261,14 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
       imagesToLabel.map((image) => image.boxId)
     );
 
-
-
-    await negativeLabel(selectedBox, imagesToNegativeLabel.map((image) => image.boxId));
+    await negativeLabel(
+      selectedBox,
+      imagesToNegativeLabel.map((image) => image.boxId)
+    );
 
     await refreshImages();
     setImagesToLabel([]);
-    setImagesToNegativeLabel([])
+    setImagesToNegativeLabel([]);
     setImages([]);
     setLabeling(false);
   };
@@ -231,32 +288,39 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
     borderRadius: "10px",
   };
 
-  const [{ canDrop, isOver }, drop] = useDrop(() => ({
-    accept: ItemTypes.BOX,
-    drop: (item: { name: string, labeledImage: { boxId: string } }) => {
-
-      addToNegativeLabel(item.labeledImage.boxId);
-      return { item };
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
-    }),
-  }), [images]);
-
-  const [{ canDrop: canDropSecond, isOver: isOverSecond }, dropSecond] =
-    useDrop(() => ({
+  const [{ canDrop, isOver }, drop] = useDrop(
+    () => ({
       accept: ItemTypes.BOX,
-      drop: async (item: { name: string, labeledImage: { boxId: string } }) => {
-
-        await addToLabel(item.labeledImage.boxId);
-        return { item, name: "label" };
+      drop: (item: { name: string; labeledImage: { boxId: string } }) => {
+        addToNegativeLabel(item.labeledImage.boxId);
+        return { item };
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
       }),
-    }), [images]);
+    }),
+    [images]
+  );
+
+  const [{ canDrop: canDropSecond, isOver: isOverSecond }, dropSecond] =
+    useDrop(
+      () => ({
+        accept: ItemTypes.BOX,
+        drop: async (item: {
+          name: string;
+          labeledImage: { boxId: string };
+        }) => {
+          await addToLabel(item.labeledImage.boxId);
+          return { item, name: "label" };
+        },
+        collect: (monitor) => ({
+          isOver: monitor.isOver(),
+          canDrop: monitor.canDrop(),
+        }),
+      }),
+      [images]
+    );
 
   const isActive = canDrop && isOver;
   // const isActiveSecond = canDropSecond && isOverSecond;
@@ -274,61 +338,82 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
   const dropdownOptions = [
     {
       value: null,
-      label: 'No filter'
+      label: "No filter",
     },
     {
-      value: 'similar',
-      label: 'Similar'
+      value: "similar",
+      label: "Similar",
     },
     {
-      value: 'similarToAverage',
-      label: 'Similar To Average'
+      value: "similarToAverage",
+      label: "Similar To Average",
     },
     {
-      value: 'sameLabel',
-      label: 'Same Label'
-    }
-  ]
+      value: "sameLabel",
+      label: "Same Label",
+    },
+  ];
 
   return (
     <div className="container p-labelsControls h-full">
       <div className="mb-mx40 flex items-center">
-        <input
-          type="text"
-          className="w-inputWidth border-xs4 border-color-primary-900 rounded-lg p-2 bg-white text-color-gray-100 p-input mr-5"
-          placeholder="Name selected object with label..."
-          value={labelValue}
-          onChange={(e) => setLabelValue(e.target.value)}
-        />
+        <div className="relative mr-3">
+          <FontAwesomeIcon
+            icon={faSearch}
+            className="absolute z-30 left-[20px] bottom-[18px] w-[17px] h-[17px]"
+          />
+          <input
+            type="text"
+            className="w-inputWidth border-xs4 border-color-primary-900 rounded-lg min-w-[724px] h-[50px] bg-white text-color-gray-100 py-[16px] pl-[48px] pr-[15px]"
+            placeholder="Name selected object with label..."
+            value={labelValue}
+            onChange={(e) => setLabelValue(e.target.value)}
+          />
+        </div>
         <button
-          className={`ml-2 bg-primary-400 text-base16 text-white p-submitBtn rounded-xl10 ${labeling ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[20px] rounded-xl10 min-h-[50px] ${
+            labeling ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           onClick={() => {
             submitLabel();
           }}
         >
           Submit
         </button>
-        <div className="ml-2">
-          <DropDown options={dropdownOptions} onClick={(val) => setSelectedCategory(val)} />
+        <div className="ml-3">
+          <DropDown
+            options={dropdownOptions}
+            onClick={(val) => setSelectedCategory(val)}
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 border-2 border-gray-300 rounded-md p-4 mb-3" style={{ maxHeight: '40vh', overflow: 'auto' }}>
-        {images.length > 0 ? images.filter((labeledImage) => {
-
-          if (!selectedCategory) {
-            return true
-          } else {
-            return labeledImage.category === selectedCategory
-          }
-        }).map((labeledImage) => {
-          return (
-            <ImageComponent
-              key={labeledImage.boxId}
-              labeledImage={labeledImage}
-            />
-          );
-        }) : <p className="w-full text-center text-gray-500 col-span-full">No images available. Click an identified object to populate.</p>}
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 border-[0.5px] bg-black  bg-opacity-5 border-black border-opacity-[5%] rounded-md py-[40px] px-[110px] mb-3"
+        style={{ maxHeight: "40vh", overflow: "auto" }}
+      >
+        {images.length > 0 ? (
+          images
+            .filter((labeledImage) => {
+              if (!selectedCategory) {
+                return true;
+              } else {
+                return labeledImage.category === selectedCategory;
+              }
+            })
+            .map((labeledImage) => {
+              return (
+                <ImageComponent
+                  key={labeledImage.boxId}
+                  labeledImage={labeledImage}
+                />
+              );
+            })
+        ) : (
+          <p className="w-full text-center text-gray-500 col-span-full">
+            No images available. Click an identified object to populate.
+          </p>
+        )}
       </div>
       <div className="flex justify-between pb-40 h-full">
         <div className="w-1/2 mr-2">
@@ -339,7 +424,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
             style={{
               ...style,
               backgroundColor: getBackgroundColor(canDrop, isOver),
-              height: '100%',
+              height: "100%",
             }}
             className="relative"
             data-testid="dustbin"
@@ -369,7 +454,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({ selectedBox, setSel
             style={{
               ...style,
               backgroundColor: getBackgroundColor(canDropSecond, isOverSecond),
-              height: '100%',
+              height: "100%",
             }}
             className="relative"
             data-testid="dustbin"

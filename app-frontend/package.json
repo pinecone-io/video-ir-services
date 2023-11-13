@@ -38,7 +38,6 @@
     "docker:local:tag": "docker tag video-recognition_app-frontend video-recognition_app-frontend:local"
   },
   "dependencies": {
-    "shared": "file:../shared",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",

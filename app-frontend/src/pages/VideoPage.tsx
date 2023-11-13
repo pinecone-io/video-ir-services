@@ -5,7 +5,7 @@ import { formatImageUrl } from "../utils/formatImageUrl";
 import { GetImagesDTO } from "../types/Box";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
-import { socket } from '../utils/socket'
+import { socket } from "../utils/socket";
 import { useFps } from "../hooks/fpsHook";
 import { resetImages } from "../services/resetImagesService";
 
@@ -20,17 +20,15 @@ const VideoPage: React.FC = () => {
 
   if (initialFetch) {
     console.log("Resetting images");
-    initialFetch = false
-    resetImages()
+    initialFetch = false;
+    resetImages();
   }
 
   const updateFrameIndex = (frameIndex: number) => {
-    setFrameIndex(frameIndex)
-  }
+    setFrameIndex(frameIndex);
+  };
   // Fetch all image paths from the server
   useEffect(() => {
-
-
     // Define a function to fetch images
     const fetchImages = async () => {
       // Check if the object detection data is not done and if the frame index is less than the current frame index plus the FPS rate times 3
@@ -41,12 +39,12 @@ const VideoPage: React.FC = () => {
         // Check if the images covered in this frameIndex + limit weren't already fetched
         if (frameIndex + limit > Object.keys(imagePaths).length) {
           // Fetch the images from the server
-          console.log(`Fetching ${limit}`)
-          getImages({ limit: limit })
+          console.log(`Fetching ${limit}`);
+          getImages({ limit: limit });
         }
       }
-    }
-    fetchImages()
+    };
+    fetchImages();
     // .then((response) => response.data)
     // .then(setImagePaths);
   }, [odDataDone, frameIndex, FPS, imagePaths]);
@@ -55,33 +53,31 @@ const VideoPage: React.FC = () => {
     setImagePaths((prev) => {
       return {
         ...prev,
-        ...data
-      }
-    })
-    setFrameIndex(frameIndex + 10)
-  }
+        ...data,
+      };
+    });
+    setFrameIndex(frameIndex + 10);
+  };
 
   const handleOdDataDone = () => {
-    setOdDataDone(true)
-    console.log(imagePaths)
-  }
+    setOdDataDone(true);
+    console.log(imagePaths);
+  };
 
   useEffect(() => {
-    socket.on('odDataAdded', handleOdDataAdded)
-    socket.on('odDataDone', handleOdDataDone)
+    socket.on("odDataAdded", handleOdDataAdded);
+    socket.on("odDataDone", handleOdDataDone);
     return () => {
-      socket.off('odDataAdded', handleOdDataAdded)
-      socket.off('odDataDone', handleOdDataDone)
-    }
-  })
+      socket.off("odDataAdded", handleOdDataAdded);
+      socket.off("odDataDone", handleOdDataDone);
+    };
+  });
 
   const refreshImages = () => {
     // getImages({ offset: 0, limit: 10 })
     //   .then((response) => response.data)
     //   .then(setImagePaths);
-  }
-
-
+  };
 
   // Preload images
   useEffect(() => {
@@ -126,7 +122,12 @@ const VideoPage: React.FC = () => {
       <DndProvider backend={HTML5Backend}>
         <div className="min-h-screen bg-white text-black w-full">
           <div className="flex flex-wrap justify-center">
-            <VideoStream imagePaths={imagePaths} loadedImages={loadedImages} refreshImages={refreshImages} updateFrameIndex={updateFrameIndex} />
+            <VideoStream
+              imagePaths={imagePaths}
+              loadedImages={loadedImages}
+              refreshImages={refreshImages}
+              updateFrameIndex={updateFrameIndex}
+            />
           </div>
         </div>
       </DndProvider>

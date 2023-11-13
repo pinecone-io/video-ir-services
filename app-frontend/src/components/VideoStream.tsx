@@ -33,7 +33,9 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
   const [isPlaying, setPlay] = useState<boolean>(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedBox, setSelectedBox] = useState<string>("");
-  const [selectedBoxes, setSelectedBoxes] = useState<Array<{ boxId: string; label: string }>>([]);
+  const [selectedBoxes, setSelectedBoxes] = useState<
+    Array<{ boxId: string; label: string }>
+  >([]);
   const prevSelectedBox = useRef(selectedBox);
 
   const drawFrame = (frame: number) => {
@@ -57,7 +59,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     const newFrameIndex =
       frameIndex + x < 0 ? props.loadedImages.length : frameIndex;
 
-    const fi = (newFrameIndex + x) % props.loadedImages.length
+    const fi = (newFrameIndex + x) % props.loadedImages.length;
     // console.log(fi)
     setFrameIndex((newFrameIndex + x) % props.loadedImages.length);
     props.updateFrameIndex(fi);
@@ -147,8 +149,9 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             >
               <FontAwesomeIcon
                 size="2x"
-                className={`text-white p-controlsPlayBtn ${!isPlaying ? "ml-[6px]" : ""
-                  }`}
+                className={`text-white p-controlsPlayBtn ${
+                  !isPlaying ? "ml-[6px]" : ""
+                }`}
                 icon={isPlaying ? faPause : faPlay}
               />
             </button>
@@ -166,8 +169,12 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
           </div>
         </div>
       </div>
-      <div className="flex justify-center bg-primary-1000 w-full mt-[100px] min-h-[300px]">
-        <LabelingControls selectedBox={selectedBox} setSelectedBoxes={setSelectedBoxes} refreshImages={props.refreshImages} />
+      <div className="flex justify-center  w-full mt-[100px] min-h-[300px]">
+        <LabelingControls
+          selectedBox={selectedBox}
+          setSelectedBoxes={setSelectedBoxes}
+          refreshImages={props.refreshImages}
+        />
       </div>
       <footer className="text-center text-black p-smallFooter fixed bottom-0 w-full bg-white z-50">
         <p className="p-2">All Rights Reserved by Pinecone</p>
