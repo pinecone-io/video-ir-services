@@ -71,7 +71,7 @@ const DropDown: React.FC<DropdownOptions> = ({ options, onClick }) => {
           xmlns="http://www.w3.org/2000/svg"
           className="mr-[5px]"
         >
-          <g clip-path="url(#clip0_117_1311)">
+          <g clipPath="url(#clip0_117_1311)">
             <path
               d="M7.08333 13.25H9.91667V11.8333H7.08333V13.25ZM2.125 4.75V6.16667H14.875V4.75H2.125ZM4.25 9.70833H12.75V8.29167H4.25V9.70833Z"
               fill="#1C17FE"
