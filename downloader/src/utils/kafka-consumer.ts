@@ -12,7 +12,7 @@ async function createKafkaConsumer(
       brokers: [`${KAFKA_BROKER}:9092`],
       logLevel: logLevel.INFO,
     });
-    const topic = "video-splits";
+    const topic = "video-splits-1";
     const consumerGroupId = "group-2"; // This has to be the same for all consumers
     consumer = kafka.consumer({ groupId: consumerGroupId });
 

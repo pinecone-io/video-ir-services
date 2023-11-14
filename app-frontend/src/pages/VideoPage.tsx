@@ -15,8 +15,12 @@ const VideoPage: React.FC = () => {
   const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
   const [progress, setProgress] = useState(0);
   const [frameIndex, setFrameIndex] = useState(0);
+  const [nextFetchIndex, setNextFetchIndex] = useState(0); // Add this line
+
+
   const [odDataDone, setOdDataDone] = useState(false);
   const { FPS } = useFps();
+  const limit = 100
 
   if (initialFetch) {
     console.log("Resetting images");
@@ -27,41 +31,32 @@ const VideoPage: React.FC = () => {
   const updateFrameIndex = (frameIndex: number) => {
     setFrameIndex(frameIndex);
   };
+
   // Fetch all image paths from the server
   useEffect(() => {
-    // Define a function to fetch images
     const fetchImages = async () => {
-      // Check if the object detection data is not done and if the frame index is less than the current frame index plus the FPS rate times 3
-      if (!odDataDone && frameIndex < frameIndex + FPS * 5) {
-        // Determine the limit for the number of images to fetch
-        // Fetch the number of images equivalent to the FPS rate times 3
-        const limit = FPS * 5;
-        // Check if the images covered in this frameIndex + limit weren't already fetched
-        if (frameIndex + limit > Object.keys(imagePaths).length) {
-          // Fetch the images from the server
-          console.log(`Fetching ${limit}`);
-          getImages({ limit: limit });
-        }
+      if (frameIndex + 1 >= nextFetchIndex) {
+        await getImages({ offset: frameIndex, limit });
+        setNextFetchIndex(frameIndex + limit); // Update the nextFetchIndex after fetching
       }
     };
-    fetchImages();
-    // .then((response) => response.data)
-    // .then(setImagePaths);
-  }, [odDataDone, frameIndex, FPS, imagePaths]);
 
-  const handleOdDataAdded = (data: any) => {
+    fetchImages();
+  }, [frameIndex, nextFetchIndex]); //
+
+
+  const handleOdDataAdded = (data: GetImagesDTO) => {
     setImagePaths((prev) => {
       return {
         ...prev,
         ...data,
       };
     });
-    setFrameIndex(frameIndex + 10);
+    // setFrameIndex(frameIndex + 10);
   };
 
   const handleOdDataDone = () => {
     setOdDataDone(true);
-    console.log(imagePaths);
   };
 
   useEffect(() => {
@@ -74,9 +69,8 @@ const VideoPage: React.FC = () => {
   });
 
   const refreshImages = () => {
-    // getImages({ offset: 0, limit: 10 })
-    //   .then((response) => response.data)
-    //   .then(setImagePaths);
+    getImages({ offset: frameIndex, limit })
+      .then((response) => response.data)
   };
 
   // Preload images

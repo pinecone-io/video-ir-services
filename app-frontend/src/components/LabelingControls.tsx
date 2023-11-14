@@ -17,7 +17,7 @@ type ImageProps = {
   labeledImage: LabeledImage;
 };
 
-type LabeledImage = {
+export type LabeledImage = {
   boxId: string;
   path: string;
   label: string;
@@ -25,10 +25,6 @@ type LabeledImage = {
   frameIndex: string;
   score: number;
 };
-
-interface DropResult {
-  name: string;
-}
 
 interface DropdownOption {
   value: string | null;
@@ -132,6 +128,8 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   }));
 
   const opacity = isDragging ? 0.4 : 1;
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <div
       ref={drag}
@@ -143,10 +141,12 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
       <div className="flex flex-col">
         <div className="mb-[21px]">
           {/* Image */}
+          {!loaded && <div className="animate-pulse min-w-[192px] w-full h-[127px] rounded-t-xl10 bg-gray-300" />}
           <img
             src={labeledImage.path}
             alt={labeledImage.label || "no label"}
-            className="min-w-[192px] w-full h-[127px] rounded-t-xl10"
+            className={`min-w-[192px] w-full h-[127px] rounded-t-xl10 ${loaded ? '' : 'hidden'}`}
+            onLoad={() => setLoaded(true)}
           />
         </div>
         <div className="flex flex-wrap px-[17px] pb-[27px]">
@@ -371,9 +371,8 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
           />
         </div>
         <button
-          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[20px] rounded-xl10 min-h-[50px] ${
-            labeling ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[20px] rounded-xl10 min-h-[50px] ${labeling ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           onClick={() => {
             submitLabel();
           }}

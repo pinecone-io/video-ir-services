@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
 import { labelBoxes, negativeLabel } from "./label";
-import { createImageDataGenerator, loadImages, queryBox } from "./query";
+import { loadImagesWithOffset, queryBox } from "./query";
 import { resetDB } from "./reset";
 import { ProgressTracker } from './utils/progressTracker'
 import { IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
 import { LogTracker } from "./utils/logTracker";
 import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
 import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
-import { ObjectDetectionData } from "./types";
 import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter";
 
 const progressTracker = new ProgressTracker();
@@ -23,7 +22,7 @@ const numberOfEmbeddingsTrackerListener = numberOfEmbeddingsTracker.getNumberOfE
 const objectDetectionDataEmitter = new ObjectDetectionDataEmitter();
 const objectDetectionDataEmitterListener = objectDetectionDataEmitter.getOdDataEventEmitter();
 
-let imageDataGenerator = createImageDataGenerator()
+// let imageDataGenerator = createImageDataGenerator()
 
 interface Route {
   route: string;
@@ -44,51 +43,59 @@ const routes: Route[] = [
       }
     },
   },
+  // {
+  //   route: "/resetImages",
+  //   method: "post",
+  //   handler: async (req, res) => {
+  //     imageDataGenerator = createImageDataGenerator()
+  //     res.status(200).json({ message: "Images reset" });
+  //   }
+  // },
+  // {
+  //   route: "/getImages",
+  //   method: "post",
+  //   handler: async (req, res) => {
+  //     await loadImages()
+  //     const limit = req.body.limit;
+  //     try {
+
+  //       const generator = imageDataGenerator(limit);
+  //       let result = generator.next();
+  //       console.log(result.value, result.done)
+  //       while (!result.done) {
+  //         Object.entries(result.value).forEach(([key, value]) => {
+  //           objectDetectionDataEmitter.addEntry({ [key]: value });
+  //         });
+  //         result = generator.next();
+  //       }
+
+  //       if (result.done) {
+  //         objectDetectionDataEmitter.markAsComplete();
+  //       }
+
+  //       res.status(200).json({ message: "Images fetched" });
+  //       // res.json(data);
+  //     } catch (error) {
+  //       res.status(500).json({ error: "Error fetching images", message: error });
+  //     }
+  //   },
+  // },
+
   {
-    route: "/resetImages",
+    route: "/getImagesWithOffset",
     method: "post",
     handler: async (req, res) => {
-      imageDataGenerator = createImageDataGenerator()
-      res.status(200).json({ message: "Images reset" });
-    }
-  },
-  {
-    route: "/getImages",
-    method: "post",
-    handler: async (req, res) => {
-      await loadImages()
+      const offset = req.body.offset;
       const limit = req.body.limit;
       try {
 
-        const generator = imageDataGenerator(limit);
-        let result = generator.next();
-        console.log(result.value, result.done)
-        while (!result.done) {
-          Object.entries(result.value).forEach(([key, value]) => {
-            objectDetectionDataEmitter.addEntry({ [key]: value });
-          });
-          result = generator.next();
-        }
-
-        if (result.done) {
-          objectDetectionDataEmitter.markAsComplete();
-        }
-        // console.log(`emittedEntires`, emittedEntires)
-
-        // if (emittedEntires < Object.keys(imageData).length) {
-        //   Object.entries(data).forEach(([key, value]) => {
-        //     console.log(`adding entry ${key}`)
-        //     objectDetectionDataEmitter.addEntry({ [key]: value });
-        //     emittedEntires += 1;
-        //   });
-        // }
-        // else {
-        //   if (Object.keys(imageData).length > 0 && (emittedEntires === Object.keys(imageData).length)) {
-        //     console.log("all done")
-        //     objectDetectionDataEmitter.markAsComplete();
-        //   }
-        // }
-        res.status(200).json({ message: "Images fetched" });
+        const [data, numberOfEntries] = await loadImagesWithOffset(offset, limit);
+        console.log(data)
+        Object.entries(data).forEach(([key, value]) => {
+          console.log(`adding entry ${key}`)
+          objectDetectionDataEmitter.addEntry({ [key]: value });
+        });
+        res.status(200).json({ message: "Images fetched", numberOfEntries });
         // res.json(data);
       } catch (error) {
         res.status(500).json({ error: "Error fetching images", message: error });
@@ -118,12 +125,8 @@ const routes: Route[] = [
       const boxIds = req.body.boxIds as string[];
       const label = req.body.label as string;
 
-      // console.log(req.body);
-      // console.log("LABELING", boxIds, "WITH", label);
-
       try {
         await labelBoxes(label, boxIds);
-
         res.json({ message: "Labelled" });
       } catch (error) {
         res.status(500).json({ error: "Error labeling", message: error });

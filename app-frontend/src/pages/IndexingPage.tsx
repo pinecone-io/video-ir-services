@@ -34,8 +34,12 @@ const IndexingPage: React.FC = () => {
     setProcessedFiles(0);
     setCompleted({ numberOfFilesProcessed: 0, executionTime: '', status: false })
     setLogs([]);
+    setDownloaders({})
+    setIndexers({})
     setStarted(false)
   }
+  const [indexers, setIndexers] = useState<{ [key: string]: boolean }>({});
+  const [downloaders, setDownloaders] = useState<{ [key: string]: boolean }>({});
 
 
   const handleFilesToBeProcessedChanged = (data: { numberOfFilesToProcess: number }): void => {
@@ -54,6 +58,19 @@ const IndexingPage: React.FC = () => {
   }
 
   const handleLogUpdated = (data: LogLine): void => {
+
+    const line = data.message
+
+    const pod = line.split(":")[0]
+    const isIndexer = line.includes("indexer")
+    const isDownloader = line.includes("downloader")
+    if (isIndexer) {
+      setIndexers(prevIndexers => ({ ...prevIndexers, [pod]: true }));
+    }
+    if (isDownloader) {
+      setDownloaders(prevDownloaders => ({ ...prevDownloaders, [pod]: true }));
+    }
+
     setLogs([...logs, data])
   }
 
@@ -294,6 +311,22 @@ const IndexingPage: React.FC = () => {
           </table>
         </div>
 
+      </div>
+      <div className="p-4 m-10 mr-40 text-sm mt-3 text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto w-4/5" >
+        <div style={{ overflow: 'auto', width: '100%', fontFamily: 'Courier New, monospace' }}>
+          <table style={{ width: '100%' }}>
+            <tbody>
+              <tr>
+                <td style={{ width: '90%' }}><b>Indexers</b></td>
+                <td>{Object.keys(indexers).length}</td>
+              </tr>
+              <tr>
+                <td style={{ width: '90%' }}><b>Downloaders</b></td>
+                <td>{Object.keys(downloaders).length}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

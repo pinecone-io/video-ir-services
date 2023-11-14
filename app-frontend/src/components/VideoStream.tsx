@@ -9,8 +9,7 @@ import {
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
-import LabelingControls from "./LabelingControls";
-import { useFps } from "../hooks/fpsHook";
+import LabelingControls, { LabeledImage } from "./LabelingControls";
 
 const CANVAS_WIDTH = 1269;
 const CANVAS_HEIGHT = 707;
@@ -27,14 +26,15 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     LabeledBoundingBox[]
   >([]);
 
-  const { FPS } = useFps();
+  const [FPS, setFps] = useState(10);
+  const [editingFps, setEditingFps] = useState<boolean>(false);
 
   const [frameIndex, setFrameIndex] = useState<number>(0);
   const [isPlaying, setPlay] = useState<boolean>(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedBox, setSelectedBox] = useState<string>("");
   const [selectedBoxes, setSelectedBoxes] = useState<
-    Array<{ boxId: string; label: string }>
+    LabeledImage[]
   >([]);
   const prevSelectedBox = useRef(selectedBox);
 
@@ -67,20 +67,18 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
 
   // Autoplay frames
   useEffect(() => {
-    if (!props.loadedImages.length) return;
-    const intervalId =
-      isPlaying &&
-      setInterval(() => {
-        // Increment frame index and loop back if at the end
-        moveVideoFrameBy(1);
-      }, 1000 / FPS);
+    if (!props.loadedImages.length || !isPlaying) return;
+    const intervalId = setInterval(() => {
+      // Increment frame index and loop back if at the end
+      moveVideoFrameBy(1);
+    }, 1000 / FPS);
 
-    // Clean up the interval when component unmounts
+    // Clean up the interval when component unmounts or when isPlaying changes
     return () => {
       intervalId && clearInterval(intervalId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.loadedImages, frameIndex, isPlaying]);
+  }, [props.loadedImages, frameIndex, isPlaying, FPS]);
 
   // Draw frame when index is changed
   useEffect(() => {
@@ -128,7 +126,17 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
         )}
         <div className="w-full absolute bottom-0 left-0 right-0 bg-primary-800 opacity-80 rounded-10 p-overlay flex items-center">
           <p className="text-white text-base20 font-medium">
-            FPS: {FPS} | Frame Index: {frameIndex}
+            <span>
+              {editingFps ? <span>
+                <input type="number" value={FPS} onChange={(e) => {
+                  setFps(parseInt(e.currentTarget.value))
+                }} onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setEditingFps(false)
+                  }
+                }} />
+              </span> : <span onClick={() => setEditingFps(true)} >FPS: {FPS}</span>}
+            </span> | Frame Index: {frameIndex} | {Object.keys(props.imagePaths).length}
           </p>
           {/* Controlls */}
           <div className="flex items-center absolute inset-x-x45">
@@ -149,9 +157,8 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             >
               <FontAwesomeIcon
                 size="2x"
-                className={`text-white p-controlsPlayBtn ${
-                  !isPlaying ? "ml-[6px]" : ""
-                }`}
+                className={`text-white p-controlsPlayBtn ${!isPlaying ? "ml-[6px]" : ""
+                  }`}
                 icon={isPlaying ? faPause : faPlay}
               />
             </button>
