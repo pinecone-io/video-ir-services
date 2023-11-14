@@ -1,4 +1,4 @@
-import { Index, Pinecone, QueryOptions, RecordMetadata } from "@pinecone-database/pinecone";
+import { Index, Pinecone, PineconeRecord, QueryOptions, RecordMetadata } from "@pinecone-database/pinecone";
 import { mean, norm, divide, Matrix } from "mathjs";
 
 import {
@@ -77,10 +77,6 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
     const imageUrl = JSON.parse((await redis.hGet("bbox", boxId)) || "{}")!.src;
     console.log(imageUrl)
     const vector = await embedder.embed(imageUrl);
-
-    // const entries = await ns.fetch([boxId])
-    // const record = entries.records[0]
-    // const vector = record?.values as Vector;
 
     if (!vector) {
       console.error("No vector found for ", boxId);
@@ -264,7 +260,6 @@ const fetchFromRedis = async (keys: string[]): Promise<ObjectDetectionData> => {
   for (const key of keys) {
     try {
       const value = await redis.hGet("frame", key);
-      console.log(`Fetched key ${key} ${value}`)
       if (value) {
         const parsedValue = JSON.parse(value as string) as ImageWithBoundingBoxes;
         if (parsedValue && typeof parsedValue.frameIndex === "string") {
@@ -305,9 +300,9 @@ const fetchFromRedis = async (keys: string[]): Promise<ObjectDetectionData> => {
 //   return [objectDetectionData, allBoxIds];
 // }
 
-const fetchVectors = async (uniqueBoxIds: string[], ns: any, fetchLimit: number): Promise<any[]> => {
+const fetchVectors = async (uniqueBoxIds: string[], ns: Index<Metadata>, fetchLimit: number): Promise<PineconeRecord<Metadata>[]> => {
   const numRequests = Math.ceil(uniqueBoxIds.length / fetchLimit);
-  const allVectors = [];
+  const allVectors: PineconeRecord<Metadata>[] = [];
   for (let i = 0; i < numRequests; i++) {
     try {
       const start = i * fetchLimit;
@@ -338,13 +333,13 @@ const processVectors = (allVectors: any[]): Set<{ boxId: string; label: string }
   return labeledBoxes;
 }
 
-const updateLabeledBoundingBoxes = (updateData: ObjectDetectionData, labeledBoxesMap: Map<string, string>): ObjectDetectionData => {
+const updateLabeledBoundingBoxes = (updateData: ObjectDetectionData, labeledBoxesMap: Map<string, string>, reason: string): ObjectDetectionData => {
   Object.keys(updateData).forEach((frameKey) => {
     const frameData = updateData[frameKey];
     if (frameData) {
       const newLabeledBoundingBoxes = frameData.labeledBoundingBoxes.map((boundingBox) => {
         const label = labeledBoxesMap.get(boundingBox.boxId);
-        return label ? { ...boundingBox, label } : boundingBox;
+        return label ? { ...boundingBox, label, reason } : boundingBox;
       });
       updateData[frameKey] = {
         ...frameData,
@@ -406,6 +401,59 @@ const loadImagesWithOffset = async (offset: number, limit: number): Promise<[Obj
 
   // Get labeled boxes from pinecone
   const labeledBoxes = processVectors(allVectors);
+  const probableLabeledBoxes: Set<{ boxId: string; label: string }> = new Set();
+  // For each vector, query for the top 5 most similar vectors, and check if they have a label
+  allVectors.forEach(async (record) => {
+    const possibleLabelsForRecord: { [key: string]: number } = {}
+    const query = {
+      vector: record.values,
+      topK: 100,
+      includeValues: true,
+      includeMetadata: true,
+    }
+
+    const res = await ns.query(query);
+    const matches = res.matches;
+
+    // get all vectors
+    const av = matches.map((match) => match.values);
+    const averageVector = calculateAverageVector(av, true);
+
+    const averageQuery = {
+      vector: averageVector,
+      topK: 100,
+      includeMetadata: true,
+    }
+
+    const averageRes = await ns.query(averageQuery);
+    const averageMatches = averageRes.matches;
+
+    console.log(`Found some matches ${matches.length}`)
+    if (matches && averageMatches) {
+      [...matches, ...averageMatches].forEach((match) => {
+        if (match && match.score && match.score > 0.90) {
+          const { metadata } = match;
+          if (metadata && metadata.label) {
+            if (!possibleLabelsForRecord[metadata.label]) {
+              possibleLabelsForRecord[metadata.label] = 0
+            } else {
+              possibleLabelsForRecord[metadata.label] += 1
+            }
+          }
+        }
+      })
+    }
+
+    const sortedLabels = Object.entries(possibleLabelsForRecord).sort(([, a], [, b]) => b - a);
+    console.log("sortedLabels", sortedLabels.length)
+    const topLabel = sortedLabels[0];
+
+    console.log(`topLabel ${topLabel}`)
+
+    if (record.metadata && topLabel) {
+      probableLabeledBoxes.add({ boxId: record.id, label: topLabel[0] });
+    }
+  })
 
 
   const updateData: ObjectDetectionData = {
@@ -414,10 +462,31 @@ const loadImagesWithOffset = async (offset: number, limit: number): Promise<[Obj
 
   const labeledBoxesMap = new Map(Array.from(labeledBoxes).map((item: LabeledBoxSetItem) => [item.boxId, item.label]));
 
+  const probableLabeledBoxesMap = new Map(Array.from(probableLabeledBoxes).map((item: LabeledBoxSetItem) => [item.boxId, item.label]));
 
-  const updatedData = updateLabeledBoundingBoxes(updateData, labeledBoxesMap);
+  console.log("Found probableLabeledBoxesMap boxes", probableLabeledBoxesMap.size)
 
-  return [updatedData, sortedKeys.length];
+
+  const updatedData: ObjectDetectionData = updateLabeledBoundingBoxes(updateData, labeledBoxesMap, 'explicit');
+
+  const updatedDataWithProbablyData: ObjectDetectionData = updateLabeledBoundingBoxes(updateData, probableLabeledBoxesMap, 'probable');
+
+  console.log("updatedDataWithProbablyData", updatedDataWithProbablyData.size)
+
+  const combined = { ...updatedData, ...updatedDataWithProbablyData };
+
+  // count number of "probable" labels
+  let numProbables = 0
+
+  Object.values(combined).forEach((frame) => {
+    const probableLabels = frame.labeledBoundingBoxes.filter((box) => box.reason === 'probable').length;
+
+    numProbables += probableLabels;
+  })
+
+  console.log("numProbables", numProbables)
+
+  return [combined, sortedKeys.length];
 
 }
 

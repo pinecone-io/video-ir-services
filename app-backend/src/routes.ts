@@ -88,11 +88,8 @@ const routes: Route[] = [
       const offset = req.body.offset;
       const limit = req.body.limit;
       try {
-
         const [data, numberOfEntries] = await loadImagesWithOffset(offset, limit);
-        console.log(data)
         Object.entries(data).forEach(([key, value]) => {
-          console.log(`adding entry ${key}`)
           objectDetectionDataEmitter.addEntry({ [key]: value });
         });
         res.status(200).json({ message: "Images fetched", numberOfEntries });

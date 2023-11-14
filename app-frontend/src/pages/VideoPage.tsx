@@ -9,7 +9,7 @@ import { socket } from "../utils/socket";
 import { useFps } from "../hooks/fpsHook";
 import { resetImages } from "../services/resetImagesService";
 
-let initialFetch = true;
+const initialFetch = true;
 const VideoPage: React.FC = () => {
   const [imagePaths, setImagePaths] = useState<GetImagesDTO>({});
   const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
@@ -22,11 +22,11 @@ const VideoPage: React.FC = () => {
   const { FPS } = useFps();
   const limit = 100
 
-  if (initialFetch) {
-    console.log("Resetting images");
-    initialFetch = false;
-    resetImages();
-  }
+  // if (initialFetch) {
+  //   console.log("Resetting images");
+  //   initialFetch = false;
+  //   resetImages();
+  // }
 
   const updateFrameIndex = (frameIndex: number) => {
     setFrameIndex(frameIndex);

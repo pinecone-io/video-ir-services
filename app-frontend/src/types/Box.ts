@@ -9,6 +9,7 @@ export type LabeledBoundingBox = {
   boxId: string;
   box: BoundingBox;
   label?: string;
+  reason?: string;
   score: number;
 };
 

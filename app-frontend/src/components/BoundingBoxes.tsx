@@ -88,7 +88,7 @@ const BoundingBoxes: React.FC<{
       .attr("font-family", "Arial")
       .attr("font-size", "14px")
       .attr("fill", "white")
-      .text((d) => `${d?.label} | ${d?.boxId}` || "");
+      .text((d) => `${d?.label} ${d?.reason} | ${d?.boxId}` || "");
 
     // Update groups
     const updatedGroups = newGroups
@@ -110,7 +110,7 @@ const BoundingBoxes: React.FC<{
       );
 
     // Update text
-    updatedGroups.selectAll<SVGGElement, LabeledBoundingBox>("text").text((d) => d?.label || "");
+    updatedGroups.selectAll<SVGGElement, LabeledBoundingBox>("text").text((d) => `${d?.label} ${(typeof d?.reason !== 'undefined') ? d?.reason : ''}` || "");
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.labeledBoundingBox]);
