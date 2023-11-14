@@ -67,7 +67,7 @@ const DropDown: React.FC<DropdownOptions> = ({ options, onClick }) => {
           xmlns="http://www.w3.org/2000/svg"
           className="mr-[5px]"
         >
-          <g clip-path="url(#clip0_117_1311)">
+          <g clipPath="url(#clip0_117_1311)">
             <path
               d="M7.08333 13.25H9.91667V11.8333H7.08333V13.25ZM2.125 4.75V6.16667H14.875V4.75H2.125ZM4.25 9.70833H12.75V8.29167H4.25V9.70833Z"
               fill="#1C17FE"
@@ -151,25 +151,25 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
         </div>
         <div className="flex flex-wrap px-[17px] pb-[27px]">
           {/* Label */}
-          <div className="text-center text-darkLabel font-xs capitalize mb-[7px] bg-gray-300 flex flex-wrap">
+          <div className="text-center text-darkLabel font-xs capitalize mb-[7px] flex flex-wrap">
             <div className="bg-gray-200 py-[5px] px-[10px] rounded-[8px]">
               {labeledImage.label || "no label"}
             </div>
           </div>
           {/* Category */}
-          <div className="text-center text-darkLabel font-xxs capitalize mb-[7px] ml-[5px] bg-gray-300 flex flex-wrap">
+          <div className="text-center text-darkLabel font-xxs capitalize mb-[7px] ml-[5px]  flex flex-wrap">
             <div className="bg-gray-200 py-[5px] px-[10px] rounded-[8px]">
               {labeledImage.category}
             </div>
           </div>
           {/* Frame Index */}
-          <div className="text-center text-darkLabel font-xs capitalize mb-[7px] ml-[5px] bg-gray-300 flex flex-wrap">
+          <div className="text-center text-darkLabel font-xs capitalize mb-[7px] ml-[5px]  flex flex-wrap">
             <div className="bg-gray-200 py-[5px] px-[10px] rounded-[8px]">
               {labeledImage.frameIndex}
             </div>
           </div>
           {/* Score */}
-          <div className="text-center text-darkLabel font-xs capitalize mb-[7px] bg-gray-300 flex flex-wrap">
+          <div className="text-center text-darkLabel font-xs capitalize mb-[7px]  flex flex-wrap">
             <div className="bg-gray-200 py-[5px] px-[10px] rounded-[8px]">
               {(labeledImage.score * 100).toFixed(2) + "%"}
             </div>
@@ -356,7 +356,10 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
 
   return (
     <div className="container p-labelsControls h-full">
-      <div className="mb-mx40 flex items-center">
+      <h1 className="m-auto text-lg24 text-primary-100 font-bold text-center mb-[32px] pt-[55px]">
+        Video Image Recognition
+      </h1>
+      <div className="mb-mx40 flex items-center justify-center">
         <div className="relative mr-3">
           <FontAwesomeIcon
             icon={faSearch}
@@ -364,15 +367,16 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
           />
           <input
             type="text"
-            className="w-inputWidth border-xs4 border-color-primary-900 rounded-lg min-w-[724px] h-[50px] bg-white text-color-gray-100 py-[16px] pl-[48px] pr-[15px]"
+            className="placeholder-gray-500 w-inputWidth border-xs4 border-color-primary-900 rounded-lg min-w-[724px] h-[50px] bg-white text-gray-500 py-[16px] pl-[48px] pr-[15px]"
             placeholder="Name selected object with label..."
             value={labelValue}
             onChange={(e) => setLabelValue(e.target.value)}
           />
         </div>
         <button
-          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[20px] rounded-xl10 min-h-[50px] ${labeling ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[20px] rounded-xl10 min-h-[50px] ${
+            labeling ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           onClick={() => {
             submitLabel();
           }}
@@ -432,7 +436,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
               {isActive ? "Release to drop" : "Drag a box here"}
             </div>
             <div className="relative">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-4 mb-3 place-items-start">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-1 mb-3 place-items-start">
                 {imagesToNegativeLabel.map((labeledImage, index) => {
                   return (
                     <ImageComponent
@@ -446,7 +450,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
           </div>
         </div>
 
-        <div className="w-1/2 ml-2">
+        <div className="w-1/2">
           <h2>Positive Label</h2>
           <div
             ref={dropSecond}
@@ -462,7 +466,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
               {isActive ? "Release to drop" : "Drag a box here"}
             </div>
             <div className="relative">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-4 mb-3 place-items-start justify-items-start">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-1 mb-3 place-items-start justify-items-start">
                 {imagesToLabel.map((labeledImage, index) => {
                   return (
                     <ImageComponent

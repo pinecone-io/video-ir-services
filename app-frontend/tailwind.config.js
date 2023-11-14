@@ -21,8 +21,9 @@ export default {
         },
         gray: {
           100: "#7F7F7G",
-          200: "#F15F5F8",
-          300: "#F1F5F8",
+          200: "#F1F5F8",
+          400: "#E9EBED",
+          500: "#7F7F7F",
         },
         darkLabel: "#393939",
       },
@@ -31,7 +32,9 @@ export default {
         sm14: ["14px", "17px"],
         base15: ["15px", "18px"],
         base16: ["16px", "19px"],
+        base18: ["18px", "47px"],
         base20: ["20px", "24px"],
+        lg24: ["24px", "29px"],
         lg30: ["30px", "36px"],
       },
       margin: {

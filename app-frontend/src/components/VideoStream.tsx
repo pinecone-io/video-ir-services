@@ -157,8 +157,9 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             >
               <FontAwesomeIcon
                 size="2x"
-                className={`text-white p-controlsPlayBtn ${!isPlaying ? "ml-[6px]" : ""
-                  }`}
+                className={`text-white p-controlsPlayBtn ${
+                  !isPlaying ? "ml-[6px]" : ""
+                }`}
                 icon={isPlaying ? faPause : faPlay}
               />
             </button>
