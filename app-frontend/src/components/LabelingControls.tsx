@@ -356,7 +356,10 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
 
   return (
     <div className="container p-labelsControls h-full">
-      <div className="mb-mx40 flex items-center">
+      <h1 className="m-auto text-lg24 text-primary-100 font-bold text-center mb-[32px] pt-[55px]">
+        Video Image Recognition
+      </h1>
+      <div className="mb-mx40 flex items-center justify-center">
         <div className="relative mr-3">
           <FontAwesomeIcon
             icon={faSearch}
@@ -364,7 +367,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
           />
           <input
             type="text"
-            className="w-inputWidth border-xs4 border-color-primary-900 rounded-lg min-w-[724px] h-[50px] bg-white text-color-gray-100 py-[16px] pl-[48px] pr-[15px]"
+            className="w-inputWidth border-xs4 border-color-primary-900 rounded-lg min-w-[724px] h-[50px] bg-white text-gray-500 py-[16px] pl-[48px] pr-[15px]"
             placeholder="Name selected object with label..."
             value={labelValue}
             onChange={(e) => setLabelValue(e.target.value)}

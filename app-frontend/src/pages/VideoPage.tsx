@@ -107,15 +107,15 @@ const VideoPage: React.FC = () => {
   return (
     <>
       {progress !== 100 && (
-        <div className="m-auto w-[960px] mb-9">
-          <div className="mb-1 text-base">Downloading Images:</div>
-          <div className="w-full bg-gray-200 rounded-full">
+        <div className="m-auto mt-[20px] flex w-full mb-9 items-center justify-center">
+          <div className="text-black font-normal text-base16 mr-[20px]">
+            Downloading Images:
+          </div>
+          <div className="w-[427px] h-[15px] bg-gray-400 rounded-full">
             <div
-              className="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
+              className="bg-cta-100 h-[15px] p-0.5 leading-none rounded-full"
               style={{ width: progress + "%" }}
-            >
-              {progress}%
-            </div>
+            ></div>
           </div>
         </div>
       )}
