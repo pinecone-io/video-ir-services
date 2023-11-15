@@ -114,10 +114,6 @@ const updateLabeledBoundingBoxes = (updateData: ObjectDetectionData, labeledBoxe
     return updateData;
 }
 
-let imageDataKeys = await getAllKeys();
-console.log("Found keys", imageDataKeys.length)
-let sortedKeys = sortKeys(imageDataKeys);
-console.log("Sorted keys", sortedKeys.length)
 const indexName = PINECONE_INDEX;
 const index = pineconeClient.index<Metadata>(indexName);
 const ns = index.namespace(namespace);
@@ -149,7 +145,14 @@ function isObject(item: any) {
     return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
+let imageDataKeys: string[] | null
+let sortedKeys: string[] | null
+
 const loadImagesWithOffset = async (offset: number, limit: number): Promise<[ObjectDetectionData, number]> => {
+    if (!imageDataKeys || !sortedKeys) {
+        imageDataKeys = await getAllKeys();
+        sortedKeys = sortKeys(imageDataKeys);
+    }
     const keys = getKeys(sortedKeys, offset, limit);
     const objectDetectionData = await fetchFromRedis(keys);
     const boxIds = Object.values(objectDetectionData).map((frame) => frame.labeledBoundingBoxes.map((box) => box.boxId)).flat();

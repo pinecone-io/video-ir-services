@@ -44,6 +44,11 @@ const downloadAndSplit = async (target = "", name = "video", fps = 1, chunkDurat
 
     writable.on("finish", async () => {
       await log("Download completed.");
+      const fullTargetPath = `${name}/video/${name}.mp4`
+      const videoBuffer = await fs.promises.readFile(videoPath);
+      await log(`Saving to S3: ${fullTargetPath}`)
+      await saveToS3Bucket(fullTargetPath, videoBuffer);
+
       try {
         await log("Splitting video...");
         const videos = await split(videoPath, name, fps, chunkDuration, videoLimit);

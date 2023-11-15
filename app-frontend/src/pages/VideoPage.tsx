@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from "react";
 import VideoStream from "../components/VideoStream";
 import { getImages } from "../services/imageService";
-import { formatImageUrl } from "../utils/formatImageUrl";
+// import { formatImageUrl } from "../utils/formatImageUrl";
 import { GetImagesDTO } from "../types/Box";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
 import { socket } from "../utils/socket";
 import { useFps } from "../hooks/fpsHook";
-import { resetImages } from "../services/resetImagesService";
+// import { resetImages } from "../services/resetImagesService";
 
-const initialFetch = true;
+// const initialFetch = true;
 const VideoPage: React.FC = () => {
   const [imagePaths, setImagePaths] = useState<GetImagesDTO>({});
   const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
   const [progress, setProgress] = useState(0);
   const [frameIndex, setFrameIndex] = useState(0);
   const [nextFetchIndex, setNextFetchIndex] = useState(0); // Add this line
+  const [fetchingImages, setFetchingImages] = useState(false);
 
 
-  const [odDataDone, setOdDataDone] = useState(false);
-  const { FPS } = useFps();
+  // const [odDataDone, setOdDataDone] = useState(false);
+  // const { FPS } = useFps();
   const limit = 100
 
   // if (initialFetch) {
@@ -34,9 +35,12 @@ const VideoPage: React.FC = () => {
   // Fetch all image paths from the server
   useEffect(() => {
     const fetchImages = async () => {
-      if (frameIndex + 1 >= nextFetchIndex) {
+      // console.log(frameIndex + 1 >= nextFetchIndex, nextFetchIndex, frameIndex + 1)
+      if (frameIndex + 1 >= nextFetchIndex && !fetchingImages) {
+        setFetchingImages(true);
         await getImages({ offset: frameIndex, limit });
         setNextFetchIndex(frameIndex + limit); // Update the nextFetchIndex after fetching
+        setFetchingImages(false);
       }
     };
 
@@ -45,6 +49,7 @@ const VideoPage: React.FC = () => {
 
 
   const handleOdDataAdded = (data: GetImagesDTO) => {
+    console.log("odDataAdded", data)
     setImagePaths((prev) => {
       return {
         ...prev,
@@ -55,7 +60,7 @@ const VideoPage: React.FC = () => {
   };
 
   const handleOdDataDone = () => {
-    setOdDataDone(true);
+    // setOdDataDone(true);
   };
 
   useEffect(() => {
@@ -74,7 +79,7 @@ const VideoPage: React.FC = () => {
 
 
   useEffect(() => {
-    console.log(imagePaths);
+    // console.log(imagePaths);
   }, [imagePaths]);
 
   return (
