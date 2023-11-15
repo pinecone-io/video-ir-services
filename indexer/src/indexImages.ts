@@ -233,6 +233,7 @@ async function embedAndUpsert({
     embedders.push(
       embedder.embedBatch(imagePaths, chunkSize, async (embeddings) => {
         try {
+          //TODO: Get rid of this it's a hack to get around the fact that the embedder is returning undefined
           const filteredEmbeddings = embeddings.filter(
             (x) => x.values.length > 0,
           );
@@ -276,7 +277,7 @@ const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: 
     list = filesList;
   }
 
-  for (const fileName of list) {
+  const tasks = list.map(async (fileName) => {
     try {
       const segmentedFiles = (await segmentImage(fileName || ""))?.filter(x => x) || [];
       await embedAndUpsert({ imagePaths: segmentedFiles, chunkSize: 100 });
@@ -285,7 +286,8 @@ const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: 
     } catch (error) {
       console.error(`Error processing file ${fileName}: ${error}`);
     }
-  }
+  });
+  await Promise.all(tasks);
   return;
 };
 
