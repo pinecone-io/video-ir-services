@@ -27,3 +27,7 @@ export const initIndex = async () => {
     console.log("Index is ready:", PINECONE_INDEX);
   }
 };
+
+export {
+  pineconeClient
+}

@@ -58,3 +58,10 @@ export type FileWithReference = {
 export type ObjectDetectionData = {
   [key: string]: ImageWithBoundingBoxes;
 };
+
+
+export type LabeledBoxSetItem = { boxId: string; label: string };
+
+export type Vector = number[];
+
+

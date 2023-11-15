@@ -19,6 +19,14 @@ function bufferToBlob(buffer: Buffer, mimeType: string): Blob {
   return new Blob([arrayBuffer], { type: mimeType });
 }
 
+type EmbeddingError = {
+  imagePath: string,
+  metadata: Metadata | undefined,
+}
+
+function isEmbedderError(result: PineconeRecord<Metadata> | EmbeddingError): result is EmbeddingError {
+  return (result as EmbeddingError).imagePath !== undefined;
+}
 class Embedder {
   private processor!: Processor;
 
@@ -38,11 +46,8 @@ class Embedder {
   async embed(
     imagePath: string,
     metadata?: Metadata,
-  ): Promise<PineconeRecord<Metadata>> {
+  ): Promise<PineconeRecord<Metadata> | EmbeddingError> {
     try {
-      // Read imagePath into buffer
-      // const obj = await fetchData(imagePath, "embedding.ts");
-
       const url = await getS3SignedUrl(imagePath);
       const cleanUrl = getKeyFromS3Url(url);
       const obj = await getS3Object(cleanUrl!);
@@ -73,44 +78,54 @@ class Embedder {
       };
     } catch (e) {
       console.log(`Error embedding image, ${e}`);
-      // Hack to return a dummy embedding
-      return {
-        id: "dummy",
-        metadata,
-        values: Array.from({ length: 768 }, () => 0) as number[],
-      };
+      // Return the error
+      return { imagePath, metadata };
     }
   }
 
+  // This function is used to embed a batch of images
   async embedBatch(
+    // An array of image paths along with their references
     imagePaths: FileWithReference[],
+    // The size of the batch to be processed
     batchSize: number,
+    // A callback function to be executed once a batch is done processing
     onDoneBatch: (embeddings: PineconeRecord<Metadata>[]) => Promise<void>,
   ) {
+    // Split the image paths into chunks of size batchSize
     const batches = sliceIntoChunks<FileWithReference>(imagePaths, batchSize);
+    // Loop over each batch
     for (const batch of batches) {
+      // Array to store the embeddings of the current batch
       const embeddings: PineconeRecord<Metadata>[] = [];
+      // Loop over each image in the batch
       for (const fileWithReference of batch) {
+        // Create metadata for the current image
         const metadata = {
           frameIndex: fileWithReference.frameIndex,
           boxId: fileWithReference.boxId,
           imagePath: fileWithReference.path,
         };
-        const embedding = await this.embed(fileWithReference.path, metadata);
-        embeddings.push(embedding);
+        // Embed the current image
+        const result = await this.embed(fileWithReference.path, metadata);
+        // If there is no error and the embedding is successful, add it to the embeddings array
+        if (!isEmbedderError(result) && result.values.length > 0) {
+          embeddings.push(result);
+        } else {
+          // Log the error if there is one
+          console.log(`Error embedding image, ${result}`);
+        }
       }
+      // Once a batch is done processing, execute the callback function
       try {
-        await onDoneBatch(
-          embeddings
-            .filter((x) => x.id !== "dummy")
-            .filter((x) => x.values.length > 0),
-        );
+        await onDoneBatch(embeddings);
       } catch (e) {
-        console.error("Error running onDoneBatch", embeddings);
+        // Log any errors that occur while executing the callback function
+        console.error("Error running onDoneBatch", e);
       }
     }
   }
 }
 
 const embedder = new Embedder();
-export { embedder };
+export { embedder, isEmbedderError };

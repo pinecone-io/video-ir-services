@@ -16,6 +16,8 @@ const routes: Route[] = [
                 res.status(500).json({ error: "Request timed out" })
             })
             try {
+                console.log(req.body)
+                // res.json({ message: "Downloaded" });
                 const target = req.body.target as string;
                 const fps = req.body.fps as number;
                 const name = req.body.name as string;
@@ -34,7 +36,7 @@ const routes: Route[] = [
         route: "/health",
         method: "get",
         handler: (_, res) => {
-            res.status(200).json({ message: "Downloader server is healthy :)" });
+            res.status(200).json({ message: "Splitter server is healthy :)" });
         },
     },
 ];

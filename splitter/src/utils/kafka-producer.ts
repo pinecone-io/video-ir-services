@@ -25,11 +25,13 @@ class KafkaProducer {
     }
 
     private async createTopics() {
-        console.log("creating topics")
         await this.admin.connect();
-        await this.admin.createTopics({
-            topics: [{ topic: this.topic, numPartitions: 15 }],
-        });
+        const topics = await this.admin.listTopics();
+        if (!topics.includes(this.topic)) {
+            await this.admin.createTopics({
+                topics: [{ topic: this.topic, numPartitions: 15 }],
+            });
+        }
         await this.admin.disconnect();
     }
 

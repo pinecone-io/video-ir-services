@@ -37,6 +37,6 @@
     "vite-plugin-node": "^3.0.2",
     "vite-plugin-static-copy": "^0.17.0",
     "vitest": "^0.34.6",
-    "ytdl-core": "^4.11.5"
+    "@distube/ytdl-core": "^4.13.2"
   }
 }

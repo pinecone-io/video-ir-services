@@ -2,7 +2,7 @@ import ffmpeg from "fluent-ffmpeg";
 import fs, { createWriteStream, mkdirSync, existsSync } from "fs";
 import { promises as fsPromises } from 'fs';
 
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 import { promisify } from "util";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -30,6 +30,7 @@ const downloadAndSplit = async (target = "", name = "video", fps = 1, chunkDurat
     const writable = createWriteStream(videoPath);
 
     await log("Downloading video...");
+
     const videoStream = ytdl(
       target || "https://www.youtube.com/watch?v=PIScf2rif5Q",
       {
@@ -39,6 +40,7 @@ const downloadAndSplit = async (target = "", name = "video", fps = 1, chunkDurat
     );
 
     videoStream.pipe(writable);
+
 
     writable.on("finish", async () => {
       await log("Download completed.");
@@ -73,13 +75,14 @@ const downloadAndSplit = async (target = "", name = "video", fps = 1, chunkDurat
 
         resolve();
       } catch (error) {
-        console.log(error);
+        console.log(`Writable on finish error: ${error}`);
         await log(`Error ${error}`);
         reject(new Error(`Error extracting frames: ${error}`));
       }
     });
 
     writable.on("error", (error) => {
+      console.log(`Writable error: ${error}`)
       reject(new Error(`Error writing video: ${error}`));
     });
   });

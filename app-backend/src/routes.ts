@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { labelBoxes, negativeLabel } from "./label";
-import { loadImagesWithOffset, queryBox } from "./query";
+import { queryBox } from "./query";
+import { loadImagesWithOffset } from './loadImagesWithOffset'
 import { resetDB } from "./reset";
 import { ProgressTracker } from './utils/progressTracker'
 import { IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
@@ -22,7 +23,6 @@ const numberOfEmbeddingsTrackerListener = numberOfEmbeddingsTracker.getNumberOfE
 const objectDetectionDataEmitter = new ObjectDetectionDataEmitter();
 const objectDetectionDataEmitterListener = objectDetectionDataEmitter.getOdDataEventEmitter();
 
-// let imageDataGenerator = createImageDataGenerator()
 
 interface Route {
   route: string;
@@ -43,44 +43,6 @@ const routes: Route[] = [
       }
     },
   },
-  // {
-  //   route: "/resetImages",
-  //   method: "post",
-  //   handler: async (req, res) => {
-  //     imageDataGenerator = createImageDataGenerator()
-  //     res.status(200).json({ message: "Images reset" });
-  //   }
-  // },
-  // {
-  //   route: "/getImages",
-  //   method: "post",
-  //   handler: async (req, res) => {
-  //     await loadImages()
-  //     const limit = req.body.limit;
-  //     try {
-
-  //       const generator = imageDataGenerator(limit);
-  //       let result = generator.next();
-  //       console.log(result.value, result.done)
-  //       while (!result.done) {
-  //         Object.entries(result.value).forEach(([key, value]) => {
-  //           objectDetectionDataEmitter.addEntry({ [key]: value });
-  //         });
-  //         result = generator.next();
-  //       }
-
-  //       if (result.done) {
-  //         objectDetectionDataEmitter.markAsComplete();
-  //       }
-
-  //       res.status(200).json({ message: "Images fetched" });
-  //       // res.json(data);
-  //     } catch (error) {
-  //       res.status(500).json({ error: "Error fetching images", message: error });
-  //     }
-  //   },
-  // },
-
   {
     route: "/getImagesWithOffset",
     method: "post",
@@ -217,26 +179,6 @@ const routes: Route[] = [
       res.status(200).json({ message: "completed file" });
     },
   },
-  // {
-  //   route: "/trackProgress",
-  //   method: "post",
-  //   handler: (req, res) => {
-  //     res.setHeader('Content-Type', 'text/event-stream');
-  //     res.setHeader('Cache-Control', 'no-cache');
-  //     res.setHeader('Connection', 'keep-alive');
-
-  //     // Function to send data every second
-  //     progressTracker.startProgressPolling((data: { val: number, ratio: string }) => {
-  //       console.log(`Before writing ${data.val}`)
-  //       res.write(`progress: ${data.ratio} (${data.val}%)\n\n`);
-  //     }, () => {
-  //       console.log("Processing complete.")
-  //       // setTimeout(() => {
-  //       //   res.end();
-  //       // }, 3000)
-  //     })
-  //   },
-  // },
   {
     route: "/registerIndexer",
     method: "post",
