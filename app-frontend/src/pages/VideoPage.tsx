@@ -72,29 +72,9 @@ const VideoPage: React.FC = () => {
       .then((response) => response.data)
   };
 
-  // Preload images
+
   useEffect(() => {
-    const loadedImages: HTMLImageElement[] = [];
-    const numberOfImages = Object.keys(imagePaths).length;
-    Promise.all(
-      Object.keys(imagePaths).map((key: string) => {
-        return new Promise<HTMLImageElement>((resolve, reject) => {
-          const img = new Image();
-          img.src = formatImageUrl(imagePaths[key].src);
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-        }).then((img) => {
-          loadedImages.push(img);
-          setProgress(Math.round((loadedImages.length / numberOfImages) * 100));
-
-          if (loadedImages.length % 5 === 0) {
-            setLoadedImages(loadedImages);
-          }
-
-          return img;
-        });
-      })
-    ).then(setLoadedImages);
+    console.log(imagePaths);
   }, [imagePaths]);
 
   return (

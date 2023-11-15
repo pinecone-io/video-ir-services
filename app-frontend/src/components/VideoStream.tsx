@@ -33,9 +33,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
   const [isPlaying, setPlay] = useState<boolean>(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedBox, setSelectedBox] = useState<string>("");
-  const [selectedBoxes, setSelectedBoxes] = useState<
-    LabeledImage[]
-  >([]);
+  const [selectedBoxes, setSelectedBoxes] = useState<LabeledImage[]>([]);
   const prevSelectedBox = useRef(selectedBox);
 
   const drawFrame = (frame: number) => {
@@ -94,7 +92,30 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     const boundingBoxes: LabeledBoundingBox[] =
       props.imagePaths[key]?.labeledBoundingBoxes;
     setLabeledBoundingBox(boundingBoxes);
+    console.log("bb", boundingBoxes);
   }, [props.imagePaths, frameIndex]);
+
+  // Indexer is runned on same video with video limit 60s, 10fps with chunk duration of 3 to collect infromations about bboxes
+  // Sample video is downlaode form same yt url and limited to 60x and 10fps
+  // Goal is to conect video with bboxes
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const onEachFrame = () => {
+    const time = videoRef.current.currentTime;
+    // NOTE PLEASE SET CORRECT FPS OF PROCESSED VIDEO - One that is passed in indexing form
+    const frame = Math.floor(time * 30);
+
+    setFrameIndex(frame);
+    props.updateFrameIndex(frame);
+    videoRef.current.requestVideoFrameCallback(onEachFrame);
+  };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.requestVideoFrameCallback(onEachFrame);
+    }
+  }, [videoRef.current]);
 
   return (
     <>
@@ -105,14 +126,13 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
           height: CANVAS_HEIGHT,
         }}
       >
-        {props.imagePaths && (
-          <canvas
-            className="rounded-xl10"
-            ref={canvasRef}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-          ></canvas>
-        )}
+        <video
+          ref={videoRef}
+          style={{ width: CANVAS_WIDTH, height: CANVAS_HEIGHT }}
+          controls
+        >
+          <source src="./split_car-race.mp4" type="video/mp4"></source>
+        </video>
 
         {labeledBoundingBox && (
           <BoundingBoxes
@@ -124,22 +144,32 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             }}
           />
         )}
-        <div className="w-full absolute bottom-0 left-0 right-0 bg-primary-800 opacity-80 rounded-10 p-overlay flex items-center">
-          <p className="text-white text-base20 font-medium">
+        {/* <div className="w-full absolute bottom-0 left-0 right-0 bg-primary-800 opacity-80 rounded-10 p-overlay flex items-center"> */}
+          {/* <p className="text-white text-base20 font-medium">
             <span>
-              {editingFps ? <span>
-                <input type="number" value={FPS} onChange={(e) => {
-                  setFps(parseInt(e.currentTarget.value))
-                }} onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setEditingFps(false)
-                  }
-                }} />
-              </span> : <span onClick={() => setEditingFps(true)} >FPS: {FPS}</span>}
-            </span> | Frame Index: {frameIndex} | {Object.keys(props.imagePaths).length}
-          </p>
+              {editingFps ? (
+                <span>
+                  <input
+                    type="number"
+                    value={FPS}
+                    onChange={(e) => {
+                      setFps(parseInt(e.currentTarget.value));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setEditingFps(false);
+                      }
+                    }}
+                  />
+                </span>
+              ) : (
+                <span onClick={() => setEditingFps(true)}>FPS: {FPS}</span>
+              )}
+            </span>{" "}
+            | Frame Index: {frameIndex} | {Object.keys(props.imagePaths).length}
+          </p> */}
           {/* Controlls */}
-          <div className="flex items-center absolute inset-x-x45">
+          {/* <div className="flex items-center absolute inset-x-x45">
             <button
               className="disabled:opacity-25 border-3 border-color-white w-controlsCircle h-controlsCircle flex items-center justify-center rounded-50"
               disabled={isPlaying}
@@ -174,8 +204,8 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
                 className="p-controlsBtn text-white"
               />
             </button>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
       </div>
       <div className="flex justify-center  w-full mt-[100px] min-h-[300px]">
         <LabelingControls

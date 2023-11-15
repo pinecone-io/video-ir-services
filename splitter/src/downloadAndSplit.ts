@@ -6,7 +6,7 @@ import ytdl from "@distube/ytdl-core";
 import { promisify } from "util";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { saveToS3Bucket } from "./utils/awsS3";
+import { generateS3Url, saveToS3Bucket } from "./utils/awsS3";
 import { KafkaProducer } from "./utils/kafka-producer";
 import { log } from "./utils/logger";
 const unlinkAsync = promisify(fs.unlink);
@@ -56,6 +56,7 @@ const downloadAndSplit = async (target = "", name = "video", fps = 1, chunkDurat
           const videoBuffer = await fs.promises.readFile(videoOutput.videoPath);
           await log(`Saving to S3: ${targetPath}`)
           await saveToS3Bucket(targetPath, videoBuffer);
+          await log(`Video url: ${generateS3Url(targetPath)}`);
           await unlinkAsync(videoOutput.videoPath);
           const message = JSON.stringify({
             videoPath: targetPath,
