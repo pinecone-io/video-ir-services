@@ -55,7 +55,6 @@ const routes: Route[] = [
           objectDetectionDataEmitter.addEntry({ [key]: value });
         });
         res.status(200).json({ message: "Images fetched", numberOfEntries });
-        // res.json(data);
       } catch (error) {
         res.status(500).json({ error: "Error fetching images", message: error });
       }
