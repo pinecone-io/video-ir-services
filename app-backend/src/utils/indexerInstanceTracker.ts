@@ -1,7 +1,14 @@
 import EventEmitter from "node:events";
 
+export interface IndexerInstance {
+    id: string;
+    ready: boolean;
+    framesProcessed?: number;
+    embeddingsProcessed?: number;
+}
+
 interface IndexerInstances {
-    [key: string]: boolean;
+    [key: string]: IndexerInstance;
 }
 
 class IndexerInstanceTracker {
@@ -21,16 +28,28 @@ class IndexerInstanceTracker {
         this.eventEmitter.emit('instancesUpdated', this._indexerInstances)
     }
 
+    getInstance(id: string): IndexerInstance | undefined {
+        return this.indexerInstances[id]
+    }
 
-    updateInstance(id: string, status: boolean): void {
-        console.log(`Update instance ${id} ready: ${status}`)
-        this._indexerInstances[id] = status;
-        this.eventEmitter.emit('instancesUpdated', this._indexerInstances);
+
+    updateInstance({ id, ready, framesProcessed, embeddingsProcessed }: { id: string, ready: boolean, framesProcessed?: number, embeddingsProcessed?: number }): void {
+        const updatedInstance = {
+            id,
+            ready,
+            framesProcessed,
+            embeddingsProcessed,
+        }
+
+        this.indexerInstances = {
+            ...this.indexerInstances,
+            [id]: updatedInstance
+        }
     }
 
 
     checkAllInstancesReady(): void {
-        const allReady = Object.values(this._indexerInstances).every(value => value === true);
+        const allReady = Object.values(this._indexerInstances).every(value => value.ready === true);
         console.log(`Checking all ready ${allReady}`)
         if (allReady) {
             this.eventEmitter.emit('allInstancesReady');

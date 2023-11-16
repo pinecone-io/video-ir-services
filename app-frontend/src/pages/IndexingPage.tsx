@@ -4,6 +4,8 @@ import Loading from "../components/Loading";
 import { download } from "../services/downloadService.ts";
 import { socket } from "../utils/socket";
 import { useFps } from "../hooks/fpsHook.ts";
+import Dataflow, { IndexerInstance } from "../components/Dataflow.tsx";
+import { Index } from '@pinecone-database/pinecone';
 
 type TFormInput = {
   fps: number;
@@ -38,13 +40,13 @@ const IndexingPage: React.FC = () => {
       status: false,
     });
     setLogs([]);
-    setDownloaders({})
+    // setDownloaders({})
     setIndexers({})
     setStarted(false)
   }
-  const [indexers, setIndexers] = useState<{ [key: string]: boolean }>({});
-  const [downloaders, setDownloaders] = useState<{ [key: string]: boolean }>({});
-
+  const [indexers, setIndexers] = useState<{ [key: string]: IndexerInstance }>({});
+  // const [downloaders, setDownloaders] = useState<{ [key: string]: boolean }>({});
+  const [showLogs, setShowLogs] = useState(true);
 
   const handleFilesToBeProcessedChanged = (data: { numberOfFilesToProcess: number }): void => {
     const { numberOfFilesToProcess } = data
@@ -58,22 +60,23 @@ const IndexingPage: React.FC = () => {
   }
 
   const handleCompleted = (data: { numberOfFilesProcessed: number, executionTime: string, status: boolean }): void => {
+    setIndexers({})
     setCompleted(data)
   }
 
   const handleLogUpdated = (data: LogLine): void => {
 
-    const line = data.message
+    // const line = data.message
 
-    const pod = line.split(":")[0]
-    const isIndexer = line.includes("indexer")
-    const isDownloader = line.includes("downloader")
-    if (isIndexer) {
-      setIndexers(prevIndexers => ({ ...prevIndexers, [pod]: true }));
-    }
-    if (isDownloader) {
-      setDownloaders(prevDownloaders => ({ ...prevDownloaders, [pod]: true }));
-    }
+    // const pod = line.split(":")[0]
+    // const isIndexer = line.includes("indexer")
+    // const isDownloader = line.includes("downloader")
+    // if (isIndexer) {
+    //   setIndexers(prevIndexers => ({ ...prevIndexers, [pod]: true }));
+    // }
+    // if (isDownloader) {
+    //   setDownloaders(prevDownloaders => ({ ...prevDownloaders, [pod]: true }));
+    // }
 
     setLogs([...logs, data])
   }
@@ -83,7 +86,6 @@ const IndexingPage: React.FC = () => {
   }
 
   const handleNumberOfEmbeddings = (data: number): void => {
-    console.log("HELLO", data)
     setNumberOfEmbeddings(data)
   }
 
@@ -101,7 +103,8 @@ const IndexingPage: React.FC = () => {
     socket.on("disconnect", onDisconnect);
 
     socket.on("instancesUpdated", (data): void => {
-      console.log("data", data);
+      // console.log("data", data);
+      setIndexers(data);
     });
 
     socket.on("complete", handleCompleted);
@@ -156,12 +159,20 @@ const IndexingPage: React.FC = () => {
   };
 
   const endOfMessages = useRef<HTMLTableCellElement | null>(null);
+  const logsContainerRef = useRef<HTMLDivElement | null>(null);
+  // useEffect(() => {
+  //   if (endOfMessages.current) {
+  //     endOfMessages.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [logs]);
 
   useEffect(() => {
-    if (endOfMessages.current) {
-      endOfMessages.current.scrollIntoView({ behavior: "smooth" });
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
     }
   }, [logs]);
+
+
 
   return (
     <div className="min-h-screen text-darkLabel w-full">
@@ -318,8 +329,8 @@ const IndexingPage: React.FC = () => {
                 {completed.status
                   ? "Completed!"
                   : started
-                  ? "Processing..."
-                  : ""}{" "}
+                    ? "Processing..."
+                    : ""}{" "}
                 {(started || completed.status) && (
                   <>
                     {completed.numberOfFilesProcessed > 0 &&
@@ -332,29 +343,36 @@ const IndexingPage: React.FC = () => {
           )}
         </form>
       </div>
-      <div className="mx-auto px-[65px] pt-[56px] pb-[93px] mt-[67px] mb-[77px] text-sm text-white rounded-lg bg-primary-800 h-[529px] whitespace-pre-line overflow-auto w-4/5">
-        <div
-          style={{
-            overflow: "auto",
-            width: "100%",
-            fontFamily: "Courier New, monospace",
-          }}
-        >
-          <table style={{ width: "100%" }}>
-            <tbody>
-              {logs.map((entry, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{entry.message}</td>
-                  </tr>
-                );
-              })}
-              <tr>
-                <td ref={endOfMessages}></td>
-              </tr>
-            </tbody>
-          </table>
+      {showLogs && (
+        <div ref={logsContainerRef}
+          className={`mx-auto px-[15px] pt-[56px] pb-[13px] mt-[17px] mb-[30px] text-sm text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto w-4/5`}>
+          <div
+            style={{
+              overflow: "auto",
+              width: "100%",
+              fontFamily: "Courier New, monospace",
+            }}
+          >
+            <table style={{ width: "100%" }}>
+              <tbody>
+                {logs.map((entry, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{entry.message}</td>
+                    </tr>
+                  );
+                })}
+                <tr>
+                  <td ref={endOfMessages}></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+      )}
+
+      <div style={{ height: "100vh", width: "100%" }}>
+        <Dataflow indexerInstances={Object.values(indexers)} />
       </div>
       <footer className="text-center text-black p-smallFooter  mb-[35px]">
         <p className="p-2">All Rights Reserved by Pinecone</p>

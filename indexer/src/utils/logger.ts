@@ -7,7 +7,12 @@ const log = async (message: string, payload: object = {}) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ message: formattedMessage, payload })
+            body: JSON.stringify({
+                message: formattedMessage, payload: {
+                    ...payload,
+                    podId
+                }
+            })
         });
     } catch (error) {
         console.error('Failed to log message', error);

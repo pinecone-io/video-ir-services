@@ -4,7 +4,7 @@ import { queryBox } from "./query";
 import { loadImagesWithOffset } from './loadImagesWithOffset'
 import { resetDB } from "./reset";
 import { ProgressTracker } from './utils/progressTracker'
-import { IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
+import { IndexerInstance, IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
 import { LogTracker } from "./utils/logTracker";
 import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
 import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
@@ -148,6 +148,26 @@ const routes: Route[] = [
               break;
             }
             case 'embeddingCount': {
+              const { podId } = payload
+              console.log(`~~~~~~~~~~~ podId ${podId}`);
+              const instance = indexerInstancesTracker.getInstance(podId)
+              let updatedInstance: IndexerInstance
+              if (instance) {
+                updatedInstance = {
+                  ...instance,
+                  embeddingsProcessed: instance.embeddingsProcessed + payload.embeddingCount as number,
+                }
+              } else {
+                updatedInstance = {
+                  id: podId,
+                  ready: true,
+                  embeddingsProcessed: payload.embeddingCount as number,
+                  framesProcessed: 0,
+                }
+              }
+              console.log(`~~~~~~~~~~~ updatedInstance ${updatedInstance}`);
+              indexerInstancesTracker.updateInstance(updatedInstance)
+
               numberOfEmbeddingsTracker.addToEmbeddingsCount(payload.embeddingCount)
               break;
             }
@@ -185,7 +205,10 @@ const routes: Route[] = [
 
       const { id, status } = req.body
       console.log("registering instance", id, status)
-      indexerInstancesTracker.updateInstance(id, status)
+      indexerInstancesTracker.updateInstance({
+        id,
+        ready: status === 'ready',
+      })
       res.status(200).send('success')
     }
   },
