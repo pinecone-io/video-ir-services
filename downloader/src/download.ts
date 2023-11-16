@@ -1,7 +1,7 @@
 import ffmpeg from "fluent-ffmpeg";
 import fs, { createWriteStream, mkdirSync, existsSync } from "fs";
 
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 import { promisify } from "util";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";

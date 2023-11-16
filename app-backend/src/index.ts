@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
-import { logTrackerListener, numberOfEmbeddingsTrackerListener, numberOfObjectsTrackerListener, objectDetectionDataEmitterListener, resolvers } from "./routes";
+import { downloaderInstancesTrackerListener, logTrackerListener, numberOfEmbeddingsTrackerListener, numberOfObjectsTrackerListener, objectDetectionDataEmitterListener, resolvers } from "./routes";
 import {
   IS_PROD,
   PINECONE_DATA_DIR_PATH,
@@ -88,6 +88,10 @@ io.on("connection", (socket) => {
 
   objectDetectionDataEmitterListener.on('odDataDone', (data: ObjectDetectionData) => {
     socket.emit('odDataDone', data)
+  })
+
+  downloaderInstancesTrackerListener.on('downloaderInstancesUpdated', (data) => {
+    socket.emit('downloaderInstancesUpdated', data)
   })
 });
 

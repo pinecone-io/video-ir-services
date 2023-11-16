@@ -9,6 +9,7 @@ import { LogTracker } from "./utils/logTracker";
 import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
 import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
 import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter";
+import { DownloaderInstanceTracker } from "./utils/downloaderInstanceTracker";
 
 const progressTracker = new ProgressTracker();
 const progressTrackerListener = progressTracker.getEmitter();
@@ -22,7 +23,8 @@ const numberOfEmbeddingsTracker = new EmbeddingsCountTracker()
 const numberOfEmbeddingsTrackerListener = numberOfEmbeddingsTracker.getNumberOfEmbeddingsEventEmitter()
 const objectDetectionDataEmitter = new ObjectDetectionDataEmitter();
 const objectDetectionDataEmitterListener = objectDetectionDataEmitter.getOdDataEventEmitter();
-
+const downloaderInstancesTracker = new DownloaderInstanceTracker()
+const downloaderInstancesTrackerListener = downloaderInstancesTracker.getDownloaderInstancesEmitter()
 
 interface Route {
   route: string;
@@ -149,13 +151,14 @@ const routes: Route[] = [
             }
             case 'embeddingCount': {
               const { podId } = payload
-              console.log(`~~~~~~~~~~~ podId ${podId}`);
               const instance = indexerInstancesTracker.getInstance(podId)
               let updatedInstance: IndexerInstance
               if (instance) {
                 updatedInstance = {
                   ...instance,
+                  ready: true,
                   embeddingsProcessed: instance.embeddingsProcessed + payload.embeddingCount as number,
+                  framesProcessed: instance.framesProcessed ? instance.framesProcessed + 1 : 1,
                 }
               } else {
                 updatedInstance = {
@@ -165,9 +168,7 @@ const routes: Route[] = [
                   framesProcessed: 0,
                 }
               }
-              console.log(`~~~~~~~~~~~ updatedInstance ${updatedInstance}`);
               indexerInstancesTracker.updateInstance(updatedInstance)
-
               numberOfEmbeddingsTracker.addToEmbeddingsCount(payload.embeddingCount)
               break;
             }
@@ -185,7 +186,21 @@ const routes: Route[] = [
     method: "post",
     handler: async (req, res) => {
       const file = req.body.file;
+      const podId = req.body.podId;
       progressTracker.addFile(file);
+      const instance = downloaderInstancesTracker.getInstance(podId)
+      if (instance) {
+        downloaderInstancesTracker.updateInstance({
+          ...instance,
+          framesProduced: instance.framesProduced ? instance.framesProduced + 1 : 1,
+        })
+      } else {
+        downloaderInstancesTracker.updateInstance({
+          id: podId,
+          ready: true,
+          framesProduced: 1,
+        })
+      }
       res.status(200).json({ message: "added file" });
     },
   },
@@ -207,7 +222,7 @@ const routes: Route[] = [
       console.log("registering instance", id, status)
       indexerInstancesTracker.updateInstance({
         id,
-        ready: status === 'ready',
+        ready: true,
       })
       res.status(200).send('success')
     }
@@ -222,5 +237,6 @@ export {
   logTrackerListener,
   numberOfObjectsTrackerListener,
   numberOfEmbeddingsTrackerListener,
-  objectDetectionDataEmitterListener
+  objectDetectionDataEmitterListener,
+  downloaderInstancesTrackerListener
 };

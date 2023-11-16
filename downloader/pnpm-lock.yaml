@@ -11,6 +11,9 @@ dependencies:
   '@aws-sdk/s3-request-presigner':
     specifier: ^3.428.0
     version: 3.428.0
+  '@distube/ytdl-core':
+    specifier: ^4.13.2
+    version: 4.13.2
   '@pinecone-database/pinecone':
     specifier: ^1.1.1
     version: 1.1.1
@@ -44,9 +47,6 @@ dependencies:
   vitest:
     specifier: ^0.34.6
     version: 0.34.6
-  ytdl-core:
-    specifier: ^4.11.5
-    version: 4.11.5
 
 devDependencies:
   typescript:
@@ -647,6 +647,20 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /@distube/ytdl-core@4.13.2:
+    resolution: {integrity: sha512-FBjy4LXsBv34qFrmEF1dSbKWQtqB+yd0dt4MYYUq8oYys2Bvqps3QSFGTUZO5QA6nKD/XRsMJfcG5lgEJaUqiQ==}
+    engines: {node: '>=12'}
+    dependencies:
+      http-cookie-agent: 5.0.4(tough-cookie@4.1.3)(undici@5.27.2)
+      m3u8stream: 0.8.6
+      sax: 1.3.0
+      tough-cookie: 4.1.3
+      undici: 5.27.2
+    transitivePeerDependencies:
+      - deasync
+      - supports-color
+    dev: false
+
   /@edge-runtime/primitives@4.0.2:
     resolution: {integrity: sha512-zIzzqvq62O0gxKv/PrfFBn2TEJtJYw6YlNyfLsWr16Lxz6bT8CB1IrfWa9vc5zsQPElP/orwZCu+x80+ihWQyQ==}
     engines: {node: '>=16'}
@@ -834,6 +848,11 @@ packages:
     os: [win32]
     requiresBuild: true
     optional: true
+
+  /@fastify/busboy@2.1.0:
+    resolution: {integrity: sha512-+KpH+QxZU7O4675t3mnkQKcZZg56u+K/Ct2K+N2AZYNVK8kyeo/bI18tI8aPm3tvNNRyTWfj6s5tnGNlcbQRsA==}
+    engines: {node: '>=14'}
+    dev: false
 
   /@jest/schemas@29.6.3:
     resolution: {integrity: sha512-mo5j5X+jIZmJQveBKeS/clAueipV7KgiX1vMgCxam1RNYiqE1w62n0/tJJnHtjW8ZHcQco5gY85jA3mi0L+nSA==}
@@ -1480,6 +1499,15 @@ packages:
     hasBin: true
     dev: false
 
+  /agent-base@7.1.0:
+    resolution: {integrity: sha512-o/zjMZRhJxny7OyEF+Op8X+efiELC7k7yOjMzgfzVqOzXqkBkWI79YoTdOtsuWd5BWhAGAuOY/Xa6xpiaWXiNg==}
+    engines: {node: '>= 14'}
+    dependencies:
+      debug: 4.3.4
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /ajv@8.12.0:
     resolution: {integrity: sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==}
     dependencies:
@@ -1929,6 +1957,26 @@ packages:
     engines: {node: '>= 0.4.0'}
     dev: false
 
+  /http-cookie-agent@5.0.4(tough-cookie@4.1.3)(undici@5.27.2):
+    resolution: {integrity: sha512-OtvikW69RvfyP6Lsequ0fN5R49S+8QcS9zwd58k6VSr6r57T8G29BkPdyrBcSwLq6ExLs9V+rBlfxu7gDstJag==}
+    engines: {node: '>=14.18.0 <15.0.0 || >=16.0.0'}
+    peerDependencies:
+      deasync: ^0.1.26
+      tough-cookie: ^4.0.0
+      undici: ^5.11.0
+    peerDependenciesMeta:
+      deasync:
+        optional: true
+      undici:
+        optional: true
+    dependencies:
+      agent-base: 7.1.0
+      tough-cookie: 4.1.3
+      undici: 5.27.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
     engines: {node: '>= 0.8'}
@@ -2213,6 +2261,10 @@ packages:
       ipaddr.js: 1.9.1
     dev: false
 
+  /psl@1.9.0:
+    resolution: {integrity: sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==}
+    dev: false
+
   /punycode@2.3.0:
     resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
     engines: {node: '>=6'}
@@ -2223,6 +2275,10 @@ packages:
     engines: {node: '>=0.6'}
     dependencies:
       side-channel: 1.0.4
+    dev: false
+
+  /querystringify@2.2.0:
+    resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
     dev: false
 
   /queue-microtask@1.2.3:
@@ -2258,6 +2314,10 @@ packages:
   /require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
+    dev: false
+
+  /requires-port@1.0.0:
+    resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
     dev: false
 
   /reusify@1.0.4:
@@ -2399,6 +2459,16 @@ packages:
     engines: {node: '>=0.6'}
     dev: false
 
+  /tough-cookie@4.1.3:
+    resolution: {integrity: sha512-aX/y5pVRkfRnfmuX+OdbSdXvPe6ieKX/G2s7e98f4poJHnqH3281gDPm/metm6E/WRamfx7WC4HUqkWHfQHprw==}
+    engines: {node: '>=6'}
+    dependencies:
+      psl: 1.9.0
+      punycode: 2.3.0
+      universalify: 0.2.0
+      url-parse: 1.5.10
+    dev: false
+
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
     dev: false
@@ -2443,6 +2513,18 @@ packages:
   /undici-types@5.25.3:
     resolution: {integrity: sha512-Ga1jfYwRn7+cP9v8auvEXN1rX3sWqlayd4HP7OKk4mZWylEmu3KzXDUGrQUN6Ol7qo1gPvB2e5gX6udnyEPgdA==}
 
+  /undici@5.27.2:
+    resolution: {integrity: sha512-iS857PdOEy/y3wlM3yRp+6SNQQ6xU0mmZcwRSriqk+et/cwWAtwmIGf6WkoDN2EK/AMdCO/dfXzIwi+rFMrjjQ==}
+    engines: {node: '>=14.0'}
+    dependencies:
+      '@fastify/busboy': 2.1.0
+    dev: false
+
+  /universalify@0.2.0:
+    resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
+    engines: {node: '>= 4.0.0'}
+    dev: false
+
   /universalify@2.0.0:
     resolution: {integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==}
     engines: {node: '>= 10.0.0'}
@@ -2457,6 +2539,13 @@ packages:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
     dependencies:
       punycode: 2.3.0
+    dev: false
+
+  /url-parse@1.5.10:
+    resolution: {integrity: sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==}
+    dependencies:
+      querystringify: 2.2.0
+      requires-port: 1.0.0
     dev: false
 
   /utils-merge@1.0.1:
@@ -2656,13 +2745,4 @@ packages:
   /yocto-queue@1.0.0:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
-    dev: false
-
-  /ytdl-core@4.11.5:
-    resolution: {integrity: sha512-27LwsW4n4nyNviRCO1hmr8Wr5J1wLLMawHCQvH8Fk0hiRqrxuIu028WzbJetiYH28K8XDbeinYW4/wcHQD1EXA==}
-    engines: {node: '>=12'}
-    dependencies:
-      m3u8stream: 0.8.6
-      miniget: 4.2.3
-      sax: 1.3.0
     dev: false

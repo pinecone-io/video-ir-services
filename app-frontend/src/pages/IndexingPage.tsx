@@ -4,8 +4,8 @@ import Loading from "../components/Loading";
 import { download } from "../services/downloadService.ts";
 import { socket } from "../utils/socket";
 import { useFps } from "../hooks/fpsHook.ts";
-import Dataflow, { IndexerInstance } from "../components/Dataflow.tsx";
-import { Index } from '@pinecone-database/pinecone';
+import Dataflow, { DownloaderInstance, IndexerInstance } from "../components/Dataflow.tsx";
+// import { Index } from '@pinecone-database/pinecone';
 
 type TFormInput = {
   fps: number;
@@ -42,9 +42,11 @@ const IndexingPage: React.FC = () => {
     setLogs([]);
     // setDownloaders({})
     setIndexers({})
+    setDownloaders({})
     setStarted(false)
   }
   const [indexers, setIndexers] = useState<{ [key: string]: IndexerInstance }>({});
+  const [downloaders, setDownloaders] = useState<{ [key: string]: DownloaderInstance }>({});
   // const [downloaders, setDownloaders] = useState<{ [key: string]: boolean }>({});
   const [showLogs, setShowLogs] = useState(true);
 
@@ -89,6 +91,11 @@ const IndexingPage: React.FC = () => {
     setNumberOfEmbeddings(data)
   }
 
+  const handleDownloaderInstancesUpdated = (data): void => {
+    console.log("data", data);
+    setDownloaders(data);
+  }
+
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
@@ -114,6 +121,7 @@ const IndexingPage: React.FC = () => {
     socket.on("logUpdated", handleLogUpdated);
     socket.on("numberOfObjectsUpdated", handleNumberOfObjects);
     socket.on("numberOfEmbeddingsUpdated", handleNumberOfEmbeddings);
+    socket.on("downloaderInstancesUpdated", handleDownloaderInstancesUpdated);
 
     return () => {
       socket.off("connect", onConnect);
@@ -124,6 +132,7 @@ const IndexingPage: React.FC = () => {
       socket.off("complete", handleCompleted);
       socket.off("numberOfObjectsUpdated", handleNumberOfObjects);
       socket.off("numberOfEmbeddingsUpdated", handleNumberOfEmbeddings);
+      socket.off("downloaderInstancesUpdated", handleDownloaderInstancesUpdated);
     };
   });
 
@@ -372,7 +381,7 @@ const IndexingPage: React.FC = () => {
       )}
 
       <div style={{ height: "100vh", width: "100%" }}>
-        <Dataflow indexerInstances={Object.values(indexers)} />
+        <Dataflow indexerInstances={Object.values(indexers)} downloaderInstances={Object.values(downloaders)} />
       </div>
       <footer className="text-center text-black p-smallFooter  mb-[35px]">
         <p className="p-2">All Rights Reserved by Pinecone</p>
