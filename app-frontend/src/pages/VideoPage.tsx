@@ -29,7 +29,6 @@ const VideoPage: React.FC = () => {
 
   useEffect(() => {
     const fetchImages = async () => {
-      console.log(nextFetchIndex, Object.keys(imagePaths).length)
       if (!odDataDone && !fetchingImagesRef.current && Object.keys(imagePaths).length === nextFetchIndex) {
         fetchingImagesRef.current = true;
         const result = await getImages({ offset: nextFetchIndex, limit });

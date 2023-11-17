@@ -154,11 +154,13 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
         </video>
         <div className="flex justify-between items-center h-[100px]">
           <div>
-            <button className="m-2 p-2 border border-black rounded" onClick={() => videoRef.current?.play()}>
-              <FontAwesomeIcon icon={faPlay} />
-            </button>
-            <button className="m-2 p-2 border border-black rounded" onClick={() => videoRef.current?.pause()}>
-              <FontAwesomeIcon icon={faPause} />
+
+            <button className="m-2 p-2 border border-black rounded" onClick={() => {
+              if (videoRef.current) {
+                videoRef.current.currentTime -= 1 / FPS; // Rewind by one frame
+              }
+            }}>
+              <FontAwesomeIcon icon={faChevronLeft} color="black" />
             </button>
             <button className="m-2 p-2 border border-black rounded" onClick={() => {
               if (videoRef.current) {
@@ -167,12 +169,11 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             }}>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
-            <button className="m-2 p-2 border border-black rounded" onClick={() => {
-              if (videoRef.current) {
-                videoRef.current.currentTime -= 1 / FPS; // Rewind by one frame
-              }
-            }}>
-              <FontAwesomeIcon icon={faChevronLeft} color="black" />
+            <button className="m-2 p-2 border border-black rounded" onClick={() => videoRef.current?.play()}>
+              <FontAwesomeIcon icon={faPlay} />
+            </button>
+            <button className="m-2 p-2 border border-black rounded" onClick={() => videoRef.current?.pause()}>
+              <FontAwesomeIcon icon={faPause} />
             </button>
           </div>
           <div
