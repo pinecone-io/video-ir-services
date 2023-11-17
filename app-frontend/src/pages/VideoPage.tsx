@@ -52,7 +52,6 @@ const VideoPage: React.FC = () => {
   }, [totalImages, imagePaths])
 
   const handleOdDataAdded = (data: GetImagesDTO) => {
-    console.log("odDataAdded", data)
     setImagePaths((prev) => {
       return {
         ...prev,
@@ -88,7 +87,7 @@ const VideoPage: React.FC = () => {
           </div>
           <div className="w-[427px] h-[20px] bg-gray-400 rounded-full relative">
             <div
-              className={`bg-stripes bg-cover h-[20px] p-0.5 leading-none rounded-full ${odDataDone ? '' : 'animate-colorPulse animate-stripMove'}`}
+              className={`bg-stripes bg-cover bg-[200%] h-[20px] p-0.5 leading-none rounded-full ${odDataDone ? '' : 'animate-colorPulse animate-stripMove'}`}
               style={{ width: progress + "%" }}
             ></div>
             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">

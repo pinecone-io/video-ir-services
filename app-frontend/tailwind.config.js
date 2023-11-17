@@ -12,13 +12,13 @@ export default {
           '50%': { backgroundColor: '#00008b' }, // dark blue
         },
         'stripe-move': {
-          '0%': { backgroundPosition: '0% 0%' },
-          '100%': { backgroundPosition: '100% 100%' },
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(1rem)' },
         },
       },
       animation: {
         colorPulse: 'colorPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        stripeMove: 'stripe-move 2s linear infinite',
+        stripeMove: 'stripe-move 0.2s linear infinite',
 
       },
       colors: {

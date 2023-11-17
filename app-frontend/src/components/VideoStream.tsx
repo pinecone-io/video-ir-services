@@ -102,6 +102,39 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     videoRef.current && (videoRef.current.currentTime = newTime);
   };
 
+  const [currentTime, setCurrentTime] = useState(0);
+  const [dragPosition, setDragPosition] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [offsetX, setOffsetX] = useState(0);
+
+
+  const handleMouseDown = (event) => {
+    setDragging(true);
+    const parent = event.currentTarget.parentElement;
+    const parentOffset = parent?.getBoundingClientRect().left || 0;
+    const boxPosition = ((event.clientX - parentOffset) / parent.offsetWidth) * 100;
+    setOffsetX(dragPosition - boxPosition);
+  };
+
+  // Update the current time during the drag event
+  const handleMouseMove = (event) => {
+    if (dragging) {
+      const parent = event.currentTarget.parentElement;
+      const parentWidth = parent?.offsetWidth || 0;
+      const parentOffset = parent?.getBoundingClientRect().left || 0;
+      const newDragPosition = ((event.clientX - parentOffset - offsetX) / parentWidth) * 100;
+      setDragPosition(newDragPosition);
+      const videoDuration = videoRef.current?.duration || 0;
+      const newTime = (newDragPosition / 100) * videoDuration;
+      videoRef.current && (videoRef.current.currentTime = newTime);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setDragging(false);
+  };
+
+
   return (
     <>
       <div
@@ -119,7 +152,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
         >
           <source src={video} type="video/mp4"></source>
         </video>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center h-[100px]">
           <div>
             <button className="m-2 p-2 border border-black rounded" onClick={() => videoRef.current?.play()}>
               <FontAwesomeIcon icon={faPlay} />
@@ -143,11 +176,17 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             </button>
           </div>
           <div
-            className="h-full w-5 overflow-y-scroll bg-black bg-opacity-50 scrollbar-thin scrollbar-thumb-white scrollbar-thumb-opacity-50"
+            className="h-5 w-4/5 overflow-x-scroll bg-black bg-opacity-50 scrollbar-thin scrollbar-thumb-white scrollbar-thumb-opacity-50"
+            style={{ position: 'relative' }}
             onScroll={handleScroll}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
           >
             <div
-              className="h-full w-full bg-white bg-opacity-50"
+              className="h-5 w-5 bg-red-500 cursor-pointer"
+              style={{ position: 'absolute', left: `${dragPosition}%` }}
             />
           </div>
         </div>
