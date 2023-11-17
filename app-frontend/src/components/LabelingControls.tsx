@@ -1,16 +1,15 @@
 import React, { CSSProperties, useEffect, useState } from "react";
-import { labelBoxes } from "../services/labelBoxesService";
+import { useDrag, useDrop } from "react-dnd";
 import { queryBox } from "../services/boxService";
+import { labelBoxes } from "../services/labelBoxesService";
 import { negativeLabel } from "../services/negativeLabelService";
-import { useDrop, useDrag } from "react-dnd";
 import { ItemTypes } from "./ItemTypes";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface LabelingControlsProps {
   selectedBox: string;
   setSelectedBoxes: React.Dispatch<React.SetStateAction<LabeledImage[]>>;
   refreshImages: () => void;
+  progressRate: number;
 }
 
 type ImageProps = {
@@ -55,36 +54,36 @@ const DropDown: React.FC<DropdownOptions> = ({ options, onClick }) => {
       <button
         id="dropdownDefaultButton"
         data-dropdown-toggle="dropdown"
-        className="text-cta-100  font-medium rounded-[5px] text-sm px-5 py-[15px] text-center inline-flex items-center border-2 border-cta-100 h-[50px]"
+        className="text-black  font-medium rounded-[5px] text-sm py-[15.5px] text-center inline-flex justify-center items-center border-1 border-black h-[50px] w-[114px]"
         type="button"
         onClick={toggleDropdown}
       >
+        {" "}
         <svg
-          width="17"
+          width="18"
           height="18"
-          viewBox="0 0 17 18"
+          viewBox="0 0 18 18"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="mr-[5px]"
         >
-          <g clipPath="url(#clip0_117_1311)">
+          <g clipPath="url(#clip0_160_100163)">
             <path
-              d="M7.08333 13.25H9.91667V11.8333H7.08333V13.25ZM2.125 4.75V6.16667H14.875V4.75H2.125ZM4.25 9.70833H12.75V8.29167H4.25V9.70833Z"
-              fill="#1C17FE"
+              d="M7.58333 13.25H10.4167V11.8333H7.58333V13.25ZM2.625 4.75V6.16667H15.375V4.75H2.625ZM4.75 9.70833H13.25V8.29167H4.75V9.70833Z"
+              fill="#01004B"
             />
           </g>
           <defs>
-            <clipPath id="clip0_117_1311">
+            <clipPath id="clip0_160_100163">
               <rect
                 width="17"
                 height="17"
                 fill="white"
-                transform="translate(0 0.5)"
+                transform="translate(0.5 0.5)"
               />
             </clipPath>
           </defs>
         </svg>
-
         {selectedLabel}
       </button>
 
@@ -141,11 +140,15 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
       <div className="flex flex-col">
         <div className="mb-[21px]">
           {/* Image */}
-          {!loaded && <div className="animate-pulse min-w-[192px] w-full h-[127px] rounded-t-xl10 bg-gray-300" />}
+          {!loaded && (
+            <div className="animate-pulse min-w-[192px] w-full h-[127px] rounded-t-xl10 bg-gray-300" />
+          )}
           <img
             src={labeledImage.path}
             alt={labeledImage.label || "no label"}
-            className={`min-w-[192px] w-full h-[127px] rounded-t-xl10 ${loaded ? '' : 'hidden'}`}
+            className={`min-w-[192px] w-full h-[127px] rounded-t-xl10 ${
+              loaded ? "" : "hidden"
+            }`}
             onLoad={() => setLoaded(true)}
           />
         </div>
@@ -186,6 +189,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
   selectedBox,
   setSelectedBoxes,
   refreshImages,
+  progressRate,
 }) => {
   //tailwind 10px padding
   const [images, setImages] = useState<Array<LabeledImage>>([]);
@@ -199,6 +203,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
   const [labelValue, setLabelValue] = useState<string>("");
   const [labeling, setLabeling] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isGood, setIsGood] = useState<boolean>(false);
 
   const handleLabel = async (
     boxId: string,
@@ -248,6 +253,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
       const response = await queryBox(selectedBox);
       const result = await response?.json();
 
+      setIsGood(response.ok);
       setSelectedBoxes(result);
       setImages(result);
     };
@@ -356,25 +362,93 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
 
   return (
     <div className="container p-labelsControls h-full">
-      <h1 className="m-auto text-lg24 text-primary-100 font-bold text-center mb-[32px] pt-[55px]">
+      <div className="flex justify-center mt-[65px]">
+        {progressRate !== 100 && (
+          <div className="border-[0.5px] border-black border-opacity-[5%] bg-white formShadow pt-[36px] pb-[40px] pl-[25px] pr-[37px] mr-[23px]">
+            <div className="flex w-full items-center justify-center">
+              <div className="text-cta-500 font-semibold text-base16 mr-[15px]">
+                Images Download
+              </div>
+              <div className="w-[406px] h-[15px] bg-gray-400 rounded-full">
+                <div
+                  className="bg-cta-100 h-[15px] p-0.5 leading-none rounded-full"
+                  style={{ width: progressRate + "%" }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div
+          className={`${
+            isGood ? "bgGradientLabel min-h-[70px]" : "bgGradient"
+          } w-[606px] pt-[14px] pb-[23px] px-[16px] flex `}
+        >
+          <div className="mr-[12px]">
+            {isGood ? (
+              <svg
+                width="18"
+                height="14"
+                viewBox="0 0 18 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.06216 10.5518L2.23965 6.72935L0.937988 8.02185L6.06216 13.146L17.0622 2.14602L15.7697 0.853516L6.06216 10.5518Z"
+                  fill="#15B077"
+                />
+              </svg>
+            ) : (
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10.0835 6.41683H11.9168V8.25016H10.0835V6.41683ZM10.0835 10.0835H11.9168V15.5835H10.0835V10.0835ZM11.0002 1.8335C5.94016 1.8335 1.8335 5.94016 1.8335 11.0002C1.8335 16.0602 5.94016 20.1668 11.0002 20.1668C16.0602 20.1668 20.1668 16.0602 20.1668 11.0002C20.1668 5.94016 16.0602 1.8335 11.0002 1.8335ZM11.0002 18.3335C6.95766 18.3335 3.66683 15.0427 3.66683 11.0002C3.66683 6.95766 6.95766 3.66683 11.0002 3.66683C15.0427 3.66683 18.3335 6.95766 18.3335 11.0002C18.3335 15.0427 15.0427 18.3335 11.0002 18.3335Z"
+                  fill="#1B17F5"
+                />
+              </svg>
+            )}
+          </div>
+          <p
+            className={`text-sm14 font-normal text-cta-500 max-w-[500px] h-min`}
+          >
+            {isGood
+              ? "An object has been detected in the video. You can now proceed to view additional details."
+              : "When you select an object on the video, a request to load object details will be sent. Please wait while the information is retrieved. This process may take some time."}
+          </p>
+        </div>
+      </div>
+      <h1 className="m-auto text-lg24 text-cta-500 font-bold text-center mb-[22px] pt-[44px]">
         Video Image Recognition
       </h1>
       <div className="mb-mx40 flex items-center justify-center">
         <div className="relative mr-3">
-          <FontAwesomeIcon
-            icon={faSearch}
-            className="absolute z-30 left-[20px] bottom-[18px] w-[17px] h-[17px]"
-          />
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute z-30 left-[20px] bottom-[14px]"
+          >
+            <path
+              d="M15 15.9999L11 19.9999H21V15.9999H15ZM12.06 7.1899L3 16.2499V19.9999H6.75L15.81 10.9399L12.06 7.1899ZM5.92 17.9999H5V17.0799L12.06 9.9999L13 10.9399L5.92 17.9999ZM18.71 8.0399C19.1 7.6499 19.1 6.9999 18.71 6.6299L16.37 4.2899C16.1825 4.10389 15.9291 3.99951 15.665 3.99951C15.4009 3.99951 15.1475 4.10389 14.96 4.2899L13.13 6.11989L16.88 9.86989L18.71 8.0399Z"
+              fill="#01004B"
+            />
+          </svg>
           <input
             type="text"
-            className="placeholder-gray-500 w-inputWidth border-xs4 border-color-primary-900 rounded-lg min-w-[724px] h-[50px] bg-white text-gray-500 py-[16px] pl-[48px] pr-[15px]"
+            className="placeholder-gray-600 border-xs4 border-cta-300 rounded-lg min-w-[771px] h-[50px] bg-white text-gray-600 py-[16px] pl-[57px] pr-[15px]"
             placeholder="Name selected object with label..."
             value={labelValue}
             onChange={(e) => setLabelValue(e.target.value)}
           />
         </div>
         <button
-          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[20px] rounded-xl10 min-h-[50px] ${
+          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[29px] rounded-[5px] h-[50px] ${
             labeling ? "opacity-50 cursor-not-allowed" : ""
           }`}
           onClick={() => {
@@ -383,7 +457,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
         >
           Submit
         </button>
-        <div className="ml-3">
+        <div className="ml-[14px]">
           <DropDown
             options={dropdownOptions}
             onClick={(val) => setSelectedCategory(val)}
@@ -392,7 +466,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
       </div>
 
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 border-[0.5px] bg-black  bg-opacity-5 border-black border-opacity-[5%] rounded-md py-[40px] px-[110px] mb-3"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 border-[0.5px] bg-gray-200 border-black border-opacity-[5%] rounded-md py-[40px] px-[110px] mb-[53px]"
         style={{ maxHeight: "40vh", overflow: "auto" }}
       >
         {images.length > 0 ? (
@@ -419,20 +493,22 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
         )}
       </div>
       <div className="flex justify-between pb-40 h-full">
-        <div className="w-1/2 mr-2">
-          <h2>Negative Label</h2>
+        <div className="w-1/2 mr-[33px]">
+          <h2 className="mb-[17px] text-center text-base16 text-cta-500 font-semibold">
+            Negative Label
+          </h2>
 
           <div
             ref={drop}
             style={{
               ...style,
               backgroundColor: getBackgroundColor(canDrop, isOver),
-              height: "100%",
+              minHeight: "1005px",
             }}
             className="relative"
             data-testid="dustbin"
           >
-            <div className="absolute top-2 left-2">
+            <div className="absolute top-[40px] left-[50%] translate-x-[-50%] text-sm14 font-bold">
               {isActive ? "Release to drop" : "Drag a box here"}
             </div>
             <div className="relative">
@@ -451,18 +527,20 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
         </div>
 
         <div className="w-1/2">
-          <h2>Positive Label</h2>
+          <h2 className="mb-[17px] text-center text-base16 text-cta-500 font-semibold">
+            Positive Label
+          </h2>
           <div
             ref={dropSecond}
             style={{
               ...style,
               backgroundColor: getBackgroundColor(canDropSecond, isOverSecond),
-              height: "100%",
+              minHeight: "1005px",
             }}
             className="relative"
             data-testid="dustbin"
           >
-            <div className="absolute top-2 left-2">
+            <div className="absolute top-[40px] left-[50%] translate-x-[-50%] text-sm14 font-bold">
               {isActive ? "Release to drop" : "Drag a box here"}
             </div>
             <div className="relative">

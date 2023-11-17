@@ -4,29 +4,32 @@ export default {
   theme: {
     extend: {
       backgroundImage: () => ({
-        'stripes': 'linear-gradient(45deg, #4169E1 25%, transparent 25%, transparent 50%, #4169E1 50%, #4169E1 75%, transparent 75%, transparent)',
-     }),
+        stripes:
+          "linear-gradient(45deg, #4169E1 25%, transparent 25%, transparent 50%, #4169E1 50%, #4169E1 75%, transparent 75%, transparent)",
+      }),
       keyframes: {
         colorPulse: {
-          '0%, 100%': { backgroundColor: '#4169E1' }, // medium blue
-          '50%': { backgroundColor: '#00008b' }, // dark blue
+          "0%, 100%": { backgroundColor: "#4169E1" }, // medium blue
+          "50%": { backgroundColor: "#00008b" }, // dark blue
         },
-        'stripe-move': {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(1rem)' },
+        "stripe-move": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(1rem)" },
         },
       },
       animation: {
-        colorPulse: 'colorPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        stripeMove: 'stripe-move 0.2s linear infinite',
-
+        colorPulse: "colorPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        stripeMove: "stripe-move 0.2s linear infinite",
+        slowRotate: "slowRotation 8s linear infinite",
       },
       colors: {
         cta: {
           100: "#1C17FF",
+          200: "#121142",
+          300: "#C5D5FF",
+          400: "#3C72FF",
+          500: "#01004B",
         },
-
-      
         primary: {
           100: "#2B2B2B",
           200: "rgba(0, 0, 0, 0.8)",
@@ -44,6 +47,7 @@ export default {
           200: "#F1F5F8",
           400: "#E9EBED",
           500: "#7F7F7F",
+          600: "#72788D",
         },
         darkLabel: "#393939",
       },

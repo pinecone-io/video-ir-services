@@ -23,22 +23,49 @@
 }
 
 @keyframes flash {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slowRotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .flash-animation {
   animation: flash 0.7s ease-in-out;
 }
 
-
-.pulse-line {
-  animation: pulse 2s linear infinite;
+.formShadow {
+  box-shadow: 0px 2px 4px 0px #0000000a;
+  box-shadow: 0px 0px 4px 0px #00000005;
 }
 
-@keyframes pulse {
-  to {
-    stroke-dashoffset: -20;
-  }
+.bgGradient {
+  background: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(255, 255, 255, 0.9)
+    ),
+    #3c72ff;
+}
+
+.bgGradientLabel {
+  background: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(255, 255, 255, 0.9)
+    ),
+    #2e7d32;
 }

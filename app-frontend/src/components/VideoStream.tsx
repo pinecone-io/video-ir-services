@@ -19,6 +19,7 @@ type VideoStreamProps = {
   loadedImages: HTMLImageElement[];
   refreshImages: () => void;
   updateFrameIndex: (frameIndex: number) => void;
+  progressRate: number;
 };
 
 const VideoStream: React.FC<VideoStreamProps> = (props) => {
@@ -29,7 +30,8 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
   const FPS = 25;
 
   // TODO: Get this from the backend
-  const video = "https://video-streaming-images.s3.us-west-2.amazonaws.com/car-race/video/car-race.mp4"
+  const video =
+    "https://video-streaming-images.s3.us-west-2.amazonaws.com/car-race/video/car-race.mp4";
 
   const [frameIndex, setFrameIndex] = useState<number>(0);
   const [isPlaying, setPlay] = useState<boolean>(true);
@@ -96,7 +98,8 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const scrollPosition = event.currentTarget.scrollTop;
-    const maxScroll = event.currentTarget.scrollHeight - event.currentTarget.clientHeight;
+    const maxScroll =
+      event.currentTarget.scrollHeight - event.currentTarget.clientHeight;
     const videoDuration = videoRef.current?.duration || 0;
     const newTime = (scrollPosition / maxScroll) * videoDuration;
     videoRef.current && (videoRef.current.currentTime = newTime);
@@ -107,12 +110,12 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
   const [dragging, setDragging] = useState(false);
   const [offsetX, setOffsetX] = useState(0);
 
-
   const handleMouseDown = (event) => {
     setDragging(true);
     const parent = event.currentTarget.parentElement;
     const parentOffset = parent?.getBoundingClientRect().left || 0;
-    const boxPosition = ((event.clientX - parentOffset) / parent.offsetWidth) * 100;
+    const boxPosition =
+      ((event.clientX - parentOffset) / parent.offsetWidth) * 100;
     setOffsetX(dragPosition - boxPosition);
   };
 
@@ -122,7 +125,8 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
       const parent = event.currentTarget.parentElement;
       const parentWidth = parent?.offsetWidth || 0;
       const parentOffset = parent?.getBoundingClientRect().left || 0;
-      const newDragPosition = ((event.clientX - parentOffset - offsetX) / parentWidth) * 100;
+      const newDragPosition =
+        ((event.clientX - parentOffset - offsetX) / parentWidth) * 100;
       setDragPosition(newDragPosition);
       const videoDuration = videoRef.current?.duration || 0;
       const newTime = (newDragPosition / 100) * videoDuration;
@@ -134,7 +138,6 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     setDragging(false);
   };
 
-
   return (
     <>
       <div
@@ -142,7 +145,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
         style={{
           width: CANVAS_WIDTH,
           height: CANVAS_HEIGHT,
-          position: "relative"
+          position: "relative",
         }}
       >
         <video
@@ -154,31 +157,42 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
         </video>
         <div className="flex justify-between items-center h-[100px]">
           <div>
-
-            <button className="m-2 p-2 border border-black rounded" onClick={() => {
-              if (videoRef.current) {
-                videoRef.current.currentTime -= 1 / FPS; // Rewind by one frame
-              }
-            }}>
+            <button
+              className="m-2 p-2 border border-black rounded"
+              onClick={() => {
+                if (videoRef.current) {
+                  videoRef.current.currentTime -= 1 / FPS; // Rewind by one frame
+                }
+              }}
+            >
               <FontAwesomeIcon icon={faChevronLeft} color="black" />
             </button>
-            <button className="m-2 p-2 border border-black rounded" onClick={() => {
-              if (videoRef.current) {
-                videoRef.current.currentTime += 1 / FPS; // Fast forward by one frame
-              }
-            }}>
+            <button
+              className="m-2 p-2 border border-black rounded"
+              onClick={() => {
+                if (videoRef.current) {
+                  videoRef.current.currentTime += 1 / FPS; // Fast forward by one frame
+                }
+              }}
+            >
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
-            <button className="m-2 p-2 border border-black rounded" onClick={() => videoRef.current?.play()}>
+            <button
+              className="m-2 p-2 border border-black rounded"
+              onClick={() => videoRef.current?.play()}
+            >
               <FontAwesomeIcon icon={faPlay} />
             </button>
-            <button className="m-2 p-2 border border-black rounded" onClick={() => videoRef.current?.pause()}>
+            <button
+              className="m-2 p-2 border border-black rounded"
+              onClick={() => videoRef.current?.pause()}
+            >
               <FontAwesomeIcon icon={faPause} />
             </button>
           </div>
           <div
             className="h-5 w-4/5 overflow-x-scroll bg-black bg-opacity-50 scrollbar-thin scrollbar-thumb-white scrollbar-thumb-opacity-50"
-            style={{ position: 'relative' }}
+            style={{ position: "relative" }}
             onScroll={handleScroll}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -187,12 +201,10 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
           >
             <div
               className="h-5 w-5 bg-red-500 cursor-pointer"
-              style={{ position: 'absolute', left: `${dragPosition}%` }}
+              style={{ position: "absolute", left: `${dragPosition}%` }}
             />
           </div>
         </div>
-
-
 
         {labeledBoundingBox && (
           <BoundingBoxes
@@ -204,15 +216,16 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             }}
           />
         )}
-      </div >
-      <div className="flex justify-center  w-full mt-[100px] min-h-[FPS0px]">
+      </div>
+      <div className="flex justify-center  w-full mt-[27px]">
         <LabelingControls
+          progressRate={props.progressRate}
           selectedBox={selectedBox}
           setSelectedBoxes={setSelectedBoxes}
           refreshImages={props.refreshImages}
         />
       </div>
-      <footer className="text-center text-black p-smallFooter fixed bottom-0 w-full bg-white z-50">
+      <footer className="text-center text-black p-smallFooter w-full bg-white z-50">
         <p className="p-2">All Rights Reserved by Pinecone</p>
       </footer>
     </>
@@ -220,4 +233,3 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
 };
 
 export default VideoStream;
-
