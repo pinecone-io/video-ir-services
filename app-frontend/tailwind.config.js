@@ -3,10 +3,30 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      backgroundImage: () => ({
+        'stripes': 'linear-gradient(45deg, #4169E1 25%, transparent 25%, transparent 50%, #4169E1 50%, #4169E1 75%, transparent 75%, transparent)',
+     }),
+      keyframes: {
+        colorPulse: {
+          '0%, 100%': { backgroundColor: '#4169E1' }, // medium blue
+          '50%': { backgroundColor: '#00008b' }, // dark blue
+        },
+        'stripe-move': {
+          '0%': { backgroundPosition: '0% 0%' },
+          '100%': { backgroundPosition: '100% 100%' },
+        },
+      },
+      animation: {
+        colorPulse: 'colorPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        stripeMove: 'stripe-move 2s linear infinite',
+
+      },
       colors: {
         cta: {
           100: "#1C17FF",
         },
+
+      
         primary: {
           100: "#2B2B2B",
           200: "rgba(0, 0, 0, 0.8)",
