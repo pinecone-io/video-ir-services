@@ -31,3 +31,14 @@
 .flash-animation {
   animation: flash 0.7s ease-in-out;
 }
+
+
+.pulse-line {
+  animation: pulse 2s linear infinite;
+}
+
+@keyframes pulse {
+  to {
+    stroke-dashoffset: -20;
+  }
+}

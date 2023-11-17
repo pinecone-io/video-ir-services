@@ -10,6 +10,7 @@ import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
 import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
 import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter";
 import { DownloaderInstanceTracker } from "./utils/downloaderInstanceTracker";
+import { i } from "mathjs";
 
 const progressTracker = new ProgressTracker();
 const progressTrackerListener = progressTracker.getEmitter();
@@ -117,6 +118,7 @@ const routes: Route[] = [
       try {
         progressTracker.startTimer();
         progressTracker.resetFiles();
+        indexerInstancesTracker.resetInstancesCounts();
         numberOfObjectsTracker.clearNumberOfObjects();
         numberOfEmbeddingsTracker.clearNumberOfEmbeddings();
         const response = await fetch("http://video-ir-dev-splitter:3007/api/downloadAndSplit", {
@@ -152,6 +154,7 @@ const routes: Route[] = [
             case 'embeddingCount': {
               const { podId } = payload
               const instance = indexerInstancesTracker.getInstance(podId)
+              console.log(`Updating instance ${podId} - ${payload.embeddingsProcessed}`)
               let updatedInstance: IndexerInstance
               if (instance) {
                 updatedInstance = {

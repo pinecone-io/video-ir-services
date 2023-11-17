@@ -47,6 +47,18 @@ class IndexerInstanceTracker {
         }
     }
 
+    resetInstancesCounts(): void {
+        Object.keys(this._indexerInstances).forEach((acc, key) => {
+            const instance = this._indexerInstances[key]!;
+            this.updateInstance({
+                ...instance,
+                framesProcessed: 0,
+                embeddingsProcessed: 0,
+            })
+
+        })
+    }
+
 
     checkAllInstancesReady(): void {
         const allReady = Object.values(this._indexerInstances).every(value => value.ready === true);

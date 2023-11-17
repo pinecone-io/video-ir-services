@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import ReactFlow, {
     ReactFlowProvider,
     useNodesState,
@@ -11,6 +11,7 @@ import ReactFlow, {
 import IndexerNodeComponent from './IndexerNode';
 import StaticNodeComponent from './StaticNode';
 import DownloaderNode from './DownloaderNode'
+import CustomEdge from './CustomEdge';
 
 export interface IndexerInstance {
     id: string;
@@ -48,63 +49,19 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
 };
 
 const nodeTypes = { indexerNode: IndexerNodeComponent, staticNode: StaticNodeComponent, downloaderNode: DownloaderNode }
+const edgeTypes = { 'custom-edge': CustomEdge }
+
+
 
 const DataflowC: React.FC<DataflowProps> = ({ indexerInstances, downloaderInstances }) => {
     useEffect(() => {
-        // console.log('indexerInstances changed', indexerInstances);
+        // 
     }, [indexerInstances, downloaderInstances]);
-    // const nodeTypes = useMemo(() => ({ indexerNode: CustomNodeComponent, staticNode: StaticNodeComponent }), []);
 
-
-    const nodesPerRow = 5; // Adjust this to change the number of nodes per row
-
-    const initialNodes: Node<NodeData>[] = [...indexerInstances.map((instance, index) => {
-        const rowIndex = Math.floor(index / nodesPerRow);
-        const columnIndex = index % nodesPerRow;
-
-        // Add an offset to the x-position in every other row
-        const xOffset = rowIndex % 2 === 0 ? 0 : 125; // Adjust this to change the offset
-
-        return {
-            id: instance.id,
-            position: { x: xOffset + columnIndex * 250, y: rowIndex * 150 },
-            type: 'indexerNode',
-            data: {
-                id: instance.id,
-                label: instance.id.split("-").pop(),
-                ready: instance.ready,
-                embeddingsProcessed: instance.embeddingsProcessed,
-                framesProcessed: instance.framesProcessed,
-            },
-        };
-    }), {
-        id: 'kafka-frame-producer',
-        type: 'staticNode',
-        position: { x: 100, y: 100 },
-        data: {
-            id: 'kafka-frame-producer',
-            topic: '!!!Kafka Frame Producer',
-        }
-    },
-    {
-        id: 'pinecone',
-        type: 'staticNode',
-        position: { x: 100, y: 0 },
-        data: {
-            id: 'pinecone',
-            topic: 'Pinecone',
-        }
-    }
+    const initialNodes: Node<NodeData>[] = [
     ];
 
-    const initialEdges: Edge[] = indexerInstances.map((instance) => {
-        return {
-            id: `edge-${instance.id}`,
-            source: 'kafka-frame-producer',
-            target: instance.id,
-            animated: true,
-        }
-    })
+    const initialEdges: Edge[] = []
 
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -113,113 +70,83 @@ const DataflowC: React.FC<DataflowProps> = ({ indexerInstances, downloaderInstan
 
 
     useEffect(() => {
-        const nodesPerRow = 5; // Adjust this to change the number of nodes per row
+        const downloaderNodesPerRow = 2;
+        const indexerNodesPerRow = 5;
+        const xOffsetDownloader = -325;
+        const xOffsetIndexer = 775;
 
-        const newNodes: Node<NodeData>[] = [...indexerInstances.map((instance, index) => {
+        const checkCollision = (position: { x: number, y: number }) => {
+            return nodes.some(node => node.position.x === position.x && node.position.y === position.y);
+        };
+
+        const getNonCollidingPosition = (position: { x: number, y: number }) => {
+            while (checkCollision(position)) {
+                position.x += 250;
+            }
+            return position;
+        };
+
+        const createNode = (instance: IndexerInstance | DownloaderInstance, type: string, xOffset: number, nodesPerRow: number, index: number) => {
             const rowIndex = Math.floor(index / nodesPerRow);
             const columnIndex = index % nodesPerRow;
-
-            // Add an offset to the x-position in every other row
-            const xOffset = rowIndex % 2 === 0 ? 0 : 125; // Adjust this to change the offset
-
-            // Find the previous node with the same id
             const previousNode = nodes.find(node => node.id === instance.id);
-
-            // If the node already exists, use its previous position
-            const position = previousNode ? previousNode.position : { x: xOffset + columnIndex * 250, y: rowIndex * 150 };
+            const position = previousNode ? previousNode.position : getNonCollidingPosition({ x: xOffset + columnIndex * 300, y: rowIndex * 250 });
 
             return {
                 id: instance.id,
                 position: position,
-                type: 'indexerNode',
-                data: {
-                    id: instance.id,
-                    label: instance.id.split("-").pop(),
-                    ready: instance.ready,
-                    embeddingsProcessed: instance.embeddingsProcessed,
-                    framesProcessed: instance.framesProcessed,
-                },
+                type: type,
+                data: instance,
             };
-        }), ...downloaderInstances.map((instance, index) => {
-            const rowIndex = Math.floor(index / nodesPerRow);
-            const columnIndex = index % nodesPerRow;
+        };
 
-            // Add an offset to the x-position in every other row
-            const xOffset = rowIndex % 2 === 0 ? 0 : 125; // Adjust this to change the offset
-
-            // Find the previous node with the same id
-            const previousNode = nodes.find(node => node.id === instance.id);
-
-            // If the node already exists, use its previous position
-            const position = previousNode ? previousNode.position : { x: xOffset + columnIndex * 250, y: rowIndex * 150 };
-
+        const createEdge = (source: string, target: string, animated: boolean = false, data: unknown = {}) => {
             return {
-                id: instance.id,
-                position: position,
-                type: 'downloaderNode',
-                data: {
-                    id: instance.id,
-                    label: instance.id.split("-").pop(),
-                    ready: instance.ready,
-                    framesProduced: instance.framesProduced,
-
-                },
+                id: `edge-${source}-to-${target}`,
+                source: source,
+                target: target,
+                animated: animated,
+                type: 'custom-edge',
+                data: data,
             };
-        }), {
-            id: 'kafka-frame-producer',
-            type: 'staticNode',
-            position: { x: -300, y: 300 },
-            data: {
+        };
+
+        const newNodes: Node<NodeData>[] = [
+            ...downloaderInstances.filter((instance => instance.id)).map((instance, index) => createNode(instance, 'downloaderNode', xOffsetDownloader, downloaderNodesPerRow, index)),
+            {
                 id: 'kafka-frame-producer',
-                topic: 'Kafka Frame Producer',
+                type: 'staticNode',
+                position: { x: 350, y: 300 },
+                data: {
+                    id: 'kafka-frame-producer',
+                    topic: 'Kafka Frame Producer',
+                },
             },
-
-        },
-        {
-            id: 'pinecone',
-            type: 'staticNode',
-            position: { x: 1400, y: 300 },
-            data: {
+            ...indexerInstances.filter((instance => instance.id)).map((instance, index) => createNode(instance, 'indexerNode', xOffsetIndexer, indexerNodesPerRow, index)),
+            {
                 id: 'pinecone',
-                topic: 'Pinecone',
+                type: 'staticNode',
+                position: { x: 2800, y: 300 },
+                data: {
+                    id: 'pinecone',
+                    topic: 'Pinecone',
+                }
             }
-        }];
+        ];
 
-        let newEdges: Edge[] = indexerInstances.map((instance) => {
-            return {
-                id: `edge-${instance.id}-from-producer`,
-                source: 'kafka-frame-producer',
-                target: instance.id,
-                animated: true,
-            }
-        });
+        const newEdges: Edge[] = [
+            ...indexerInstances.map((instance) => createEdge('kafka-frame-producer', instance.id, false, { active: instance.framesProcessed, id: instance.id, type: 'indexer' })),
+            ...indexerInstances.map((instance) => createEdge(instance.id, 'pinecone', false, { active: instance.framesProcessed, id: instance.id, type: 'indexer' })),
+            ...downloaderInstances.map((instance) => createEdge(instance.id, 'kafka-frame-producer', false, { active: instance.framesProduced, type: 'downloader' })),
+        ];
 
-        newEdges = [...newEdges, ...indexerInstances.map((instance) => {
-            return {
-                id: `edge-${instance.id}-to-pinecone`,
-                source: instance.id,
-                target: 'pinecone',
-                animated: true,
-            }
-        })]
-
-        newEdges = [...newEdges, ...downloaderInstances.map((instance) => {
-            return {
-                id: `edge-${instance.id}-to-producer`,
-                source: instance.id,
-                target: 'kafka-frame-producer',
-                animated: true,
-            }
-        })]
-
-        // Only update state if indexerInstances has changed
         if (JSON.stringify(newNodes) !== JSON.stringify(nodes)) {
             setNodes(newNodes);
         }
         if (JSON.stringify(newEdges) !== JSON.stringify(edges)) {
             setEdges(newEdges);
         }
-    }, [indexerInstances, nodes, edges]);
+    }, [indexerInstances, downloaderInstances, nodes, edges, setEdges, setNodes]);
 
 
     const { fitView } = useReactFlow();
@@ -237,7 +164,13 @@ const DataflowC: React.FC<DataflowProps> = ({ indexerInstances, downloaderInstan
     }, [nodes, edges, fitView, setNodes, setEdges]);
 
     if ((!indexerInstances || indexerInstances.length === 0) && (!downloaderInstances || downloaderInstances.length === 0)) {
-        return <div>No data to display</div>;
+        return (
+            <div className="flex justify-center">
+                <div className="p-5 border border-gray-300 rounded bg-gray-100 text-center">
+                    System idle
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -249,6 +182,7 @@ const DataflowC: React.FC<DataflowProps> = ({ indexerInstances, downloaderInstan
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             fitView
         />
     );

@@ -5,7 +5,6 @@ import { download } from "../services/downloadService.ts";
 import { socket } from "../utils/socket";
 import { useFps } from "../hooks/fpsHook.ts";
 import Dataflow, { DownloaderInstance, IndexerInstance } from "../components/Dataflow.tsx";
-// import { Index } from '@pinecone-database/pinecone';
 
 type TFormInput = {
   fps: number;
@@ -40,15 +39,12 @@ const IndexingPage: React.FC = () => {
       status: false,
     });
     setLogs([]);
-    // setDownloaders({})
     setIndexers({})
     setDownloaders({})
     setStarted(false)
   }
   const [indexers, setIndexers] = useState<{ [key: string]: IndexerInstance }>({});
   const [downloaders, setDownloaders] = useState<{ [key: string]: DownloaderInstance }>({});
-  // const [downloaders, setDownloaders] = useState<{ [key: string]: boolean }>({});
-  const [showLogs, setShowLogs] = useState(true);
 
   const handleFilesToBeProcessedChanged = (data: { numberOfFilesToProcess: number }): void => {
     const { numberOfFilesToProcess } = data
@@ -67,19 +63,6 @@ const IndexingPage: React.FC = () => {
   }
 
   const handleLogUpdated = (data: LogLine): void => {
-
-    // const line = data.message
-
-    // const pod = line.split(":")[0]
-    // const isIndexer = line.includes("indexer")
-    // const isDownloader = line.includes("downloader")
-    // if (isIndexer) {
-    //   setIndexers(prevIndexers => ({ ...prevIndexers, [pod]: true }));
-    // }
-    // if (isDownloader) {
-    //   setDownloaders(prevDownloaders => ({ ...prevDownloaders, [pod]: true }));
-    // }
-
     setLogs([...logs, data])
   }
 
@@ -91,9 +74,12 @@ const IndexingPage: React.FC = () => {
     setNumberOfEmbeddings(data)
   }
 
-  const handleDownloaderInstancesUpdated = (data): void => {
-    console.log("data", data);
+  const handleDownloaderInstancesUpdated = (data: React.SetStateAction<{ [key: string]: DownloaderInstance; }>): void => {
     setDownloaders(data);
+  }
+
+  const handleIndexerInstancesUpdated = (data: React.SetStateAction<{ [key: string]: IndexerInstance; }>): void => {
+    setIndexers(data);
   }
 
   useEffect(() => {
@@ -109,10 +95,7 @@ const IndexingPage: React.FC = () => {
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
 
-    socket.on("instancesUpdated", (data): void => {
-      // console.log("data", data);
-      setIndexers(data);
-    });
+    socket.on("instancesUpdated", handleIndexerInstancesUpdated);
 
     socket.on("complete", handleCompleted);
 
@@ -133,6 +116,7 @@ const IndexingPage: React.FC = () => {
       socket.off("numberOfObjectsUpdated", handleNumberOfObjects);
       socket.off("numberOfEmbeddingsUpdated", handleNumberOfEmbeddings);
       socket.off("downloaderInstancesUpdated", handleDownloaderInstancesUpdated);
+      socket.off("instancesUpdated", handleIndexerInstancesUpdated);
     };
   });
 
@@ -169,11 +153,7 @@ const IndexingPage: React.FC = () => {
 
   const endOfMessages = useRef<HTMLTableCellElement | null>(null);
   const logsContainerRef = useRef<HTMLDivElement | null>(null);
-  // useEffect(() => {
-  //   if (endOfMessages.current) {
-  //     endOfMessages.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // }, [logs]);
+
 
   useEffect(() => {
     if (logsContainerRef.current) {
@@ -352,33 +332,31 @@ const IndexingPage: React.FC = () => {
           )}
         </form>
       </div>
-      {showLogs && (
-        <div ref={logsContainerRef}
-          className={`mx-auto px-[15px] pt-[56px] pb-[13px] mt-[17px] mb-[30px] text-sm text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto w-4/5`}>
-          <div
-            style={{
-              overflow: "auto",
-              width: "100%",
-              fontFamily: "Courier New, monospace",
-            }}
-          >
-            <table style={{ width: "100%" }}>
-              <tbody>
-                {logs.map((entry, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{entry.message}</td>
-                    </tr>
-                  );
-                })}
-                <tr>
-                  <td ref={endOfMessages}></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <div ref={logsContainerRef}
+        className={`mx-auto px-[15px] pt-[56px] pb-[13px] mt-[17px] mb-[30px] text-sm text-white rounded-lg bg-primary-800 h-[100px] whitespace-pre-line overflow-auto w-4/5`}>
+        <div
+          style={{
+            overflow: "auto",
+            width: "100%",
+            fontFamily: "Courier New, monospace",
+          }}
+        >
+          <table style={{ width: "100%" }}>
+            <tbody>
+              {logs.map((entry, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{entry.message}</td>
+                  </tr>
+                );
+              })}
+              <tr>
+                <td ref={endOfMessages}></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
       <div style={{ height: "100vh", width: "100%" }}>
         <Dataflow indexerInstances={Object.values(indexers)} downloaderInstances={Object.values(downloaders)} />

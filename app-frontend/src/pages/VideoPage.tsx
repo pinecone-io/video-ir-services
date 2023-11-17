@@ -1,51 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import VideoStream from "../components/VideoStream";
 import { getImages } from "../services/imageService";
-// import { formatImageUrl } from "../utils/formatImageUrl";
 import { GetImagesDTO } from "../types/Box";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
 import { socket } from "../utils/socket";
-import { useFps } from "../hooks/fpsHook";
-// import { resetImages } from "../services/resetImagesService";
 
-// const initialFetch = true;
 const VideoPage: React.FC = () => {
   const [imagePaths, setImagePaths] = useState<GetImagesDTO>({});
+  // TODO: Get rid of this
   const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
+
+  // TODO: Fix this
   const [progress, setProgress] = useState(0);
   const [frameIndex, setFrameIndex] = useState(0);
   const [nextFetchIndex, setNextFetchIndex] = useState(0); // Add this line
-  const [fetchingImages, setFetchingImages] = useState(false);
 
 
-  // const [odDataDone, setOdDataDone] = useState(false);
-  // const { FPS } = useFps();
+  const [odDataDone, setOdDataDone] = useState(false);
   const limit = 100
-
-  // if (initialFetch) {
-  //   console.log("Resetting images");
-  //   initialFetch = false;
-  //   resetImages();
-  // }
 
   const updateFrameIndex = (frameIndex: number) => {
     setFrameIndex(frameIndex);
   };
-  // Fetch all image paths from the server
+
+
+  const fetchingImagesRef = useRef(false); // Add this line
+
   useEffect(() => {
     const fetchImages = async () => {
-      // console.log(frameIndex + 1 >= nextFetchIndex, nextFetchIndex, frameIndex + 1)
-      if (frameIndex + 1 >= nextFetchIndex && !fetchingImages) {
-        setFetchingImages(true);
-        await getImages({ offset: frameIndex, limit });
-        setNextFetchIndex(frameIndex + limit); // Update the nextFetchIndex after fetching
-        setFetchingImages(false);
+      console.log(nextFetchIndex, Object.keys(imagePaths).length)
+      if (!odDataDone && !fetchingImagesRef.current && Object.keys(imagePaths).length === nextFetchIndex) {
+        fetchingImagesRef.current = true;
+        const images = await getImages({ offset: nextFetchIndex, limit });
+        if (images) {
+          setNextFetchIndex(prevIndex => prevIndex + limit); // Update the nextFetchIndex after fetching
+        }
+        fetchingImagesRef.current = false;
       }
     };
 
     fetchImages();
-  }, [frameIndex, nextFetchIndex]); //
+  }, [nextFetchIndex, odDataDone, imagePaths]); // Removed fetchingImages
 
 
   const handleOdDataAdded = (data: GetImagesDTO) => {
@@ -56,11 +52,10 @@ const VideoPage: React.FC = () => {
         ...data,
       };
     });
-    // setFrameIndex(frameIndex + 10);
   };
 
   const handleOdDataDone = () => {
-    // setOdDataDone(true);
+    setOdDataDone(true);
   };
 
   useEffect(() => {
@@ -76,11 +71,6 @@ const VideoPage: React.FC = () => {
     getImages({ offset: frameIndex, limit })
       .then((response) => response.data)
   };
-
-
-  useEffect(() => {
-    // console.log(imagePaths);
-  }, [imagePaths]);
 
   return (
     <>
