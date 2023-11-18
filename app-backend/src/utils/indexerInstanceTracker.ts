@@ -17,6 +17,7 @@ class IndexerInstanceTracker {
 
     constructor() {
         this.eventEmitter.on('instancesUpdated', this.checkAllInstancesReady.bind(this));
+        this.eventEmitter.setMaxListeners(100);
     }
 
     get indexerInstances(): IndexerInstances {

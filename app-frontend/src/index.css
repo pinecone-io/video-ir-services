@@ -67,5 +67,40 @@
       rgba(255, 255, 255, 0.9),
       rgba(255, 255, 255, 0.9)
     ),
-    #2e7d32;
+    
+}
+
+
+.bounding-box-rect {
+  transition: fill-opacity 0.2s ease;  
+  /* fill: rgba(110, 154, 184, 0.9); */
+  /* fill: rgba(165, 93, 224, 0.9); */
+}
+
+.bounding-box-rect:hover {
+  fill-opacity: 0.5; /* Adjust opacity as needed */  
+  fill: rgba(118, 146, 180, 0.9);
+}
+
+.bounding-box-rect-loading {
+  fill-opacity: 0.8;
+  fill: rgba(134, 227, 204, 0.9) /* Adjust opacity as needed */  
+}
+
+.rect-selected {
+  fill-opacity: 0.6; /* Adjust opacity as needed */  
+  fill: rgba(101, 179, 127, 0.9);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-rotate {
+  animation: spin 1s linear infinite;
 }

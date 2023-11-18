@@ -16,6 +16,7 @@ class DownloaderInstanceTracker {
 
     constructor() {
         this.eventEmitter.on('downloaderInstancesUpdated', this.checkAllInstancesReady.bind(this));
+        this.eventEmitter.setMaxListeners(100);
     }
 
     get downloaderInstances(): DownloaderInstances {

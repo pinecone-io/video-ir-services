@@ -9,7 +9,7 @@ import { socket } from "../utils/socket";
 const VideoPage: React.FC = () => {
   const [imagePaths, setImagePaths] = useState<GetImagesDTO>({});
   // TODO: Get rid of this
-  const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
+  // const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
 
   // TODO: Fix this
   const [progress, setProgress] = useState(0);
@@ -28,6 +28,11 @@ const VideoPage: React.FC = () => {
 
   useEffect(() => {
     const fetchImages = async () => {
+      console.log(
+        !odDataDone,
+        !fetchingImagesRef.current,
+        Object.keys(imagePaths).length, nextFetchIndex
+      )
       if (
         !odDataDone &&
         !fetchingImagesRef.current &&
@@ -56,6 +61,7 @@ const VideoPage: React.FC = () => {
   }, [totalImages, imagePaths]);
 
   const handleOdDataAdded = (data: GetImagesDTO) => {
+    console.log(data)
     setImagePaths((prev) => {
       return {
         ...prev,
@@ -77,8 +83,9 @@ const VideoPage: React.FC = () => {
     };
   });
 
-  const refreshImages = () => {
-    getImages({ offset: frameIndex, limit }).then((response) => response.data);
+  const refreshImages = async () => {
+    await getImages({ offset: frameIndex, limit }).then((response) => response.data);
+    return false
   };
 
   return (
@@ -88,7 +95,6 @@ const VideoPage: React.FC = () => {
           <div className="flex flex-wrap justify-center h-full pt-[34px]">
             <VideoStream
               imagePaths={imagePaths}
-              loadedImages={loadedImages}
               refreshImages={refreshImages}
               updateFrameIndex={updateFrameIndex}
               progressRate={progress}

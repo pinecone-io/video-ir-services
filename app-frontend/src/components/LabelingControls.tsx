@@ -10,6 +10,7 @@ interface LabelingControlsProps {
   setSelectedBoxes: React.Dispatch<React.SetStateAction<LabeledImage[]>>;
   refreshImages: () => void;
   progressRate: number;
+  handleGotSimilarResults: () => void;
 }
 
 type ImageProps = {
@@ -146,9 +147,8 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
           <img
             src={labeledImage.path}
             alt={labeledImage.label || "no label"}
-            className={`min-w-[192px] w-full h-[127px] rounded-t-xl10 ${
-              loaded ? "" : "hidden"
-            }`}
+            className={`min-w-[192px] w-full h-[127px] rounded-t-xl10 ${loaded ? "" : "hidden"
+              }`}
             onLoad={() => setLoaded(true)}
           />
         </div>
@@ -190,11 +190,14 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
   setSelectedBoxes,
   refreshImages,
   progressRate,
+  handleGotSimilarResults
 }) => {
   //tailwind 10px padding
   const [images, setImages] = useState<Array<LabeledImage>>([]);
 
   const [imagesToLabel, setImagesToLabel] = useState<Array<LabeledImage>>([]);
+  const [searchingForLabel, setSearchingForLabel] = useState<boolean>(false);
+
 
   const [imagesToNegativeLabel, setImagesToNegativeLabel] = useState<
     Array<LabeledImage>
@@ -209,6 +212,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
     boxId: string,
     setLabelFunction: React.Dispatch<React.SetStateAction<LabeledImage[]>>
   ) => {
+    setSearchingForLabel(true)
     const similarResult = await queryBox(boxId, true);
     const similar: LabeledImage[] = await similarResult?.json();
     const similarBoxIds = similar.map((image) => image.boxId);
@@ -228,7 +232,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
             (image) => ![boxId, ...similarBoxIds].includes(image.boxId)
           )
         );
-
+        setSearchingForLabel(false)
         return [...prev, imageCopy, ...similarImagesCopy];
       });
       resolve(null);
@@ -256,6 +260,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
       setIsGood(response.ok);
       setSelectedBoxes(result);
       setImages(result);
+      handleGotSimilarResults()
     };
     getBoxImages();
   }, [selectedBox, setSelectedBoxes]);
@@ -379,9 +384,8 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
           </div>
         )}
         <div
-          className={`${
-            isGood ? "bgGradientLabel min-h-[70px]" : "bgGradient"
-          } w-[606px] pt-[14px] pb-[23px] px-[16px] flex `}
+          className={`${isGood ? "bgGradientLabel min-h-[70px]" : "bgGradient"
+            } w-[606px] pt-[14px] pb-[23px] px-[16px] flex `}
         >
           <div className="mr-[12px]">
             {isGood ? (
@@ -439,18 +443,42 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
               fill="#01004B"
             />
           </svg>
-          <input
-            type="text"
-            className="placeholder-gray-600 border-xs4 border-cta-300 rounded-lg min-w-[771px] h-[50px] bg-white text-gray-600 py-[16px] pl-[57px] pr-[15px]"
-            placeholder="Name selected object with label..."
-            value={labelValue}
-            onChange={(e) => setLabelValue(e.target.value)}
-          />
+          <div className="relative">
+
+            <input
+              type="text"
+              className={`placeholder-gray-600 border-xs4 border-cta-300 rounded-lg min-w-[771px] h-[50px] bg-white text-gray-600 py-[16px] pl-[57px] pr-[15px] ${labeling ? "pl-12" : ""}`}
+              placeholder="Name selected object with label..."
+              value={labelValue}
+              onChange={(e) => setLabelValue(e.target.value)}
+              disabled={labeling}
+            />
+            {labeling && (
+              <svg
+                className="absolute right-4 top-1/3 transform -translate-y-1/3 animate-rotate h-5 w-5 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            )}
+          </div>
         </div>
         <button
-          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[29px] rounded-[5px] h-[50px] ${
-            labeling ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[29px] rounded-[5px] h-[50px] ${labeling ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           onClick={() => {
             submitLabel();
           }}
@@ -466,7 +494,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
       </div>
 
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 border-[0.5px] bg-gray-200 border-black border-opacity-[5%] rounded-md py-[40px] px-[110px] mb-[53px]"
+        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 border-[0.5px] bg-gray-200 border-black border-opacity-[5%] rounded-md py-[40px] px-[110px] mb-[53px] ${searchingForLabel ? "animate-pulse" : ""}`}
         style={{ maxHeight: "40vh", overflow: "auto" }}
       >
         {images.length > 0 ? (
@@ -544,7 +572,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
               {isActive ? "Release to drop" : "Drag a box here"}
             </div>
             <div className="relative">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-1 mb-3 place-items-start justify-items-start">
+              <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-1 mb-3 place-items-start justify-items-start`}>
                 {imagesToLabel.map((labeledImage, index) => {
                   return (
                     <ImageComponent

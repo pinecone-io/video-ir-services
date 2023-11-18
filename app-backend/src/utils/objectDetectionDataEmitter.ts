@@ -6,7 +6,7 @@ class ObjectDetectionDataEmitter {
     private eventEmitter = new EventEmitter();
 
     constructor() {
-        // this.eventEmitter.setMaxListeners(100);
+        this.eventEmitter.setMaxListeners(100);
     }
 
     get odData(): ObjectDetectionData {
@@ -19,6 +19,7 @@ class ObjectDetectionDataEmitter {
     }
 
     addEntry(entry: ObjectDetectionData) {
+        console.log("Adding entry")
         this._odData = { ...this._odData, ...entry }
         this.eventEmitter.emit('odDataAdded', entry)
     }

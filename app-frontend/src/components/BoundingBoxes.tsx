@@ -1,9 +1,7 @@
 import * as d3 from "d3";
-import React, { useEffect, useRef, } from "react";
+import React, { useEffect, useRef, useState, } from "react";
 import { LabeledBoundingBox } from "../types/Box";
-// import { queryBox } from "../services/boxService";
 
-// TODO @rschwabco maybe we should store this data in ImageWithBoundingBoxes object
 const IMAGE_WIDTH = 3840;
 const IMAGE_HEIGHT = 2160;
 
@@ -11,109 +9,115 @@ const BoundingBoxes: React.FC<{
   labeledBoundingBox: LabeledBoundingBox[];
   onBoxSelected: (boxId: string) => void;
   selectedBoxes?: Array<{ boxId: string; label: string }>;
+  loading?: boolean;
 }> = (props) => {
 
-  // const [selectedBoxes, setSelectedBoxes] = useState<
-  //   Array<{ boxId: string; label: string }>
-  // >([]);
+  const [selectedBox, setSelectedBox] = useState<string>("");
   const boxesRef = useRef<SVGSVGElement | null>(null);
   const svg = d3.select(boxesRef.current);
   const boundingClientRect = boxesRef.current?.getBoundingClientRect();
 
-  const calculateX = (x: number) => {
-    return ((boundingClientRect?.width || 0) * x) / IMAGE_WIDTH;
+  const calculateX = (x: number) => ((boundingClientRect?.width || 0) * x) / IMAGE_WIDTH;
+  const calculateY = (y: number) => ((boundingClientRect?.height || 0) * y) / IMAGE_HEIGHT;
+
+  const defaultColor = "rgba(173, 216, 230, 0.9)";
+  const selectedBoxColor = "rgba(165, 93, 224, 0.9)"
+
+  const isBoxSelected = (boxId: string) => props.selectedBoxes?.map((x) => x.boxId).includes(boxId);
+  const getBoxClass = (d: LabeledBoundingBox) => {
+    if (props.loading && d.boxId === selectedBox) {
+      return "loading cursor-pointer bounding-box-rect rect-selected animate-pulse";
+    } else if (d.boxId === selectedBox) {
+      return "cursor-pointer bounding-box-rect rect-selected";
+    } else {
+      return "cursor-pointer bounding-box-rect";
+    }
   };
 
-  const calculateY = (y: number) => {
-    return ((boundingClientRect?.height || 0) * y) / IMAGE_HEIGHT;
+  const getBoxStroke = (d: LabeledBoundingBox) => {
+    if (isBoxSelected(d.boxId)) {
+      return "#9ADD66";
+    } else if (selectedBox === d.boxId) {
+      return selectedBoxColor;
+    } else {
+      return defaultColor;
+    }
   };
 
-  // Update rect color
+  const getBoxText = (d: LabeledBoundingBox) => {
+    let text = `${d?.label} ${(typeof d?.reason !== 'undefined') ? d?.reason : ''}`;
+    if (props.loading && d.boxId === selectedBox) {
+      text += " Loading...";
+    }
+    return text || "";
+  };
+
   useEffect(() => {
     svg
       .selectAll<SVGGElement, LabeledBoundingBox>("rect")
-      .attr("stroke", (d) => {
-        return props.selectedBoxes?.map((x) => x.boxId).includes(d.boxId)
-          ? "#9ADD66"
-          : "#FF1717"
-      }
-      )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.selectedBoxes])
+      .attr("stroke", (d) => getBoxStroke(d));
+  }, [props.selectedBoxes]);
 
+  const handleSelectBox = (box: LabeledBoundingBox) => {
+    setSelectedBox(box.boxId);
+    props.onBoxSelected(box.boxId);
+  }
 
-  // Draw binding boxes
   useEffect(() => {
-    // Bind Data
     const rectGroups = svg
       .selectAll<SVGGElement, LabeledBoundingBox>("g")
       .data(props.labeledBoundingBox, (d) => d.boxId);
 
-    // Remove all obsolete groups
     rectGroups.exit().remove();
 
-    // Create new groups
+    rectGroups
+      .selectAll("rect")
+      .attr("class", (d) => getBoxClass(d))
+      .attr("fill", "rgba(0, 128, 0, 0.9)");
+
     const newGroups = rectGroups
       .enter()
       .append("g")
-      .attr(
-        "transform",
-        (d) => `translate(${calculateX(d.box.left)}, ${calculateY(d.box.top)})`
-      );
+      .attr("transform", (d) => `translate(${calculateX(d.box.left)}, ${calculateY(d.box.top)})`);
 
-    // Create new rect
     newGroups
       .append("rect")
-      .attr("class", "cursor-pointer")
+      .attr("class", getBoxClass)
       .attr("width", (d) => calculateX(d.box.width))
       .attr("height", (d) => calculateY(d.box.height))
-      .attr("stroke-width", 4)
-      .attr("stroke", (d) => {
-        return props.selectedBoxes?.map((x) => x.boxId).includes(d.boxId)
-          ? "#9ADD66"
-          : "#FF1717"
-      }
-      )
+      .attr("stroke-width", 2)
+      .attr("stroke", getBoxStroke)
       .attr("fill-opacity", 0)
-      .on("click", (_, d) => {
-        console.log("box selected", d.boxId)
-        props.onBoxSelected(d.boxId);
-      });
+      .on("click", (_, d) => { handleSelectBox(d) });
 
-    // Create new text
     newGroups
       .append("text")
-      // Reduce top so label is sitting over rect
+      .attr("class", getBoxClass)
       .attr("y", "-5")
       .attr("font-family", "Arial")
-      .attr("font-size", "14px")
+      .attr("font-size", "22px")
+      .attr("font-weight", "bold")
+      .attr("stroke", "black")
+      .attr("stroke-width", "0.5px")
       .attr("fill", "white")
-      .text((d) => `${d?.label} ${d?.reason} | ${d?.boxId}` || "");
+      .text(getBoxText);
 
-    // Update groups
     const updatedGroups = newGroups
       .merge(rectGroups)
-      .attr(
-        "transform",
-        (d) => `translate(${calculateX(d.box.left)}, ${calculateY(d.box.top)})`
-      );
+      .attr("transform", (d) => `translate(${calculateX(d.box.left)}, ${calculateY(d.box.top)})`);
 
-    // Update rects
     updatedGroups
       .selectAll<SVGGElement, LabeledBoundingBox>("rect")
+      .attr("class", getBoxClass)
       .attr("width", (d) => calculateX(d.box.width))
       .attr("height", (d) => calculateY(d.box.height))
-      .attr("stroke", (d) =>
-        props.selectedBoxes?.map((x) => x.boxId).includes(d.boxId)
-          ? "#9ADD66"
-          : "#FF1717"
-      );
+      .attr("stroke", getBoxStroke);
 
-    // Update text
-    updatedGroups.selectAll<SVGGElement, LabeledBoundingBox>("text").text((d) => `${d?.label} ${(typeof d?.reason !== 'undefined') ? d?.reason : ''}` || "");
+    updatedGroups
+      .selectAll<SVGGElement, LabeledBoundingBox>("text")
+      .text(getBoxText);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.labeledBoundingBox]);
+  }, [props.labeledBoundingBox, props.loading]);
 
   return (
     <svg
@@ -125,3 +129,4 @@ const BoundingBoxes: React.FC<{
 };
 
 export default BoundingBoxes;
+

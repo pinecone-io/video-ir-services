@@ -149,6 +149,7 @@ let imageDataKeys: string[] | null
 let sortedKeys: string[] | null
 
 const loadImagesWithOffset = async (offset: number, limit: number): Promise<[ObjectDetectionData, number]> => {
+    console.log(`Loading images with offset ${offset} and limit ${limit}, ${process.env.POD_NAME}`)
     if (!imageDataKeys || !sortedKeys) {
         imageDataKeys = await getAllKeys();
         sortedKeys = sortKeys(imageDataKeys);

@@ -5,7 +5,7 @@ class EmbeddingsCountTracker {
     private eventEmitter = new EventEmitter();
 
     constructor() {
-        // this.eventEmitter.setMaxListeners(100);
+        this.eventEmitter.setMaxListeners(100);
     }
 
     get embeddings(): number {

@@ -11,6 +11,7 @@ import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
 import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter";
 import { DownloaderInstanceTracker } from "./utils/downloaderInstanceTracker";
 import { i } from "mathjs";
+import { ObjectDetectionData } from "./types";
 
 const progressTracker = new ProgressTracker();
 const progressTrackerListener = progressTracker.getEmitter();
@@ -54,6 +55,7 @@ const routes: Route[] = [
       const limit = req.body.limit;
       try {
         const [data, numberOfEntries] = await loadImagesWithOffset(offset, limit);
+        console.log(`Emitting ${data.size} of ${numberOfEntries} entries from ${process.env.POD_NAME}`)
         Object.entries(data).forEach(([key, value]) => {
           objectDetectionDataEmitter.addEntry({ [key]: value });
         });

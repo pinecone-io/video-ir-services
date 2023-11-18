@@ -31,3 +31,8 @@ spec:
         envFrom:
         - secretRef:
             name: app-backend-env
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
