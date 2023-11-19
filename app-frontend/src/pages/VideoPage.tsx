@@ -34,13 +34,15 @@ const VideoPage: React.FC = () => {
         Object.keys(imagePaths).length, nextFetchIndex
       )
       if (
-        !odDataDone
+        !odDataDone && (Object.keys(imagePaths).length < totalImages || totalImages === 0)
       ) {
         fetchingImagesRef.current = true;
         const result = await getImages({ offset: nextFetchIndex, limit });
         const numberOfEntries = result.data.numberOfEntries;
         if (numberOfEntries) {
-          setTotalImages(numberOfEntries);
+          if (totalImages === 0) {
+            setTotalImages(numberOfEntries);
+          }
           setNextFetchIndex((prevIndex) => prevIndex + limit); // Update the nextFetchIndex after fetching
         }
         fetchingImagesRef.current = false;
@@ -48,7 +50,7 @@ const VideoPage: React.FC = () => {
     };
 
     fetchImages();
-  }, [nextFetchIndex, odDataDone, imagePaths]); // Removed fetchingImages
+  }, [nextFetchIndex, odDataDone, imagePaths, totalImages]); // Removed fetchingImages
 
   useEffect(() => {
     if (totalImages === 0) return;
@@ -59,7 +61,6 @@ const VideoPage: React.FC = () => {
   }, [totalImages, imagePaths]);
 
   const handleOdDataAdded = (data: GetImagesDTO) => {
-    console.log(data)
     setImagePaths((prev) => {
       return {
         ...prev,
