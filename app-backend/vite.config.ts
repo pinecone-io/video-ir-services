@@ -9,7 +9,8 @@ export default defineConfig({
     port: 3000,
   },
   optimizeDeps: {
-    exclude: ['fsevents']
+    exclude: ['fsevents'],
+    include: ['ioredis']
   },
   plugins: [
     VitePluginNode({
@@ -20,6 +21,14 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     target: "node18.17.1",
+    rollupOptions: {
+      external: ['ioredis'],
+      output: {
+        globals: {
+          'ioredis': 'ioredis'
+        }
+      }
+    }
   },
   test: {
     globals: true,
@@ -39,5 +48,6 @@ export default defineConfig({
     // Retry the test specific number of times if it fails.
     retry: 5,
     globalSetup: ["server/tests/globalSetup/startUp.ts"],
+
   },
 });

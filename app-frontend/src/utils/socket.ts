@@ -5,6 +5,7 @@ const socket = io('http://167.172.8.153/', {
     reconnection: true,
     secure: true,
     transports: ['websocket'],
+    withCredentials: true
 });
 
 export { socket }

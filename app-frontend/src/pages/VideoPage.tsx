@@ -34,9 +34,7 @@ const VideoPage: React.FC = () => {
         Object.keys(imagePaths).length, nextFetchIndex
       )
       if (
-        !odDataDone &&
-        !fetchingImagesRef.current &&
-        Object.keys(imagePaths).length === nextFetchIndex
+        !odDataDone
       ) {
         fetchingImagesRef.current = true;
         const result = await getImages({ offset: nextFetchIndex, limit });

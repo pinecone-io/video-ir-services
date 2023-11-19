@@ -3,6 +3,18 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { createAdapter } from "socket.io-redis";
+import Redis from 'ioredis';
+
+const pubClient = new Redis({
+  host: process.env.REDIS_HOST,
+  port: parseInt(process.env.REDIS_PORT || '6379')
+});
+const subClient = new Redis({
+  host: process.env.REDIS_HOST,
+  port: parseInt(process.env.REDIS_PORT || '6379')
+});
+
 
 import { downloaderInstancesTrackerListener, logTrackerListener, numberOfEmbeddingsTrackerListener, numberOfObjectsTrackerListener, objectDetectionDataEmitterListener, resolvers } from "./routes";
 import {
@@ -24,9 +36,14 @@ const io = new Server(server, {
   cors: {
     origin: "*", // Allow all origins
     methods: ["GET", "POST"], // Allow GET and POST methods    
+    credentials: true,
   },
   transports: ["polling", "websocket"]
 });
+
+
+io.adapter(createAdapter({ pubClient, subClient }));
+
 // Ensure that Pinecone index exist
 await initIndex();
 
@@ -83,7 +100,7 @@ io.on("connection", (socket) => {
   })
 
   objectDetectionDataEmitterListener.on('odDataAdded', (data: ObjectDetectionData) => {
-    socket.emit('odDataAdded', data)
+    io.emit('odDataAdded', data)
   })
 
   objectDetectionDataEmitterListener.on('odDataDone', (data: ObjectDetectionData) => {
