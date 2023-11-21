@@ -157,7 +157,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
               <FontAwesomeIcon icon={faPause} />
             </button>
           </div>
-          <div className="w-4/5 flex justify-start">
+          <div className="w-4/5 flex justify-start m-3 mt-7">
             <VideoScrubber videoRef={videoRef} />
           </div>
 

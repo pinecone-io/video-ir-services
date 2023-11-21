@@ -17,7 +17,7 @@ const VideoPage: React.FC = () => {
   const [frameIndex, setFrameIndex] = useState(0);
   const [totalImages, setTotalImages] = useState(1);
 
-  const [, setOdDataDone] = useState(false);
+  const [odDataDone, setOdDataDone] = useState(false);
   const limit = 100;
 
   const updateFrameIndex = (frameIndex: number) => {
@@ -40,6 +40,7 @@ const VideoPage: React.FC = () => {
     limit: 100,
     batchCount: 10,
     totalEntries: totalImages,
+    odDataDone,
     updateState: (data) => {
       setTotalImages(data.numberOfEntries)
     }

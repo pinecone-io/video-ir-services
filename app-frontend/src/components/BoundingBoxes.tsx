@@ -23,7 +23,7 @@ const BoundingBoxes: React.FC<{
   const defaultColor = "rgba(173, 216, 230, 0.9)";
   const selectedBoxColor = "rgba(165, 93, 224, 0.9)"
 
-  const isBoxSelected = (boxId: string) => props.selectedBoxes?.map((x) => x.boxId).includes(boxId);
+  const isBoxSelected = (boxId: string) => Array.isArray(props.selectedBoxes) ? props.selectedBoxes?.map((x) => x.boxId).includes(boxId) : false;
   const getBoxClass = (d: LabeledBoundingBox) => {
     if (props.loading && d.boxId === selectedBox) {
       return "loading cursor-pointer bounding-box-rect rect-selected animate-pulse";
