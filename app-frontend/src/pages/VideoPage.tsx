@@ -6,13 +6,11 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
 import { socket } from "../utils/socket";
 import { useFetchImages } from "../hooks/fetchImages";
-import { getSortedKeys } from "../services/getSortredKeys";
+import { getSortedKeys } from "../services/getSortedKeys";
 
 
 const VideoPage: React.FC = () => {
   const [imagePaths, setImagePaths] = useState<GetImagesDTO>({});
-
-  // TODO: Fix this
   const [progress, setProgress] = useState(0);
   const [frameIndex, setFrameIndex] = useState(0);
   const [totalImages, setTotalImages] = useState(1);
@@ -61,6 +59,7 @@ const VideoPage: React.FC = () => {
 
 
   const handleOdDataAdded = (data: GetImagesDTO) => {
+    console.log(data)
     setImagePaths((prev) => {
       const key = Object.keys(data)[0];
       return { ...prev, [key]: data[key] };

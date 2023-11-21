@@ -6,6 +6,7 @@ import ReactFlow, {
     Node,
     Edge,
     useReactFlow,
+    MiniMap
 } from 'reactflow';
 
 import IndexerNodeComponent from './IndexerNode';
@@ -176,7 +177,7 @@ const DataflowC: React.FC<DataflowProps> = ({ indexerInstances, downloaderInstan
     return (
 
         <ReactFlow
-            nodes={nodes}
+            nodes={nodes.map(node => ({ ...node, position: { ...node.position, y: node.position.y - 170 } }))}
             edges={edges}
 
             onNodesChange={onNodesChange}
@@ -184,7 +185,9 @@ const DataflowC: React.FC<DataflowProps> = ({ indexerInstances, downloaderInstan
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             fitView
-        />
+        >
+            <MiniMap nodeStrokeWidth={3} />
+        </ReactFlow>
     );
 }
 

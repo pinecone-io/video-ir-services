@@ -73,30 +73,30 @@ app.get("/ping", (req, res) => res.send("pong2"));
 io.on("connection", (socket) => {
   console.log("A client has connect:", socket.id);
   indexerInstancesTrackerListener.on('instancesUpdated', (data) => {
-    io.emit('instancesUpdated', data)
+    socket.emit('instancesUpdated', data)
   })
 
   progressTrackerListener.on('filesToProcessChanged', (data) => {
-    io.emit('filesToProcessChanged', data)
+    socket.emit('filesToProcessChanged', data)
   })
   progressTrackerListener.on('processedFilesChanged', (data) => {
-    io.emit('processedFilesChanged', data)
+    socket.emit('processedFilesChanged', data)
   })
 
   progressTrackerListener.on('complete', (data) => {
-    io.emit('complete', data)
+    socket.emit('complete', data)
   })
 
   logTrackerListener.on('logUpdated', (data) => {
-    io.emit('logUpdated', data)
+    socket.emit('logUpdated', data)
   })
 
   numberOfObjectsTrackerListener.on('numberOfObjectsUpdated', (data) => {
-    io.emit('numberOfObjectsUpdated', data)
+    socket.emit('numberOfObjectsUpdated', data)
   })
 
   numberOfEmbeddingsTrackerListener.on('numberOfEmbeddingsUpdated', (data) => {
-    io.emit('numberOfEmbeddingsUpdated', data)
+    socket.emit('numberOfEmbeddingsUpdated', data)
   })
 
   objectDetectionDataEmitterListener.on('odDataAdded', (data: ObjectDetectionData) => {
@@ -104,11 +104,11 @@ io.on("connection", (socket) => {
   })
 
   objectDetectionDataEmitterListener.on('odDataDone', (data: ObjectDetectionData) => {
-    io.emit('odDataDone', data)
+    socket.emit('odDataDone', data)
   })
 
   downloaderInstancesTrackerListener.on('downloaderInstancesUpdated', (data) => {
-    io.emit('downloaderInstancesUpdated', data)
+    socket.emit('downloaderInstancesUpdated', data)
   })
 });
 

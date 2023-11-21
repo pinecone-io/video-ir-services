@@ -84,6 +84,7 @@ const IndexingPage: React.FC = () => {
     setIndexers({});
     setCompleted(data);
     setShowModal(true);
+    setStarted(false);
   };
 
   const handleLogUpdated = (data: LogLine): void => {
@@ -193,6 +194,8 @@ const IndexingPage: React.FC = () => {
     }
   }, [logs]);
 
+  console.log(started, completed)
+
   return (
     <div className="min-h-screen text-darkLabel w-full">
       <div className="flex flex-col bg-gray-200 items-center flex-wrap justify-center pb-[35px] mb-[53px]">
@@ -200,7 +203,7 @@ const IndexingPage: React.FC = () => {
           Video Image Recognition
         </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="border-[0.5px] border-black border-opacity-[5%] bg-white formShadow relative pl-[36px] pr-[38px] pt-[62px] mb-[27px]">
+          <div className={`border-[0.5px] border-black border-opacity-[5%] bg-white formShadow relative pl-[36px] pr-[38px] pt-[62px] mb-[27px]`}>
             <div className="flex flex-col mb-[27px]">
               <label
                 htmlFor="youtubeUrl"
@@ -376,8 +379,8 @@ const IndexingPage: React.FC = () => {
                 {completed.status
                   ? "Completed!"
                   : started
-                  ? "Processing..."
-                  : ""}{" "}
+                    ? "Processing..."
+                    : ""}{" "}
                 {(started || completed.status) && (
                   <>
                     {completed.numberOfFilesProcessed > 0 &&
@@ -390,11 +393,10 @@ const IndexingPage: React.FC = () => {
           )}
         </form>
       </div>
-      <div
+      {(started || completed.status) && (<div
         ref={logsContainerRef}
-        className={`mx-auto px-[62px] py-[56px] mb-[50px] text-sm text-white rounded-lg bg-primary-800 ${
-          !started ? "h-[220px]" : "h-[529px]"
-        } whitespace-pre-line overflow-auto w-4/5`}
+        className={`mx-auto px-[62px] pt-[56px] pb-[16px] mb-[50px] text-sm text-white rounded-lg bg-primary-800 ${!started ? "h-[120px]" : "h-[120px]"
+          } whitespace-pre-line overflow-auto w-4/5`}
       >
         <div
           style={{
@@ -418,9 +420,9 @@ const IndexingPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      </div>)}
 
-      <div style={{ height: "100vh", width: "100%" }}>
+      <div style={{ height: "100vh", width: "100%", top: "-200px" }}>
         <Dataflow
           indexerInstances={Object.values(indexers)}
           downloaderInstances={Object.values(downloaders)}

@@ -44,7 +44,7 @@ export const Modal: React.FC<ModalProps> = ({
                     height="56"
                     rx="4"
                     fill="black"
-                    fill-opacity="0.04"
+                    fillOpacity="0.04"
                   />
                   <path
                     d="M25.3292 31.2291L21.8542 27.7541L20.6709 28.9291L25.3292 33.5875L35.3292 23.5875L34.1542 22.4125L25.3292 31.2291Z"
@@ -65,9 +65,8 @@ export const Modal: React.FC<ModalProps> = ({
               {title}
             </h2>
             <p
-              className={`${
-                button ? "pb-[48px]" : "pb-[80px]"
-              } text-cta-200 font-normal text-base16 text-center`}
+              className={`${button ? "pb-[48px]" : "pb-[80px]"
+                } text-cta-200 font-normal text-base16 text-center`}
             >
               {paragraph}
             </p>
