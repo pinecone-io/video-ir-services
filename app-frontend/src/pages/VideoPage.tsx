@@ -1,76 +1,74 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import VideoStream from "../components/VideoStream";
 import { getImages } from "../services/imageService";
 import { GetImagesDTO } from "../types/Box";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
 import { socket } from "../utils/socket";
+import { useFetchImages } from "../hooks/fetchImages";
+import { getSortedKeys } from "../services/getSortredKeys";
+
 
 const VideoPage: React.FC = () => {
   const [imagePaths, setImagePaths] = useState<GetImagesDTO>({});
-  // TODO: Get rid of this
-  // const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
 
   // TODO: Fix this
   const [progress, setProgress] = useState(0);
   const [frameIndex, setFrameIndex] = useState(0);
-  const [nextFetchIndex, setNextFetchIndex] = useState(0); // Add this line
-  const [totalImages, setTotalImages] = useState(0);
+  const [totalImages, setTotalImages] = useState(1);
 
-  const [odDataDone, setOdDataDone] = useState(false);
+  const [, setOdDataDone] = useState(false);
   const limit = 100;
 
   const updateFrameIndex = (frameIndex: number) => {
     setFrameIndex(frameIndex);
   };
 
-  const fetchingImagesRef = useRef(false); // Add this line
-
   useEffect(() => {
-    const fetchImages = async () => {
-      console.log(
-        !odDataDone,
-        !fetchingImagesRef.current,
-        Object.keys(imagePaths).length, nextFetchIndex
-      )
-      if (
-        !odDataDone && (Object.keys(imagePaths).length < totalImages || totalImages === 0)
-      ) {
-        fetchingImagesRef.current = true;
-        const result = await getImages({ offset: nextFetchIndex, limit });
-        const numberOfEntries = result.data.numberOfEntries;
-        if (numberOfEntries) {
-          if (totalImages === 0) {
-            setTotalImages(numberOfEntries);
-          }
-          setNextFetchIndex((prevIndex) => prevIndex + limit); // Update the nextFetchIndex after fetching
-        }
-        fetchingImagesRef.current = false;
-      }
+    const fetchData = async () => {
+      const result = await getSortedKeys();
+      const sortedKeys = result.data.sortedKeys;
+      sortedKeys.forEach((key: string) => {
+        imagePaths[key] = null;
+      })
+      setTotalImages(sortedKeys.length);
     };
+    fetchData();
+  }, []);
 
-    fetchImages();
-  }, [nextFetchIndex, odDataDone, imagePaths, totalImages]); // Removed fetchingImages
+  useFetchImages({
+    limit: 100,
+    batchCount: 10,
+    totalEntries: totalImages,
+    updateState: (data) => {
+      setTotalImages(data.numberOfEntries)
+    }
+  });
+
 
   useEffect(() => {
     if (totalImages === 0) return;
+    const incompleteImages = Object.keys(imagePaths).filter((key) => {
+      return imagePaths[key] === null;
+    });
     const progressRate = Math.round(
-      (Object.keys(imagePaths).length / totalImages) * 100
+
+      ((totalImages - incompleteImages.length) / totalImages) * 100
     );
     setProgress(progressRate);
   }, [totalImages, imagePaths]);
 
+
   const handleOdDataAdded = (data: GetImagesDTO) => {
     setImagePaths((prev) => {
-      return {
-        ...prev,
-        ...data,
-      };
+      const key = Object.keys(data)[0];
+      return { ...prev, [key]: data[key] };
     });
   };
 
   const handleOdDataDone = () => {
     setOdDataDone(true);
+    setProgress(Object.keys(imagePaths).length / totalImages);
   };
 
   useEffect(() => {

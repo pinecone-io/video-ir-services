@@ -20,5 +20,5 @@ export type ImageWithBoundingBoxes = {
 };
 
 export type GetImagesDTO = {
-  [key: string]: ImageWithBoundingBoxes;
+  [key: string]: ImageWithBoundingBoxes | null;
 }

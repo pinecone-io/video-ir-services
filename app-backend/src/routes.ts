@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { labelBoxes, negativeLabel } from "./label";
 import { queryBox } from "./query";
-import { loadImagesWithOffset } from './loadImagesWithOffset'
+import { getNumberOfEntries, getSortedKeys, loadImagesWithOffset } from './loadImagesWithOffset'
 import { resetDB } from "./reset";
 import { ProgressTracker } from './utils/progressTracker'
 import { IndexerInstance, IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
@@ -64,6 +64,31 @@ const routes: Route[] = [
         res.status(500).json({ error: "Error fetching images", message: error });
       }
     },
+  },
+  {
+    route: "/getNumberOfEntries",
+    method: "get",
+    handler: async (req, res) => {
+      try {
+        const numberOfEntries = await getNumberOfEntries();
+        res.status(200).json({ numberOfEntries });
+      } catch (error) {
+        res.status(500).json({ error: "Error fetching images", message: error });
+      }
+    }
+  },
+
+  {
+    route: "/getSortedKeys",
+    method: "get",
+    handler: async (req, res) => {
+      try {
+        const sortedKeys = await getSortedKeys();
+        res.status(200).json({ sortedKeys });
+      } catch (error) {
+        res.status(500).json({ error: "Error fetching images", message: error });
+      }
+    }
   },
 
   {

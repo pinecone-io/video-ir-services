@@ -148,6 +148,22 @@ function isObject(item: any) {
 let imageDataKeys: string[] | null
 let sortedKeys: string[] | null
 
+const getNumberOfEntries = async (): Promise<number> => {
+    if (!imageDataKeys || !sortedKeys) {
+        imageDataKeys = await getAllKeys();
+        sortedKeys = sortKeys(imageDataKeys);
+    }
+    return sortedKeys.length;
+}
+
+const getSortedKeys = async (): Promise<string[]> => {
+    if (!imageDataKeys || !sortedKeys) {
+        imageDataKeys = await getAllKeys();
+        sortedKeys = sortKeys(imageDataKeys);
+    }
+    return sortedKeys;
+}
+
 const loadImagesWithOffset = async (offset: number, limit: number): Promise<[ObjectDetectionData, number]> => {
     console.log(`Loading images with offset ${offset} and limit ${limit}, ${process.env.POD_NAME}`)
     if (!imageDataKeys || !sortedKeys) {
@@ -244,4 +260,6 @@ const loadImagesWithOffset = async (offset: number, limit: number): Promise<[Obj
 
 export {
     loadImagesWithOffset,
+    getNumberOfEntries,
+    getSortedKeys
 }

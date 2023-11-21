@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import LabelingControls, { LabeledImage } from "./LabelingControls";
 import VideoScrubber from "./VideoScrubber";
+// import { FilesLoadingStatus } from "./FilesLoadingStatus";
 
 const CANVAS_WIDTH = 1269;
 const CANVAS_HEIGHT = 707;
@@ -77,9 +78,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
 
   useEffect(() => {
     const key = Object.keys(props.imagePaths)[frameIndex];
-
-    const boundingBoxes: LabeledBoundingBox[] =
-      props.imagePaths[key]?.labeledBoundingBoxes;
+    const boundingBoxes: LabeledBoundingBox[] = props.imagePaths[key]?.labeledBoundingBoxes || [];
     setLabeledBoundingBox(boundingBoxes);
   }, [props.imagePaths, frameIndex]);
 
@@ -122,8 +121,9 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
         >
           <source src={video} type="video/mp4"></source>
         </video>
-        <div className="flex justify-between items-center h-[60px] bg-gray-100 p-4 mb-[50px] bg-gray-200 mt-4">
-          <div className="flex items-center">
+
+        <div className="flex justify-between items-center bg-gray-100 p-4 mt-[10px] bg-gray-200">
+          <div className="flex items-center pt-[15px]">
             <button
               className="m-2 p-[10px] border border-gray-300 rounded-lg shadow-sm hover:shadow-md bg-white hover:bg-gray-200 transition duration-200 ease-in-out text-gray-600"
               onClick={() => {
@@ -160,6 +160,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
           <div className="w-4/5 flex justify-start">
             <VideoScrubber videoRef={videoRef} />
           </div>
+
         </div>
 
 
@@ -177,7 +178,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
           />
         )}
       </div>
-      <div className="flex justify-center  w-full mt-[47px]">
+      <div className="flex justify-center  w-full mt-[67px]">
         <LabelingControls
           progressRate={props.progressRate}
           selectedBox={selectedBox}
@@ -185,6 +186,9 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
           refreshImages={props.refreshImages}
           handleGotSimilarResults={handleGotSimilarResults}
         />
+      </div>
+      <div id="prog" className="flex justify-between flext-grow items-center  bg-gray-100 p-4 mb-[50px] bg-gray-200 mt-4">
+        {/* <FilesLoadingStatus cols={100} rows={10} imagePaths={props.imagePaths} /> */}
       </div>
       <footer className="text-center text-black p-smallFooter w-full bg-white z-50">
         <p className="p-2">All Rights Reserved by Pinecone</p>
