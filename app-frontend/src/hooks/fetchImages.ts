@@ -1,45 +1,74 @@
 import { useState, useEffect } from 'react';
-import { UseQueryOptions, useQueries } from 'react-query';
+import { useQueryClient, UseQueryOptions, QueryFunction } from 'react-query';
 import { getImages } from '../services/imageService';
+import { GetImagesDTO } from '../types/Box';
+
+interface UseFetchImagesParams {
+    limit: number;
+    concurrentFetches: number;
+    updateState: (data: { message: string; numberOfEntries: number; data: GetImagesDTO }) => void;
+    totalEntries: number;
+    delay: number;
+}
+
+interface ImageResponse {
+    message: string;
+    numberOfEntries: number;
+    data: GetImagesDTO;
+}
 
 const useFetchImages = ({
     limit,
-    batchCount,
-    odDataDone,
+    concurrentFetches,
     updateState,
-    totalEntries
-}: {
-    limit: number,
-    batchCount: number,
-    odDataDone: boolean,
-    updateState: (data: { message: string, numberOfEntries: number, index: number }) => void,
-    totalEntries: number
-}) => {
+    totalEntries,
+    delay
+}: UseFetchImagesParams) => {
     const [currentBatch, setCurrentBatch] = useState(0);
-    const [queries, setQueries] = useState<UseQueryOptions[]>([]);
-
+    const queryClient = useQueryClient();
 
     useEffect(() => {
-        if ((currentBatch * batchCount * limit < totalEntries) && !odDataDone) {
-            const offsets = Array.from({ length: batchCount }, (_, i) => (currentBatch * batchCount + i) * limit);
-
-            const newQueries = offsets.map((offset, index) => {
-                return {
+        const fetchBatch = async () => {
+            if (currentBatch * concurrentFetches * limit < totalEntries) {
+                const offsets = Array.from({ length: concurrentFetches }, (_, i) => (currentBatch * concurrentFetches + i) * limit);
+                const newQueries: UseQueryOptions<ImageResponse, unknown, ImageResponse, [string, number]>[] = offsets.map(offset => ({
                     queryKey: ['data', offset],
-                    queryFn: () => getImages({ offset, limit }).then((res) => ({ ...res.data, index })),
-                    onSuccess: (data: { message: string, numberOfEntries: number, index: number, offset: number, limit: number }) => updateState(data),
-                    // Adding retry logic with a maximum of 3 attempts
+                    queryFn: ({ queryKey }) => {
+                        const [, offset] = queryKey as [string, number];
+                        return getImages({ offset, limit }).then(axiosResponse => {
+                            const { message, numberOfEntries, data } = axiosResponse.data;
+                            return { message, numberOfEntries, data };
+                        });
+                    },
+                    onSuccess: (res: ImageResponse) => {
+                        const dataWithIndex = { ...res, index: offset / limit };
+                        updateState(dataWithIndex);
+                    },
                     retry: 3,
                     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-                }
-            }) as UseQueryOptions[];
+                }));
 
-            setQueries(newQueries);
-            setCurrentBatch(currentBatch + 1);
-        }
-    }, [currentBatch, limit, batchCount, updateState, totalEntries, odDataDone]);
+                // Execute the queries for the current batch
+                await Promise.all(newQueries.map(query =>
+                    queryClient.fetchQuery(query.queryKey as [string, number], query.queryFn as QueryFunction<ImageResponse, [string, number]>)
+                        .then(data => {
+                            if (query.queryKey) {
+                                queryClient.setQueryData(query.queryKey, data);
+                                if (query.onSuccess) {
+                                    query.onSuccess(data);
+                                }
+                            }
+                        })
+                ));
+                // Set a delay before fetching the next batch
+                setTimeout(() => {
+                    setCurrentBatch(currentBatch + 1);
+                }, delay * 1000); // 5 seconds delay
+            }
+        };
 
-    useQueries(queries);
+        fetchBatch();
+    }, [currentBatch, limit, concurrentFetches, totalEntries, updateState, queryClient, delay]);
 };
 
-export { useFetchImages }
+export { useFetchImages };

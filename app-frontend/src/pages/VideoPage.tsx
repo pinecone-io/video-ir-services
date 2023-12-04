@@ -4,7 +4,7 @@ import { getImages } from "../services/imageService";
 import { GetImagesDTO } from "../types/Box";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
-import { socket } from "../utils/socket";
+// import { queryEngineSocket as socket } from "../utils/socket";
 import { useFetchImages } from "../hooks/fetchImages";
 import { getSortedKeys } from "../services/getSortedKeys";
 
@@ -15,7 +15,6 @@ const VideoPage: React.FC = () => {
   const [frameIndex, setFrameIndex] = useState(0);
   const [totalImages, setTotalImages] = useState(1);
 
-  const [odDataDone, setOdDataDone] = useState(false);
   const limit = 100;
 
   const updateFrameIndex = (frameIndex: number) => {
@@ -35,50 +34,60 @@ const VideoPage: React.FC = () => {
   }, []);
 
   useFetchImages({
-    limit: 100,
-    batchCount: 10,
+    limit: 30,
+    concurrentFetches: 20,
+    delay: 2,
     totalEntries: totalImages,
-    odDataDone,
-    updateState: (data) => {
-      setTotalImages(data.numberOfEntries)
+    updateState: ({ data, numberOfEntries }) => {
+      setImagePaths((prev) => {
+        const newPaths = { ...prev };
+
+        Object.keys(data).forEach((key) => {
+          newPaths[key] = data[key];
+        });
+
+        return newPaths;
+      });
+      setTotalImages(numberOfEntries)
     }
   });
 
 
   useEffect(() => {
+
     if (totalImages === 0) return;
-    const incompleteImages = Object.keys(imagePaths).filter((key) => {
-      return imagePaths[key] === null;
+    const completeImages = Object.keys(imagePaths).filter((key) => {
+      return imagePaths[key] !== null;
     });
+
     const progressRate = Math.round(
 
-      ((totalImages - incompleteImages.length) / totalImages) * 100
+      (completeImages.length / totalImages) * 100
     );
+
     setProgress(progressRate);
+
   }, [totalImages, imagePaths]);
 
 
-  const handleOdDataAdded = (data: GetImagesDTO) => {
-    console.log(data)
-    setImagePaths((prev) => {
-      const key = Object.keys(data)[0];
-      return { ...prev, [key]: data[key] };
-    });
-  };
+  // const handleOdDataAdded = (data: GetImagesDTO) => {
+  //   console.log(data)
 
-  const handleOdDataDone = () => {
-    setOdDataDone(true);
-    setProgress(Object.keys(imagePaths).length / totalImages);
-  };
+  // };
 
-  useEffect(() => {
-    socket.on("odDataAdded", handleOdDataAdded);
-    socket.on("odDataDone", handleOdDataDone);
-    return () => {
-      socket.off("odDataAdded", handleOdDataAdded);
-      socket.off("odDataDone", handleOdDataDone);
-    };
-  });
+  // const handleOdDataDone = () => {
+  //   setOdDataDone(true);
+  //   setProgress(Object.keys(imagePaths).length / totalImages);
+  // };
+
+  // useEffect(() => {
+  //   socket.on("odDataAdded", handleOdDataAdded);
+  //   socket.on("odDataDone", handleOdDataDone);
+  //   return () => {
+  //     socket.off("odDataAdded", handleOdDataAdded);
+  //     socket.off("odDataDone", handleOdDataDone);
+  //   };
+  // });
 
   const refreshImages = async () => {
     await getImages({ offset: frameIndex, limit }).then((response) => response.data);

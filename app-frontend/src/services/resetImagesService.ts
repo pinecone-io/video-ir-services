@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 
-const NEGATIVE_LABEL_BOXES_API = "http://167.172.8.153/api/resetImages";
+const RESET_IMAGES_SERVER = "http://167.172.8.153/query/resetImages";
 
 export const resetImages = (): Promise<AxiosResponse<string>> =>
-    axios.post(`${NEGATIVE_LABEL_BOXES_API}`)
+    axios.post(`${RESET_IMAGES_SERVER}`)

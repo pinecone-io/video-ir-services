@@ -1,0 +1,71 @@
+{
+  "name": "embedder",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "vite --config ./vite.config.ts build",
+    "dev": "vite --force --config vite.config.ts",
+    "format:server": "eslint . --fix",
+    "lint": "tsc --p . && eslint .",
+    "maintance:depcheck": "pnpm dlx depcheck",
+    "maintance:outdated": "pnpm outdated",
+    "start": "node dist",
+    "test": "vitest run --config vite.config.ts  --coverage --retry 5",
+    "docker": "pnpm docker:build && pnpm docker:tag && pnpm docker:push",
+    "docker:build": "docker build --platform=linux/amd64 -t video-recognition_query-engine .",
+    "docker:tag": "docker tag video-recognition_query-engine registry.digitalocean.com/devrel-registry/video-recognition_query-engine:latest",
+    "docker:push": "docker push registry.digitalocean.com/devrel-registry/video-recognition_query-engine:latest",
+    "docker:run": "docker run -p 3000:3000 video-recognition_query-engine",
+    "docker:local": "pnpm docker:local:build && pnpm docker:local:tag",
+    "docker:local:build": "docker build -t video-recognition_query-engine .",
+    "docker:local:tag": "docker tag video-recognition_query-engine video-recognition_query-engine:local"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.428.0",
+    "@aws-sdk/s3-request-presigner": "^3.428.0",
+    "@pinecone-database/pinecone": "^1.1.1",
+    "@smithy/node-http-handler": "^2.1.7",
+    "@xenova/transformers": "^2.6.2",
+    "express": "^4.18.2",
+    "ioredis": "^5.3.2",
+    "kafkajs": "^2.2.4",
+    "mathjs": "^11.11.2",
+    "redis": "^4.6.10",
+    "sharp": "^0.32.6",
+    "socket.io": "^4.7.2",
+    "socket.io-redis": "^6.1.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.19",
+    "@types/node": "^20.6.2",
+    "@types/supertest": "^2.0.12",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "@vitest/coverage-v8": "^0.34.4",
+    "eslint": "^8.49.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "prettier": "^3.0.3",
+    "supertest": "^6.3.3",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.11",
+    "vite-plugin-node": "^3.0.2",
+    "vite-plugin-static-copy": "^0.17.0",
+    "vitest": "^0.34.4"
+  },
+  "packageManager": "pnpm@8.6.12",
+  "engines": {
+    "node": "18.17.1",
+    "npm": "Please use pnpm 8.6.12",
+    "pnpm": "8.6.12",
+    "yarn": "Please use pnpm 8.6.12"
+  }
+}

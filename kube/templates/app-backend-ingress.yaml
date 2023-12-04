@@ -5,10 +5,10 @@ metadata:
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"    
-    nginx.ingress.kubernetes.io/websocket-services: "{{ .Release.Name }}-{{ .Release.Namespace }}-app-backend"
+    nginx.ingress.kubernetes.io/websocket-services: "{{ .Release.Name }}-{{ .Release.Namespace }}-app-backend,{{ .Release.Name }}-{{ .Release.Namespace }}-query-engine"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     service.beta.kubernetes.io/do-loadbalancer-protocol: http
-    nginx.org/websocket-services: "{{ .Release.Name }}-{{ .Release.Namespace }}-app-backend"
+    nginx.org/websocket-services: "{{ .Release.Name }}-{{ .Release.Namespace }}-app-backend,{{ .Release.Name }}-{{ .Release.Namespace }}-query-engine"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/affinity: "cookie"
@@ -33,9 +33,23 @@ spec:
             port:
               number: 3000      
       - pathType: ImplementationSpecific
+        path: "/query/(.*)"
+        backend:
+          service:
+            name: {{ .Release.Name }}-{{ .Release.Namespace }}-query-engine
+            port:
+              number: 3004  
+      - pathType: ImplementationSpecific
         path: "/app-sockets/socket/(.*)"
         backend:
           service:
             name: {{ .Release.Name }}-{{ .Release.Namespace }}-app-backend
             port:
               number: 3000
+      - pathType: ImplementationSpecific
+        path: "/query-sockets/socket/(.*)"
+        backend:
+          service:
+            name: {{ .Release.Name }}-{{ .Release.Namespace }}-query-engine
+            port:
+              number: 3004

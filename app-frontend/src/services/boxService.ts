@@ -1,4 +1,4 @@
-const GET_BOX_API_PATH = "http://167.172.8.153/api/queryBox?boxId=";
+const GET_BOX_API_PATH = "http://167.172.8.153/query/queryBox?boxId=";
 
 export const queryBox = async (boxId: string, focused: boolean = false): Promise<Response> => {
   return await fetch(GET_BOX_API_PATH, {
