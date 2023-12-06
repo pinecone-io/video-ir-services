@@ -30,18 +30,18 @@ const __dirname = dirname(__filename);
 const app: Express = express();
 const server = createServer(app);
 
-const io = new Server(server, {
-  path: "/app-sockets/socket",
-  cors: {
-    origin: "*", // Allow all origins
-    methods: ["GET", "POST"], // Allow GET and POST methods    
-    credentials: true,
-  },
-  transports: ["polling", "websocket"]
-});
+// const io = new Server(server, {
+//   path: "/app-sockets/socket",
+//   cors: {
+//     origin: "*", // Allow all origins
+//     methods: ["GET", "POST"], // Allow GET and POST methods    
+//     credentials: true,
+//   },
+//   transports: ["polling", "websocket"]
+// });
 
 
-io.adapter(createAdapter({ pubClient, subClient }));
+// io.adapter(createAdapter({ pubClient, subClient }));
 
 // Ensure that Pinecone index exist
 await initIndex();
@@ -69,18 +69,18 @@ app.use("/data", express.static(join(__dirname, PINECONE_DATA_DIR_PATH)));
 app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)));
 app.get("/ping", (req, res) => res.send("pong2"));
 
-io.on("connection", (socket) => {
-  console.log("A client has connect:", socket.id);
+// io.on("connection", (socket) => {
+//   console.log("A client has connect:", socket.id);
 
 
-  objectDetectionDataEmitterListener.on('odDataAdded', (data: ObjectDetectionData) => {
-    io.emit('odDataAdded', data)
-  })
+//   objectDetectionDataEmitterListener.on('odDataAdded', (data: ObjectDetectionData) => {
+//     io.emit('odDataAdded', data)
+//   })
 
-  objectDetectionDataEmitterListener.on('odDataDone', (data: ObjectDetectionData) => {
-    socket.emit('odDataDone', data)
-  })
-});
+//   objectDetectionDataEmitterListener.on('odDataDone', (data: ObjectDetectionData) => {
+//     socket.emit('odDataDone', data)
+//   })
+// });
 
 if (IS_PROD) {
   const port = 3004;

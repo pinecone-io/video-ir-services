@@ -49,6 +49,13 @@ export type BoxResult = {
   category?: string;
 };
 
+export type Match = {
+  metadata: Metadata;
+  score: number;
+  values: number[];
+
+}
+
 export type FileWithReference = {
   boxId: string;
   path: string;

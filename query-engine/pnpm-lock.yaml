@@ -12,8 +12,8 @@ dependencies:
     specifier: ^3.428.0
     version: 3.428.0
   '@pinecone-database/pinecone':
-    specifier: ^1.1.1
-    version: 1.1.1
+    specifier: ^1.1.2
+    version: 1.1.2
   '@smithy/node-http-handler':
     specifier: ^2.1.7
     version: 2.1.7
@@ -1059,8 +1059,8 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@pinecone-database/pinecone@1.1.1:
-    resolution: {integrity: sha512-8af+2fAAkkHC1BIe+op8Tk4YLvJYK1qM2ITuwVmFdNVcHG6oHdXlZdR8GGdOLfYSVuLf4aZid7xhjYUSBqux8Q==}
+  /@pinecone-database/pinecone@1.1.2:
+    resolution: {integrity: sha512-xrvaMWWloTjT70pSxvw+Es2f7qX5lzhtTZBfduagtwGQqK0nFMqS6Jq+1yqzobDaUhqfRfVwRZ95Gm10odqD3Q==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@edge-runtime/types': 2.2.4
