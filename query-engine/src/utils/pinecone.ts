@@ -14,7 +14,7 @@ const pineconeClient = new Pinecone({
 
 export const initIndex = async () => {
   const indexes = (await pineconeClient.listIndexes()).map(
-    (index) => index.name,
+    (index: { name: string }) => index.name,
   );
 
   if (!indexes.includes(PINECONE_INDEX)) {
