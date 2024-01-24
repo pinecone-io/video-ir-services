@@ -123,11 +123,8 @@ const IndexingPage: React.FC = () => {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-
     socket.on("instancesUpdated", handleIndexerInstancesUpdated);
-
     socket.on("complete", handleCompleted);
-
     socket.on("filesToProcessChanged", handleFilesToBeProcessedChanged);
     socket.on("processedFilesChanged", handleProcessedFilesChanged);
     socket.on("logUpdated", handleLogUpdated);

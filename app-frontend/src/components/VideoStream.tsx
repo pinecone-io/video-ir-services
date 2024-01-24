@@ -47,7 +47,6 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
 
   useEffect(() => {
     if (prevSelectedBox.current !== selectedBox) {
-      console.log("!!!!!", selectedBox)
       setLoading(true);
       prevSelectedBox.current = selectedBox;
       const refresh = async () => {
@@ -59,7 +58,6 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
   }, [selectedBox, prevSelectedBox, props]);
 
   const handleGotSimilarResults = async () => {
-    console.log("handleGotSimilarResults");
     setLoading(false);
   }
 

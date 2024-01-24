@@ -36,21 +36,21 @@ queryEngine:
         port: 3004
         targetPort: 3004
 
-appFronend:
+appFrontend:
   deployment:
     image: registry.digitalocean.com/devrel-registry/video-recognition_app-frontend
     imagePullPolicy: Always
   ingress:
     ingressClassName: nginx
 
-downloader:
+frameExtractor:
   deployment:
-    image: "registry.digitalocean.com/devrel-registry/video-recognition_downloader"
+    image: "registry.digitalocean.com/devrel-registry/video-recognition_frame-extractor"
     imagePullPolicy: Always
 
-splitter:
+videoSplitter:
   deployment:
-    image: "registry.digitalocean.com/devrel-registry/video-recognition_splitter"
+    image: "registry.digitalocean.com/devrel-registry/video-recognition_video-splitter"
     imagePullPolicy: Always
 
 indexer:

@@ -2,11 +2,11 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ .Release.Name }}-{{ .Release.Namespace }}-splitter
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-video-splitter
 spec:
   type: LoadBalancer
   selector:
-    app.kubernetes.io/name: {{ .Release.Name }}-splitter
+    app.kubernetes.io/name: {{ .Release.Name }}-video-splitter
   ports:
     - protocol: TCP
       port: 3007

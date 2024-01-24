@@ -62,7 +62,7 @@ kubectl config use-context do-sfo2-virtal-cluster-1
 kubectl config use-context docker-desktop
 
 # Restart pod
-kubectl rollout restart deployment video-ir-dev-downloader -n dev
+kubectl rollout restart deployment video-ir-dev-frame-extractor -n dev
 
 
 #########
@@ -72,7 +72,7 @@ cd app-backend &&
 pnpm docker:build &&
 cd ../app-frontend &&
 pnpm docker:build &&
-cd ../downloader &&
+cd ../frame-extractor &&
 pnpm docker:build &&
 cd ../indexer
 pnpm docker:build &&

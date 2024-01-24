@@ -1,5 +1,5 @@
 {
-  "name": "splitter",
+  "name": "frame-splitter",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,13 +11,13 @@
     "lint": "tsc --p . && eslint .",
     "start": "node dist",
     "docker": "pnpm docker:build && pnpm docker:tag && pnpm docker:push",
-    "docker:build": "docker build --platform=linux/amd64 -t video-recognition_splitter .",
-    "docker:tag": "docker tag video-recognition_splitter registry.digitalocean.com/devrel-registry/video-recognition_splitter:latest",
-    "docker:push": "docker push registry.digitalocean.com/devrel-registry/video-recognition_splitter:latest",
-    "docker:run": "docker run -p 3001:3001 video-recognition_splitter",
+    "docker:build": "docker build --platform=linux/amd64 -t video-recognition_frame-extractor .",
+    "docker:tag": "docker tag video-recognition_frame-extractor registry.digitalocean.com/devrel-registry/video-recognition_frame-extractor:latest",
+    "docker:push": "docker push registry.digitalocean.com/devrel-registry/video-recognition_frame-extractor:latest",
+    "docker:run": "docker run -p 3001:3001 video-recognition_frame-extractor",
     "docker:local": "pnpm docker:local:build && pnpm docker:local:tag",
-    "docker:local:build": "docker build -t video-recognition_splitter .",
-    "docker:local:tag": "docker tag video-recognition_splitter video-recognition_splitter:local"
+    "docker:local:build": "docker build -t video-recognition_frame-extractor .",
+    "docker:local:tag": "docker tag video-recognition_frame-extractor video-recognition_frame-extractor:local"
   },
   "devDependencies": {
     "typescript": "^5.0.2",
@@ -26,17 +26,18 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.428.0",
     "@aws-sdk/s3-request-presigner": "^3.428.0",
+    "@distube/ytdl-core": "^4.13.2",
     "@pinecone-database/pinecone": "^1.1.1",
     "@smithy/node-http-handler": "^2.1.7",
     "@types/express": "^4.17.19",
     "@types/fluent-ffmpeg": "^2.1.22",
     "@types/kafkajs": "^1.9.0",
+    "@types/node": "^20.11.5",
     "express": "^4.18.2",
     "fluent-ffmpeg": "^2.1.2",
     "kafkajs": "^2.2.4",
     "vite-plugin-node": "^3.0.2",
     "vite-plugin-static-copy": "^0.17.0",
-    "vitest": "^0.34.6",
-    "@distube/ytdl-core": "^4.13.2"
+    "vitest": "^0.34.6"
   }
 }

@@ -185,6 +185,10 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   );
 };
 
+const deepCopy = (obj: unknown) => {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 const LabelingControls: React.FC<LabelingControlsProps> = ({
   selectedBox,
   setSelectedBoxes,
@@ -225,8 +229,8 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
         );
         if (!image) return prev;
 
-        const imageCopy = JSON.parse(JSON.stringify(image));
-        const similarImagesCopy = JSON.parse(JSON.stringify(similarImages));
+        const imageCopy = deepCopy(image);
+        const similarImagesCopy = deepCopy(similarImages);
         setImages((prevImages) =>
           prevImages.filter(
             (image) => ![boxId, ...similarBoxIds].includes(image.boxId)
@@ -285,8 +289,6 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
   };
 
   const style: CSSProperties = {
-    // height: "17.81rem",
-    // width: "17.81rem",
     color: "white",
     padding: "1rem",
     display: "flex",

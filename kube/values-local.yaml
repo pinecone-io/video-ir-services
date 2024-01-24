@@ -22,21 +22,21 @@ appBackend:
       port: 3000
       targetPort: 3000
 
-appFronend:
+appFrontend:
   deployment:
     image: video-recognition_app-frontend:local
     imagePullPolicy: Never
   ingress:
     ingressClassName: null
 
-downloader:
+frameExtractor:
   deployment:
-    image: "video-recognition_downloader:local"
+    image: "video-recognition_frame-extractor:local"
     imagePullPolicy: Never
 
-splitter:
+videoSplitter:
   deployment:
-    image: "video-recognition_splitter:local"
+    image: "video-recognition_video-splitter:local"
     imagePullPolicy: Never
 
 indexer:

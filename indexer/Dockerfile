@@ -1,7 +1,7 @@
 # Use an official Node.js runtime as a parent image
 FROM node:18.17.1
 
-# Set the working directory to /downloader
+# Set the working directory to /indexer
 WORKDIR /indexer
 
 # Install pnpm

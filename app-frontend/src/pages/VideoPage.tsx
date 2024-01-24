@@ -4,7 +4,6 @@ import { getImages } from "../services/imageService";
 import { GetImagesDTO } from "../types/Box";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
-// import { queryEngineSocket as socket } from "../utils/socket";
 import { useFetchImages } from "../hooks/fetchImages";
 import { getSortedKeys } from "../services/getSortedKeys";
 
@@ -37,7 +36,7 @@ const VideoPage: React.FC = () => {
     limit: 30,
     concurrentFetches: 20,
     delay: 2,
-    totalEntries: totalImages,
+    totalEntries: 100,
     updateState: ({ data, numberOfEntries }) => {
       setImagePaths((prev) => {
         const newPaths = { ...prev };
@@ -68,26 +67,6 @@ const VideoPage: React.FC = () => {
     setProgress(progressRate);
 
   }, [totalImages, imagePaths]);
-
-
-  // const handleOdDataAdded = (data: GetImagesDTO) => {
-  //   console.log(data)
-
-  // };
-
-  // const handleOdDataDone = () => {
-  //   setOdDataDone(true);
-  //   setProgress(Object.keys(imagePaths).length / totalImages);
-  // };
-
-  // useEffect(() => {
-  //   socket.on("odDataAdded", handleOdDataAdded);
-  //   socket.on("odDataDone", handleOdDataDone);
-  //   return () => {
-  //     socket.off("odDataAdded", handleOdDataAdded);
-  //     socket.off("odDataDone", handleOdDataDone);
-  //   };
-  // });
 
   const refreshImages = async () => {
     await getImages({ offset: frameIndex, limit }).then((response) => response.data);

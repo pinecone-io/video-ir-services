@@ -2,23 +2,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ .Release.Name }}-{{ .Release.Namespace }}-downloader
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-frame-extractor
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}-downloader
+    app.kubernetes.io/name: {{ .Release.Name }}-frame-extractor
 spec:
   replicas: 15
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ .Release.Name }}-downloader
+      app.kubernetes.io/name: {{ .Release.Name }}-frame-extractor
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ .Release.Name }}-downloader
+        app.kubernetes.io/name: {{ .Release.Name }}-frame-extractor
     spec:
       containers:
-      - name: downloader
-        image: {{ .Values.downloader.deployment.image }}
-        imagePullPolicy: {{ .Values.downloader.deployment.imagePullPolicy }}        
+      - name: frame-extractor
+        image: {{ .Values.frameExtractor.deployment.image }}
+        imagePullPolicy: {{ .Values.frameExtractor.deployment.imagePullPolicy }}        
         ports:
         - containerPort: 3001
         env:

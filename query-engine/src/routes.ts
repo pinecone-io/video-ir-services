@@ -66,8 +66,12 @@ const routes: Route[] = [
       const focused = req.body.focused as boolean ?? false;
       try {
         const matches = await queryBox(boxId, focused);
-
-        res.json(matches);
+        if (matches instanceof Error) {
+          res.status(500).json({ error: "Error querying box", message: matches.message });
+        }
+        else {
+          res.json(matches);
+        }
       } catch (error) {
         res.status(500).json({ error: "Error fetching images" });
       }

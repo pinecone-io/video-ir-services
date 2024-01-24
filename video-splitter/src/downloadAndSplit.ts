@@ -1,11 +1,10 @@
 import ffmpeg from "fluent-ffmpeg";
-import fs, { createWriteStream, mkdirSync, existsSync } from "fs";
-import { promises as fsPromises } from 'fs';
+import fs, { createWriteStream, promises as fsPromises } from "fs";
 
 import ytdl from "@distube/ytdl-core";
-import { promisify } from "util";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { promisify } from "util";
 import { generateS3Url, saveToS3Bucket } from "./utils/awsS3";
 import { KafkaProducer } from "./utils/kafka-producer";
 import { log } from "./utils/logger";
@@ -75,10 +74,6 @@ const downloadAndSplit = async (target = "", name = "video", fps = 1, chunkDurat
           await producer.sendMessage(message);
         });
 
-
-        // Remove processed videos
-        // await Promise.all(videos.map((videoOutput) => unlinkAsync(videoOutput.videoPath)));
-
         resolve();
       } catch (error) {
         console.log(`Writable on finish error: ${error}`);
@@ -133,7 +128,6 @@ const split = async (
     let count = 0;
     ffmpeg(videoPath)
       .outputOptions([
-        // `-r ${fps}`, // Set the output frame rate
         '-c copy', // Use stream copy mode to avoid re-encoding
         '-map 0', // Map all streams to the output
         `-segment_time ${chunkDuration}`, // Duration of each segment
@@ -165,103 +159,5 @@ const split = async (
 
   return videoOutputs;
 };
-
-
-
-// const split = async (
-//   videoPath: string,
-//   name: string,
-//   fps: number,
-//   chunkDuration: number,
-//   videoLimit: number
-// ): Promise<VideoOutput[]> => {
-//   const outputFolder = join(__dirname, `temp_files/${name}`);
-
-//   // Create the folder if it doesn't exist
-//   if (!existsSync(outputFolder)) {
-//     mkdirSync(outputFolder, { recursive: true });
-//   }
-
-//   let videoDurationsInSeconds = Math.min(
-//     await videoDuration(videoPath),
-//     videoLimit
-//   );
-
-//   // Reduce video to desierd length and fps before chunking
-//   await cutVideo(
-//     videoPath,
-//     {
-//       videoPath: `split_${videoPath}`,
-//       index: 0
-//     },
-//     0,
-//     videoDurationsInSeconds,
-//     fps
-//   );
-
-//   const cutPromises = [];
-//   for (
-//     let i = 0, len = Math.ceil(videoDurationsInSeconds / chunkDuration);
-//     i < len;
-//     i++
-//   ) {
-//     cutPromises.push(
-//       cutVideo(
-//         `split_${videoPath}`,
-//         {
-//           videoPath: join(outputFolder, `part_${i}.mp4`),
-//           index: i
-//         },
-//         i * chunkDuration,
-//         chunkDuration,
-//         fps
-//       )
-//     );
-//   }
-
-//   const videos = await Promise.all(cutPromises);
-
-//   // Delete local videos
-//   await unlinkAsync(`split_${videoPath}`);
-//   await unlinkAsync(videoPath);
-
-//   return videos;
-// };
-
-// const cutVideo = (
-//   videoPath: string,
-//   videoOutput: VideoOutput,
-//   startTime: number,
-//   duration: number,
-//   fps: number
-// ): Promise<VideoOutput> =>
-//   new Promise(async (resolve, reject) => {
-//     let count = 0
-//     ffmpeg(videoPath)
-//       .fpsOutput(fps)
-//       .setStartTime(startTime)
-//       .setDuration(duration)
-//       .output(videoOutput.videoPath)
-//       .on("end", async function (err) {
-//         await log(`Progress splitting video`);
-//         if (!err) {
-//           resolve(videoOutput);
-//         } else {
-//           reject(err);
-//         }
-//       })
-//       .on("progress", async (progressData) => {
-//         count++
-//         if (count % 10 === 0) {
-//           await log(`: ${count}`);
-//         }
-//         console.log(count)
-//       })
-//       .on("error", (err) => {
-//         console.log("error: ", err);
-//         reject(err);
-//       })
-//       .run();
-//   });
 
 export { downloadAndSplit };

@@ -38,5 +38,6 @@ module.exports = {
     "no-useless-constructor": 0,
     semi: ["error", "always"],
     "prettier/prettier": "error",
+    "quotes": ["error", "double"],
   },
 };

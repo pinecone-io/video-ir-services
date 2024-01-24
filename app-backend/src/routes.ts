@@ -1,17 +1,16 @@
 import { Request, Response } from "express";
 import { labelBoxes, negativeLabel } from "./label";
+import { getNumberOfEntries, getSortedKeys, loadImagesWithOffset } from './loadImagesWithOffset';
 import { queryBox } from "./query";
-import { getNumberOfEntries, getSortedKeys, loadImagesWithOffset } from './loadImagesWithOffset'
 import { resetDB } from "./reset";
-import { ProgressTracker } from './utils/progressTracker'
+import { DownloaderInstanceTracker } from "./utils/downloaderInstanceTracker";
+import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
 import { IndexerInstance, IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
 import { LogTracker } from "./utils/logTracker";
-import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
-import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
 import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter";
-import { DownloaderInstanceTracker } from "./utils/downloaderInstanceTracker";
-import { i } from "mathjs";
-import { ObjectDetectionData } from "./types";
+import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
+import { ProgressTracker } from './utils/progressTracker';
+
 
 const progressTracker = new ProgressTracker();
 const progressTrackerListener = progressTracker.getEmitter();
@@ -148,7 +147,7 @@ const routes: Route[] = [
         indexerInstancesTracker.resetInstancesCounts();
         numberOfObjectsTracker.clearNumberOfObjects();
         numberOfEmbeddingsTracker.clearNumberOfEmbeddings();
-        const response = await fetch("http://video-ir-dev-splitter:3007/api/downloadAndSplit", {
+        const response = await fetch("http://video-ir-dev-video-splitter:3007/api/downloadAndSplit", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -261,12 +260,6 @@ const routes: Route[] = [
 ];
 
 export {
-  routes as resolvers,
-  indexerInstancesTrackerListener,
-  progressTrackerListener,
-  logTrackerListener,
-  numberOfObjectsTrackerListener,
-  numberOfEmbeddingsTrackerListener,
-  objectDetectionDataEmitterListener,
-  downloaderInstancesTrackerListener
+  downloaderInstancesTrackerListener, indexerInstancesTrackerListener, logTrackerListener, numberOfEmbeddingsTrackerListener, numberOfObjectsTrackerListener, objectDetectionDataEmitterListener, progressTrackerListener, routes as resolvers
 };
+

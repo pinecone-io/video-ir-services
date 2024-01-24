@@ -21,8 +21,6 @@ const routes: Route[] = [
                 const name = req.body.name as string;
                 const chunkDuration = req.body.chunkDuration as number;
                 const videoLimit = req.body.videoLimit as number;
-
-                console.log(`Downloading ${target}`)
                 await downloadAndSplit(target, name, fps, chunkDuration, videoLimit);
                 res.json({ message: "Downloaded" });
             } catch (error) {

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: app-frontend
-        image: {{ .Values.appFronend.deployment.image }}
-        imagePullPolicy: {{ .Values.appFronend.deployment.imagePullPolicy }}
+        image: {{ .Values.appFrontend.deployment.image }}
+        imagePullPolicy: {{ .Values.appFrontend.deployment.imagePullPolicy }}
         ports:
         - containerPort: 3005

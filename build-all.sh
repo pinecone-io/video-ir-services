@@ -2,9 +2,9 @@ cd app-backend &&
 pnpm docker &&
 cd ../app-frontend &&
 pnpm docker &&
-cd ../downloader &&
+cd ../frame-extractor &&
 pnpm docker &&
-cd ../splitter &&
+cd ../video-splitter &&
 pnpm docker &&
 cd ../indexer
 pnpm docker &&

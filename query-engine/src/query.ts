@@ -1,4 +1,4 @@
-import { Index, QueryOptions, RecordMetadata } from "@pinecone-database/pinecone";
+import { Index, QueryOptions, RecordMetadata, ScoredPineconeRecord } from "@pinecone-database/pinecone";
 import redis from "./redis";
 import {
   BoxResult,
@@ -31,13 +31,18 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
     const ns: Index<RecordMetadata> = index.namespace(namespace);
 
     const imageUrl = JSON.parse((await redis.hGet("bbox", boxId)) || "{}")!.src;
-    console.log(imageUrl, boxId)
+
+    if (!imageUrl) {
+      return new Error("Image URL is null");
+    }
+
     const embeddingResult = await embedder.embed(imageUrl);
 
-    if (isEmbedderError(embeddingResult)) {
-      console.error("No vector found for ", boxId);
-      return [];
+    if (typeof embeddingResult == "undefined" || isEmbedderError(embeddingResult)) {
+      return new Error("Embedding result is null");
     }
+
+    console.log("EMBEDDING RESULT", embeddingResult.values.length)
 
     const query: QueryOptions = {
       vector: embeddingResult.values,
@@ -54,9 +59,9 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
     const queryResult = await ns.query(query);
 
     const result: BoxResult[] = queryResult.matches
-      ?.filter((match: Match) => match)
-      ?.filter((match: Match) => match.score && match.score > confidence)
-      .map((match: Match) => {
+      ?.filter((match: ScoredPineconeRecord) => match)
+      ?.filter((match: ScoredPineconeRecord) => match.score && match.score > confidence)
+      .map((match: ScoredPineconeRecord) => {
         return {
           boxId: (match.metadata as Metadata).boxId,
           label: (match.metadata as Metadata).label,
@@ -69,7 +74,7 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
 
 
     const vectors: Vector[] = queryResult.matches?.map(
-      (match: Match) => match.values,
+      (match: ScoredPineconeRecord) => match.values,
     ) as Vector[];
 
     // detect whether one of the "label" values on queryResult is not undefined
@@ -105,8 +110,8 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
           includeMetadata: true,
         });
         labeledBoxed = labelQueryResult.matches
-          ?.filter((match: Match) => match)
-          .map((match: Match) => ({
+          ?.filter((match: ScoredPineconeRecord) => match)
+          .map((match: ScoredPineconeRecord) => ({
             boxId: (match.metadata as Metadata).boxId,
             label: (match.metadata as Metadata).label,
             path: (match.metadata as Metadata).imagePath,
@@ -116,7 +121,7 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
           })) as BoxResult[];
       }
 
-      let additionalBoxes: BoxResult[][] | undefined;
+      let additionalBoxes: BoxResult[] | undefined;
 
       const additionalQuery = await ns.query({
         vector: averageVector,
@@ -130,16 +135,16 @@ const queryBox: (boxId: string, focused?: boolean) => Promise<BoxResult[] | Erro
       });
 
       additionalBoxes = additionalQuery.matches
-        ?.filter((match: Match) => match)
-        ?.filter((match: Match) => match.score && match.score > confidence)
-        .map((match: Match) => ({
+        ?.filter((match: ScoredPineconeRecord) => match && match.metadata?.boxId)
+        ?.filter((match: ScoredPineconeRecord) => match.score && match.score > confidence)
+        .map((match: ScoredPineconeRecord) => ({
           boxId: (match.metadata as Metadata).boxId,
           label: (match.metadata as Metadata).label,
           path: (match.metadata as Metadata).imagePath,
           frameIndex: (match.metadata as Metadata).frameIndex,
           score: match.score,
           category: 'similarToAverage',
-        }));
+        })) as BoxResult[];
 
 
       if (additionalBoxes) {

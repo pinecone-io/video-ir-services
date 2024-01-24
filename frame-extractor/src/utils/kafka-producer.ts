@@ -1,5 +1,5 @@
 import { Admin, Kafka, Partitioners, Producer, logLevel } from 'kafkajs';
-import { log, trackFile } from './logger';
+import { log } from './logger';
 
 const KAFKA_BROKER = "kafka-dev"
 
@@ -20,18 +20,16 @@ class KafkaProducer {
             createPartitioner: Partitioners.DefaultPartitioner
         });
         this.admin = kafka.admin();
-        this.topic = "video-splits-1";
+        this.topic = "frames";
         this.isConnected = false;
     }
 
     private async createTopics() {
+        console.log("creating topics")
         await this.admin.connect();
-        const topics = await this.admin.listTopics();
-        if (!topics.includes(this.topic)) {
-            await this.admin.createTopics({
-                topics: [{ topic: this.topic, numPartitions: 15 }],
-            });
-        }
+        await this.admin.createTopics({
+            topics: [{ topic: this.topic, numPartitions: 40 }],
+        });
         await this.admin.disconnect();
     }
 

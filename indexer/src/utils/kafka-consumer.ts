@@ -1,4 +1,4 @@
-import { Kafka, Consumer, KafkaMessage, logLevel } from "kafkajs";
+import { Consumer, Kafka, KafkaMessage, logLevel } from "kafkajs";
 
 const KAFKA_BROKER = "kafka-dev";
 
@@ -12,7 +12,7 @@ async function createKafkaConsumer(
       brokers: [`${KAFKA_BROKER}:9092`],
       logLevel: logLevel.INFO,
     });
-    const topic = "topic-8";
+    const topic = "frames";
     const consumerGroupId = "group-1"; // This has to be the same for all consumers
     consumer = kafka.consumer({ groupId: consumerGroupId });
 

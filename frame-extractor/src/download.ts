@@ -1,43 +1,18 @@
-import ffmpeg, { FfprobeData } from "fluent-ffmpeg";
-import fs, { createWriteStream, mkdirSync, existsSync } from "fs";
+import ffmpeg from "fluent-ffmpeg";
+import fs, { createWriteStream, existsSync, mkdirSync } from "fs";
 
 import ytdl from "@distube/ytdl-core";
-import { promisify } from "util";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { generateS3Url, getS3Object, saveToS3Bucket } from "./utils/awsS3";
+import { promisify } from "util";
+import { generateS3Url, saveToS3Bucket } from "./utils/awsS3";
 import { KafkaProducer } from "./utils/kafka-producer";
 import { log, trackFile } from "./utils/logger";
-import { AWS_REGION, AWS_S3_BUCKET } from "./utils/environment";
+import { videoDuration } from "./utils/videoUtils";
+
 const unlinkAsync = promisify(fs.unlink);
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
 const producer = new KafkaProducer();
-
-const getVideoFps = (videoPath: string): Promise<number> =>
-  new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(videoPath, function (err: Error, metadata: FfprobeData) {
-      if (err) {
-        reject(err);
-      } else {
-        const stream = metadata.streams[0];
-        if (stream && stream.r_frame_rate) {
-          // r_frame_rate is the rate at which frames are emitted from the decoder
-          const frameRate = stream.r_frame_rate;
-          // frameRate is a string in the format "num/den", so we need to calculate the actual fps
-          const [num, den] = frameRate.split('/').map(Number);
-          if (num !== undefined && den !== undefined && !isNaN(num) && !isNaN(den)) {
-            resolve(num / den);
-          } else {
-            reject(new Error('Invalid frame rate format'));
-          }
-        } else {
-          reject(new Error('No stream data or frame rate found'));
-        }
-      }
-    });
-  });
 
 const extractFrames = async (
   videoPath: string,
@@ -54,9 +29,6 @@ const extractFrames = async (
     if (!existsSync(outputFolder)) {
       mkdirSync(outputFolder, { recursive: true });
     }
-
-    // const probedFps = await getVideoFps(videoPath);
-    await log(`Found FPS ${fps}}`);
     // Use fluent-ffmpeg to extract frames
     ffmpeg(videoPath)
       .outputOptions([`-vf fps=${fps}`])
@@ -162,23 +134,17 @@ const downloadFromYoutube = async (
 const downloadFromS3 = async ({
   videoPath = "",
   index,
-  target = "",
   name = "video",
   fps = 1,
-  chunkDuration = 5,
-  videoLimit = Number.MAX_SAFE_INTEGER,
 }: {
   videoPath?: string,
   index: string,
-  target?: string,
   name?: string,
   fps?: number,
-  chunkDuration?: number,
   videoLimit?: number,
 }) => {
   // await log(`Attempting to download ${target}. \nFirst, attempting to connect to Kafka`);
   await producer.connect();
-  console.log("INSIDE", index)
 
   const videoPathDownload = `${name}.mp4`;
   await log(`Downloading video part ${videoPathDownload}... ${index}`);
@@ -203,16 +169,6 @@ const downloadFromS3 = async ({
   });
 };
 
-const videoDuration = (videoPath: string): Promise<number> =>
-  new Promise((resolve, reject) =>
-    ffmpeg.ffprobe(videoPath, function (err, metadata) {
-      if (!err) {
-        resolve(metadata.format.duration as number);
-      } else {
-        reject(err);
-      }
-    })
-  );
 
 const split = async (
   videoPath: string,
@@ -295,4 +251,5 @@ const cutVideo = (
       .run();
   });
 
-export { downloadFromYoutube, downloadFromS3 };
+export { downloadFromS3, downloadFromYoutube };
+

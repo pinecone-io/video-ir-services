@@ -1,18 +1,19 @@
 import React, { useCallback, useEffect } from 'react';
 import ReactFlow, {
-    ReactFlowProvider,
-    useNodesState,
-    useEdgesState,
-    Node,
     Edge,
-    useReactFlow,
-    MiniMap
+    MiniMap,
+    Node,
+    ReactFlowProvider,
+    useEdgesState,
+    useNodesState,
+    useReactFlow
 } from 'reactflow';
 
+import 'reactflow/dist/style.css';
+import CustomEdge from './CustomEdge';
+import DownloaderNode from './DownloaderNode';
 import IndexerNodeComponent from './IndexerNode';
 import StaticNodeComponent from './StaticNode';
-import DownloaderNode from './DownloaderNode'
-import CustomEdge from './CustomEdge';
 
 export interface IndexerInstance {
     id: string;
@@ -26,8 +27,6 @@ export interface DownloaderInstance {
     ready: boolean;
     framesProduced: number;
 }
-
-import 'reactflow/dist/style.css';
 
 
 interface NodeData {
@@ -179,7 +178,6 @@ const DataflowC: React.FC<DataflowProps> = ({ indexerInstances, downloaderInstan
         <ReactFlow
             nodes={nodes.map(node => ({ ...node, position: { ...node.position, y: node.position.y - 170 } }))}
             edges={edges}
-
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             nodeTypes={nodeTypes}
