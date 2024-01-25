@@ -1,36 +1,37 @@
-import React, { useEffect, useState } from "react";
-import VideoStream from "../components/VideoStream";
-import { getImages } from "../services/imageService";
-import { GetImagesDTO } from "../types/Box";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { DndProvider } from "react-dnd";
-import { useFetchImages } from "../hooks/fetchImages";
-import { getSortedKeys } from "../services/getSortedKeys";
-
+import React, { useEffect, useState } from "react"
+import VideoStream from "../components/VideoStream"
+import { getImages } from "../services/imageService"
+import { GetImagesDTO } from "../types/Box"
+import { HTML5Backend } from "react-dnd-html5-backend"
+import { DndProvider } from "react-dnd"
+import { useFetchImages } from "../hooks/fetchImages"
+import { getSortedKeys } from "../services/getSortedKeys"
 
 const VideoPage: React.FC = () => {
-  const [imagePaths, setImagePaths] = useState<GetImagesDTO>({});
-  const [progress, setProgress] = useState(0);
-  const [frameIndex, setFrameIndex] = useState(0);
-  const [totalImages, setTotalImages] = useState(1);
+  const [imagePaths, setImagePaths] = useState<GetImagesDTO>({})
+  const [progress, setProgress] = useState(0)
+  const [frameIndex, setFrameIndex] = useState(0)
+  const [totalImages, setTotalImages] = useState(1)
 
-  const limit = 100;
+  const limit = 100
 
+  // eslint-disable-next-line no-shadow
   const updateFrameIndex = (frameIndex: number) => {
-    setFrameIndex(frameIndex);
-  };
+    setFrameIndex(frameIndex)
+  }
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await getSortedKeys();
-      const sortedKeys = result.data.sortedKeys;
+      const result = await getSortedKeys()
+      const sortedKeys = result.data.sortedKeys
       sortedKeys.forEach((key: string) => {
-        imagePaths[key] = null;
+        imagePaths[key] = null
       })
-      setTotalImages(sortedKeys.length);
-    };
-    fetchData();
-  }, []);
+      setTotalImages(sortedKeys.length)
+    }
+    fetchData()
+  }, [imagePaths])
+  //TODO: Check if this effect dependency is necessary
 
   useFetchImages({
     limit: 30,
@@ -39,39 +40,39 @@ const VideoPage: React.FC = () => {
     totalEntries: 100,
     updateState: ({ data, numberOfEntries }) => {
       setImagePaths((prev) => {
-        const newPaths = { ...prev };
+        const newPaths = { ...prev }
 
         Object.keys(data).forEach((key) => {
-          newPaths[key] = data[key];
-        });
+          newPaths[key] = data[key]
+        })
 
-        return newPaths;
-      });
+        return newPaths
+      })
       setTotalImages(numberOfEntries)
     }
-  });
+  })
 
 
   useEffect(() => {
 
-    if (totalImages === 0) return;
+    if (totalImages === 0) return
     const completeImages = Object.keys(imagePaths).filter((key) => {
-      return imagePaths[key] !== null;
-    });
+      return imagePaths[key] !== null
+    })
 
     const progressRate = Math.round(
 
       (completeImages.length / totalImages) * 100
-    );
+    )
 
-    setProgress(progressRate);
+    setProgress(progressRate)
 
-  }, [totalImages, imagePaths]);
+  }, [totalImages, imagePaths])
 
   const refreshImages = async () => {
-    await getImages({ offset: frameIndex, limit }).then((response) => response.data);
+    await getImages({ offset: frameIndex, limit }).then((response) => response.data)
     return false
-  };
+  }
 
   return (
     <>
@@ -88,7 +89,7 @@ const VideoPage: React.FC = () => {
         </div>
       </DndProvider>
     </>
-  );
-};
+  )
+}
 
-export default VideoPage;
+export default VideoPage

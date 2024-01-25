@@ -1,4 +1,4 @@
-import { ModalProps } from "../types/Modal";
+import { ModalProps } from "../types/Modal"
 
 export const Modal: React.FC<ModalProps> = ({
   title,
@@ -84,5 +84,5 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

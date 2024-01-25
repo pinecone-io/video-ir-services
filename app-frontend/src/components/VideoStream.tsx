@@ -1,20 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { LabeledBoundingBox, GetImagesDTO } from "../types/Box";
-import BoundingBoxes from "./BoundingBoxes";
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { LabeledBoundingBox, GetImagesDTO } from "../types/Box"
+import BoundingBoxes from "./BoundingBoxes"
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
   faPlay,
   faPause,
   faChevronLeft,
   faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
-import LabelingControls, { LabeledImage } from "./LabelingControls";
-import VideoScrubber from "./VideoScrubber";
+} from "@fortawesome/free-solid-svg-icons"
+import LabelingControls, { LabeledImage } from "./LabelingControls"
+import VideoScrubber from "./VideoScrubber"
 // import { FilesLoadingStatus } from "./FilesLoadingStatus";
 
-const CANVAS_WIDTH = 1269;
-const CANVAS_HEIGHT = 707;
+const CANVAS_WIDTH = 1269
+const CANVAS_HEIGHT = 707
 
 type VideoStreamProps = {
   imagePaths: GetImagesDTO;
@@ -27,79 +27,79 @@ type VideoStreamProps = {
 const VideoStream: React.FC<VideoStreamProps> = (props) => {
   const [labeledBoundingBox, setLabeledBoundingBox] = useState<
     LabeledBoundingBox[]
-  >([]);
+  >([])
 
 
-  const FPS = 25;
+  const FPS = 25
 
   // TODO: Get this from the backend
   const video =
-    "https://video-streaming-images.s3.us-west-2.amazonaws.com/car-race/video/car-race.mp4";
+    "https://video-streaming-images.s3.us-west-2.amazonaws.com/car-race/video/car-race.mp4"
 
-  const [frameIndex, setFrameIndex] = useState<number>(0);
-  const [isPlaying, setPlay] = useState<boolean>(true);
-  const [selectedBox, setSelectedBox] = useState<string>("");
-  const [selectedBoxes, setSelectedBoxes] = useState<LabeledImage[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const prevSelectedBox = useRef(selectedBox);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [frameIndex, setFrameIndex] = useState<number>(0)
+  const [isPlaying, setPlay] = useState<boolean>(true)
+  const [selectedBox, setSelectedBox] = useState<string>("")
+  const [selectedBoxes, setSelectedBoxes] = useState<LabeledImage[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const prevSelectedBox = useRef(selectedBox)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
 
 
   useEffect(() => {
     if (prevSelectedBox.current !== selectedBox) {
-      setLoading(true);
-      prevSelectedBox.current = selectedBox;
+      setLoading(true)
+      prevSelectedBox.current = selectedBox
       const refresh = async () => {
-        await props.refreshImages();
+        await props.refreshImages()
 
       }
       refresh()
     }
-  }, [selectedBox, prevSelectedBox, props]);
+  }, [selectedBox, prevSelectedBox, props])
 
   const handleGotSimilarResults = async () => {
-    setLoading(false);
+    setLoading(false)
   }
 
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying) return
     const intervalId = setInterval(() => {
-      props.updateFrameIndex(frameIndex + 1);
-    }, 1000 / FPS);
+      props.updateFrameIndex(frameIndex + 1)
+    }, 1000 / FPS)
 
     return () => {
-      intervalId && clearInterval(intervalId);
-    };
+      intervalId && clearInterval(intervalId)
+    }
     // TODO: Fix this dependency array
-  }, [frameIndex, isPlaying, FPS, props]);
+  }, [frameIndex, isPlaying, FPS, props])
 
   useEffect(() => {
-    const key = Object.keys(props.imagePaths)[frameIndex];
-    const boundingBoxes: LabeledBoundingBox[] = props.imagePaths[key]?.labeledBoundingBoxes || [];
-    setLabeledBoundingBox(boundingBoxes);
-  }, [props.imagePaths, frameIndex]);
+    const key = Object.keys(props.imagePaths)[frameIndex]
+    const boundingBoxes: LabeledBoundingBox[] = props.imagePaths[key]?.labeledBoundingBoxes || []
+    setLabeledBoundingBox(boundingBoxes)
+  }, [props.imagePaths, frameIndex])
 
 
   const onEachFrame = useCallback(() => {
-    const time = videoRef.current?.currentTime;
+    const time = videoRef.current?.currentTime
     if (time) {
-      const frame = Math.floor(time * FPS);
-      setFrameIndex(frame);
-      props.updateFrameIndex(frame);
+      const frame = Math.floor(time * FPS)
+      setFrameIndex(frame)
+      props.updateFrameIndex(frame)
     }
-    requestAnimationFrame(onEachFrame);
-  }, [props]);
+    requestAnimationFrame(onEachFrame)
+  }, [props])
 
   useEffect(() => {
-    requestAnimationFrame(onEachFrame);
-  }, [onEachFrame]);
+    requestAnimationFrame(onEachFrame)
+  }, [onEachFrame])
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.playbackRate = 1;
+      videoRef.current.playbackRate = 1
     }
-  }, []);
+  }, [])
 
 
 
@@ -126,7 +126,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
               className="m-2 p-[10px] border border-gray-300 rounded-lg shadow-sm hover:shadow-md bg-white hover:bg-gray-200 transition duration-200 ease-in-out text-gray-600"
               onClick={() => {
                 if (videoRef.current) {
-                  videoRef.current.currentTime -= 1 / FPS; // Rewind by one frame
+                  videoRef.current.currentTime -= 1 / FPS // Rewind by one frame
                 }
               }}
             >
@@ -136,7 +136,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
               className="m-2 p-[10px] border border-gray-300 rounded-lg shadow-sm hover:shadow-md bg-white hover:bg-gray-200 transition duration-200 ease-in-out text-gray-600"
               onClick={() => {
                 if (videoRef.current) {
-                  videoRef.current.currentTime += 1 / FPS; // Fast forward by one frame
+                  videoRef.current.currentTime += 1 / FPS // Fast forward by one frame
                 }
               }}
             >
@@ -170,8 +170,8 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
             selectedBoxes={selectedBoxes}
             loading={loading}
             onBoxSelected={(boxId: string) => {
-              setSelectedBox(boxId);
-              setPlay(false);
+              setSelectedBox(boxId)
+              setPlay(false)
             }}
           />
         )}
@@ -192,7 +192,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
         <p className="p-2">All Rights Reserved by Pinecone</p>
       </footer>
     </>
-  );
-};
+  )
+}
 
-export default VideoStream;
+export default VideoStream

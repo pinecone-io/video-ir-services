@@ -1,3 +1,5 @@
+import type { Request, Response } from "express"
+
 export type Metadata = {
   boxId?: string;
   imagePath?: string;
@@ -66,9 +68,12 @@ export type ObjectDetectionData = {
   [key: string]: ImageWithBoundingBoxes;
 };
 
-
 export type LabeledBoxSetItem = { boxId: string; label: string };
 
 export type Vector = number[];
 
-
+export interface Route {
+  route: string;
+  method: "get" | "post" | "put" | "delete";
+  handler: (req: Request, res: Response) => void;
+}

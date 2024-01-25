@@ -61,11 +61,11 @@
     "vite-plugin-static-copy": "^0.17.0",
     "vitest": "^0.34.4"
   },
-  "packageManager": "pnpm@8.6.12",
+  "packageManager": "pnpm@8.14.3",
   "engines": {
     "node": "18.17.1",
-    "npm": "Please use pnpm 8.6.12",
-    "pnpm": "8.6.12",
-    "yarn": "Please use pnpm 8.6.12"
+    "npm": "Please use pnpm 8.14.3",
+    "pnpm": "8.14.3",
+    "yarn": "Please use pnpm 8.14.3"
   }
 }

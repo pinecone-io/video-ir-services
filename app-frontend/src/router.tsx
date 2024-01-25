@@ -1,7 +1,7 @@
-import VideoPage from "./pages/VideoPage";
-import IndexingPage from "./pages/IndexingPage";
-import { createBrowserRouter } from "react-router-dom";
-import Layout from "./components/Layout";
+import VideoPage from "./pages/VideoPage"
+import IndexingPage from "./pages/IndexingPage"
+import { createBrowserRouter } from "react-router-dom"
+import Layout from "./components/Layout"
 
 const router = createBrowserRouter([
   {
@@ -17,6 +17,6 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+])
 
-export default router;
+export default router

@@ -1,39 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react"
 
 interface VideoScrubberProps {
     videoRef: React.RefObject<HTMLVideoElement>;
 }
 
 const VideoScrubber: React.FC<VideoScrubberProps> = ({ videoRef }) => {
-    const [progress, setProgress] = useState(0);
+    const [progress, setProgress] = useState(0)
 
     useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
+        const video = videoRef.current
+        if (!video) return
 
         const updateProgress = () => {
-            const currentTime = video.currentTime;
-            const duration = video.duration;
-            setProgress((currentTime / duration) * 100);
-        };
+            const currentTime = video.currentTime
+            const duration = video.duration
+            setProgress((currentTime / duration) * 100)
+        }
 
-        video.addEventListener('timeupdate', updateProgress);
+        video.addEventListener("timeupdate", updateProgress)
 
         return () => {
-            video.removeEventListener('timeupdate', updateProgress);
-        };
-    }, [videoRef]);
+            video.removeEventListener("timeupdate", updateProgress)
+        }
+    }, [videoRef])
 
     const handleScrub = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const video = videoRef.current;
-        if (!video) return;
+        const video = videoRef.current
+        if (!video) return
 
-        const newProgress = parseFloat(e.target.value);
-        setProgress(newProgress);
+        const newProgress = parseFloat(e.target.value)
+        setProgress(newProgress)
 
-        const newTime = (newProgress / 100) * video.duration;
-        video.currentTime = newTime;
-    };
+        const newTime = (newProgress / 100) * video.duration
+        video.currentTime = newTime
+    }
 
     return (
         <input
@@ -45,7 +45,7 @@ const VideoScrubber: React.FC<VideoScrubberProps> = ({ videoRef }) => {
             onChange={handleScrub}
             className="w-full"
         />
-    );
-};
+    )
+}
 
-export default VideoScrubber;
+export default VideoScrubber

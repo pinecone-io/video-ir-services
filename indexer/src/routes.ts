@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { indexImages } from "./indexImages";
+import { Request, Response } from "express"
+import { indexImages } from "./indexImages"
 
 interface Route {
   route: string;
@@ -13,13 +13,13 @@ const routes: Route[] = [
     method: "get",
     handler: async (req, res) => {
       try {
-        const name = req.query.name as string;
-        const limit = req.query.limit as number | undefined;
-        await indexImages({ name, limit });
-        res.status(200).json({ message: "Indexing complete" });
+        const name = req.query.name as string
+        const limit = req.query.limit as number | undefined
+        await indexImages({ name, limit })
+        res.status(200).json({ message: "Indexing complete" })
       } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Error indexing images" });
+        console.log(error)
+        res.status(500).json({ error: "Error indexing images" })
       }
     },
   },
@@ -27,9 +27,9 @@ const routes: Route[] = [
     route: "/health",
     method: "get",
     handler: (_, res) => {
-      res.status(200).json({ message: "Indexer server is healthy :)" });
+      res.status(200).json({ message: "Indexer server is healthy :)" })
     },
   },
-];
+]
 
-export { routes as resolvers };
+export { routes as resolvers }

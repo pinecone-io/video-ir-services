@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
-import { Box } from '@react-three/drei';
-import * as THREE from 'three';
-import { Mesh, Group } from 'three';
+import React, { useEffect, useRef } from "react"
+import { Canvas, useThree } from "@react-three/fiber"
+import { Box } from "@react-three/drei"
+import { MeshStandardMaterial, Mesh, Group } from "three"
 
-import { GetImagesDTO } from '../types/Box';
+import { GetImagesDTO } from "../types/Box"
 
 const MyBox = ({
     key,
@@ -25,24 +24,23 @@ const MyBox = ({
     rowIndex: number,
     image: GetImagesDTO[keyof GetImagesDTO]
 }) => {
-    const meshRef = useRef<Mesh>();
+    const meshRef = useRef<Mesh>()
 
     // Function to update scale
     const updateMeshScale = (hover: boolean) => {
-        if (!meshRef.current) return;
+        if (!meshRef.current) return
 
-        const scale = hover ? 1.1 : 1;
-        meshRef.current.scale.set(scale, scale, scale);
-    };
-
-    // Set color based on image presence
-    const color = image ? 0x00ff00 : 'grey'; // Green if image is truthy, grey otherwise
+        const scale = hover ? 1.1 : 1
+        meshRef.current.scale.set(scale, scale, scale)
+    }
 
     useEffect(() => {
-        if (!meshRef.current) return;
-        const color = image ? 0x00ff00 : 'grey';
-        (meshRef.current.material as THREE.MeshStandardMaterial).color.set(color);
-    }, [color]);
+        // Set color based on image presence
+        const color = image ? 0x00ff00 : "grey" // Green if image is truthy, grey otherwise
+        if (!meshRef.current) return    
+        (meshRef.current.material as MeshStandardMaterial).color.set(color)
+    }, [image])
+
 
     return (
         <Box
@@ -59,10 +57,10 @@ const MyBox = ({
             onPointerOver={() => updateMeshScale(true)}
             onPointerOut={() => updateMeshScale(false)}
         />
-    );
-};
+    )
+}
 
-export default MyBox;
+export default MyBox
 
 interface GridProps {
     cols: number;
@@ -71,19 +69,19 @@ interface GridProps {
 }
 
 const Grid: React.FC<GridProps> = ({ cols, rows, imagePaths }) => {
-    const groupRef = useRef<Group>(null);
-    const { viewport } = useThree();
+    const groupRef = useRef<Group>(null)
+    const { viewport } = useThree()
 
     const renderGrid = () => {
-        const elements = [];
-        const boxSize = Math.min(viewport.width / cols, viewport.height / rows);
-        const spacing = 0.1 * boxSize;  // Adjust spacing relative to box size
+        const elements = []
+        const boxSize = Math.min(viewport.width / cols, viewport.height / rows)
+        const spacing = 0.1 * boxSize  // Adjust spacing relative to box size
 
         for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
             for (let colIndex = 0; colIndex < cols; colIndex++) {
-                const index = rowIndex * cols + colIndex;
-                const key = Object.keys(imagePaths)[index];
-                const image = imagePaths[key];
+                const index = rowIndex * cols + colIndex
+                const key = Object.keys(imagePaths)[index]
+                const image = imagePaths[key]
 
                 if (key) {
                     elements.push(
@@ -97,19 +95,19 @@ const Grid: React.FC<GridProps> = ({ cols, rows, imagePaths }) => {
                             rowIndex={rowIndex}
                             image={image}
                         />
-                    );
+                    )
                 }
             }
         }
-        return elements;
-    };
+        return elements
+    }
 
     return (
         <group ref={groupRef}>
             {renderGrid()}
         </group>
-    );
-};
+    )
+}
 
 
 const FilesLoadingStatus: React.FC<{ cols: number, rows: number, imagePaths: GetImagesDTO }> = (props) => {
@@ -117,6 +115,6 @@ const FilesLoadingStatus: React.FC<{ cols: number, rows: number, imagePaths: Get
         <Canvas>
             <Grid {...props} />
         </Canvas>
-    );
-};
+    )
+}
 export { FilesLoadingStatus }

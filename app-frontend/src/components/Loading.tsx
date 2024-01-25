@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 
 const Loading: React.FC = () => (
   <svg
@@ -17,6 +17,6 @@ const Loading: React.FC = () => (
       fill="currentFill"
     />
   </svg>
-);
+)
 
-export default Loading;
+export default Loading

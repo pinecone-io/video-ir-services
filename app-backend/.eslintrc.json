@@ -1,19 +1,19 @@
-module.exports = {
-  root: true,
-  env: { browser: true, es2020: true },
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react-hooks/recommended',
+{
+  "extends": [
+    "airbnb-base",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
-  parser: '@typescript-eslint/parser',
-  plugins: ['react-refresh'],
-  rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "parser": "@typescript-eslint/parser",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "root": true,
+  "rules": {
     "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/no-empty-function": 0,
     "@typescript-eslint/no-empty-any": 0,
@@ -47,6 +47,8 @@ module.exports = {
     "no-use-before-define": 0,
     "no-useless-constructor": 0,
     "no-async-promise-executor": 0,
+    "no-unused-vars": "error",
+    "radix": 0,
     "semi": [
       "error",
       "never"
@@ -59,5 +61,5 @@ module.exports = {
       "error",
       "double"
     ]
-  },
+  }
 }

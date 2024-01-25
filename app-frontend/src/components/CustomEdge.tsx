@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { getBezierPath, EdgeProps } from 'reactflow';
+import { useEffect, useState } from "react"
+import { getBezierPath, EdgeProps } from "reactflow"
 
 const CustomEdge = ({
     id,
@@ -12,29 +12,29 @@ const CustomEdge = ({
     data,
 }: EdgeProps) => {
 
-    const [path] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+    const [path] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition })
 
     // Existing logic and effects
-    const [value, setValue] = useState(0);
-    const [flash, setFlash] = useState(false);
+    const [value, setValue] = useState(0)
+    const [flash, setFlash] = useState(false)
 
     useEffect(() => {
         if (data.active && data.active > value) {
-            setFlash(true);
-            setTimeout(() => setFlash(false), 2000);
+            setFlash(true)
+            setTimeout(() => setFlash(false), 2000)
             setValue(data.active)
         }
-    }, [data, value]);
+    }, [data, value])
 
-    const color = data.type == 'indexer' ? 'green' : 'blue'
-    const circleColor = data.type == 'indexer' ? "rgb(0, 255, 0)" : "rgb(0, 191, 255)"
+    const color = data.type == "indexer" ? "green" : "blue"
+    const circleColor = data.type == "indexer" ? "rgb(0, 255, 0)" : "rgb(0, 191, 255)"
 
     const lineStyle = {
-        stroke: flash ? color : 'black',
-        strokeWidth: flash ? '2' : '0.5',
-        fill: 'none',
-        transition: 'stroke-width stroke 0.3s ease-in-out'
-    };
+        stroke: flash ? color : "black",
+        strokeWidth: flash ? "2" : "0.5",
+        fill: "none",
+        transition: "stroke-width stroke 0.3s ease-in-out"
+    }
 
     return (
         <g>
@@ -47,7 +47,7 @@ const CustomEdge = ({
                 </circle>
             )}
         </g>
-    );
-};
+    )
+}
 
-export default CustomEdge;
+export default CustomEdge

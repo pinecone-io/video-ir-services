@@ -1,9 +1,9 @@
-import React, { CSSProperties, useEffect, useState } from "react";
-import { useDrag, useDrop } from "react-dnd";
-import { queryBox } from "../services/boxService";
-import { labelBoxes } from "../services/labelBoxesService";
-import { negativeLabel } from "../services/negativeLabelService";
-import { ItemTypes } from "./ItemTypes";
+import React, { CSSProperties, useEffect, useState } from "react"
+import { useDrag, useDrop } from "react-dnd"
+import { queryBox } from "../services/boxService"
+import { labelBoxes } from "../services/labelBoxesService"
+import { negativeLabel } from "../services/negativeLabelService"
+import { ItemTypes } from "./ItemTypes"
 
 interface LabelingControlsProps {
   selectedBox: string;
@@ -37,18 +37,18 @@ interface DropdownOptions {
 }
 
 const DropDown: React.FC<DropdownOptions> = ({ options, onClick }) => {
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [selectedLabel, setSelectedLabel] = useState<string>("Filter");
-
-  const onSelect = (val: DropdownOption) => {
-    setSelectedLabel(val.label);
-    onClick(val.value);
-    toggleDropdown();
-  };
+  const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [selectedLabel, setSelectedLabel] = useState<string>("Filter")
 
   const toggleDropdown = () => {
-    setDropdownVisible(!dropdownVisible);
-  };
+    setDropdownVisible(!dropdownVisible)
+  }
+
+  const onSelect = (val: DropdownOption) => {
+    setSelectedLabel(val.label)
+    onClick(val.value)
+    toggleDropdown()
+  }
 
   return (
     <div className="relative inline-block text-left">
@@ -108,14 +108,14 @@ const DropDown: React.FC<DropdownOptions> = ({ options, onClick }) => {
                     {option.label}
                   </a>
                 </li>
-              );
+              )
             })}
           </ul>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -125,16 +125,16 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
       isDragging: monitor.isDragging(),
       handlerId: monitor.getHandlerId(),
     }),
-  }));
+  }))
 
-  const opacity = isDragging ? 0.4 : 1;
-  const [loaded, setLoaded] = useState(false);
+  const opacity = isDragging ? 0.4 : 1
+  const [loaded, setLoaded] = useState(false)
 
   return (
     <div
       ref={drag}
       style={{ opacity, fontSize: "0.8em" }}
-      data-testid={`box`}
+      data-testid={"box"}
       className="relative group inline-block bg-white shadow-md rounded-lg"
     >
       {/* Grid container */}
@@ -182,11 +182,11 @@ const ImageComponent: React.FC<ImageProps> = ({ labeledImage }) => {
       {/* Semi-transparent layer */}
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 opacity-0  cursor-pointer"></div>
     </div>
-  );
-};
+  )
+}
 
 const deepCopy = (obj: unknown) => {
-  return JSON.parse(JSON.stringify(obj));
+  return JSON.parse(JSON.stringify(obj))
 }
 
 const LabelingControls: React.FC<LabelingControlsProps> = ({
@@ -197,96 +197,96 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
   handleGotSimilarResults
 }) => {
   //tailwind 10px padding
-  const [images, setImages] = useState<Array<LabeledImage>>([]);
+  const [images, setImages] = useState<Array<LabeledImage>>([])
 
-  const [imagesToLabel, setImagesToLabel] = useState<Array<LabeledImage>>([]);
-  const [searchingForLabel, setSearchingForLabel] = useState<boolean>(false);
+  const [imagesToLabel, setImagesToLabel] = useState<Array<LabeledImage>>([])
+  const [searchingForLabel, setSearchingForLabel] = useState<boolean>(false)
 
 
   const [imagesToNegativeLabel, setImagesToNegativeLabel] = useState<
     Array<LabeledImage>
-  >([]);
+  >([])
 
-  const [labelValue, setLabelValue] = useState<string>("");
-  const [labeling, setLabeling] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [isGood, setIsGood] = useState<boolean>(false);
+  const [labelValue, setLabelValue] = useState<string>("")
+  const [labeling, setLabeling] = useState<boolean>(false)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [isGood, setIsGood] = useState<boolean>(false)
 
   const handleLabel = async (
     boxId: string,
     setLabelFunction: React.Dispatch<React.SetStateAction<LabeledImage[]>>
   ) => {
     setSearchingForLabel(true)
-    const similarResult = await queryBox(boxId, true);
-    const similar: LabeledImage[] = await similarResult?.json();
-    const similarBoxIds = similar.map((image) => image.boxId);
+    const similarResult = await queryBox(boxId, true)
+    const similar: LabeledImage[] = await similarResult?.json()
+    const similarBoxIds = similar.map((image) => image.boxId)
 
     return new Promise((resolve) => {
       setLabelFunction((prev) => {
-        const image = images.find((image) => image.boxId === boxId);
-        const similarImages = images.filter((image) =>
-          similarBoxIds.includes(image.boxId)
-        );
-        if (!image) return prev;
+        const image = images.find((img) => img.boxId === boxId)
+        const similarImages = images.filter((img) =>
+          similarBoxIds.includes(img.boxId)
+        )
+        if (!image) return prev
 
-        const imageCopy = deepCopy(image);
-        const similarImagesCopy = deepCopy(similarImages);
+        const imageCopy = deepCopy(image)
+        const similarImagesCopy = deepCopy(similarImages)
         setImages((prevImages) =>
           prevImages.filter(
-            (image) => ![boxId, ...similarBoxIds].includes(image.boxId)
+            (img) => ![boxId, ...similarBoxIds].includes(img.boxId)
           )
-        );
+        )
         setSearchingForLabel(false)
-        return [...prev, imageCopy, ...similarImagesCopy];
-      });
-      resolve(null);
-    });
-  };
+        return [...prev, imageCopy, ...similarImagesCopy]
+      })
+      resolve(null)
+    })
+  }
 
   const addToLabel = async (boxId: string) => {
-    await handleLabel(boxId, setImagesToLabel);
-  };
+    await handleLabel(boxId, setImagesToLabel)
+  }
 
   const addToNegativeLabel = async (boxId: string) => {
-    await handleLabel(boxId, setImagesToNegativeLabel);
-  };
+    await handleLabel(boxId, setImagesToNegativeLabel)
+  }
 
   useEffect(() => {
-    setImagesToLabel([]);
-    setImagesToNegativeLabel([]);
-    setImages([]);
+    setImagesToLabel([])
+    setImagesToNegativeLabel([])
+    setImages([])
     //Async function to queryBoxImages
     const getBoxImages = async () => {
-      if (!selectedBox) return;
-      const response = await queryBox(selectedBox);
-      const result = await response?.json();
+      if (!selectedBox) return
+      const response = await queryBox(selectedBox)
+      const result = await response?.json()
 
-      setIsGood(response.ok);
-      setSelectedBoxes(result);
-      setImages(result);
+      setIsGood(response.ok)
+      setSelectedBoxes(result)
+      setImages(result)
       handleGotSimilarResults()
-    };
-    getBoxImages();
-  }, [selectedBox, setSelectedBoxes]);
+    }
+    getBoxImages()
+  }, [selectedBox, setSelectedBoxes, handleGotSimilarResults])
 
   const submitLabel = async () => {
-    setLabeling(true);
+    setLabeling(true)
     await labelBoxes(
       labelValue,
       imagesToLabel.map((image) => image.boxId)
-    );
+    )
 
     await negativeLabel(
       selectedBox,
       imagesToNegativeLabel.map((image) => image.boxId)
-    );
+    )
 
-    await refreshImages();
-    setImagesToLabel([]);
-    setImagesToNegativeLabel([]);
-    setImages([]);
-    setLabeling(false);
-  };
+    await refreshImages()
+    setImagesToLabel([])
+    setImagesToNegativeLabel([])
+    setImages([])
+    setLabeling(false)
+  }
 
   const style: CSSProperties = {
     color: "white",
@@ -299,14 +299,14 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
     fontWeight: "700",
     lineHeight: "17px",
     borderRadius: "10px",
-  };
+  }
 
   const [{ canDrop, isOver }, drop] = useDrop(
     () => ({
       accept: ItemTypes.BOX,
       drop: (item: { name: string; labeledImage: { boxId: string } }) => {
-        addToNegativeLabel(item.labeledImage.boxId);
-        return { item };
+        addToNegativeLabel(item.labeledImage.boxId)
+        return { item }
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
@@ -314,7 +314,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
       }),
     }),
     [images]
-  );
+  )
 
   const [{ canDrop: canDropSecond, isOver: isOverSecond }, dropSecond] =
     useDrop(
@@ -324,8 +324,8 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
           name: string;
           labeledImage: { boxId: string };
         }) => {
-          await addToLabel(item.labeledImage.boxId);
-          return { item, name: "label" };
+          await addToLabel(item.labeledImage.boxId)
+          return { item, name: "label" }
         },
         collect: (monitor) => ({
           isOver: monitor.isOver(),
@@ -333,20 +333,21 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
         }),
       }),
       [images]
-    );
+    )
 
-  const isActive = canDrop && isOver;
+  const isActive = canDrop && isOver
   // const isActiveSecond = canDropSecond && isOverSecond;
 
+  // eslint-disable-next-line no-shadow
   const getBackgroundColor = (canDrop: boolean, isActive: boolean) => {
-    let backgroundColor = "#202A37";
+    let backgroundColor = "#202A37"
     if (isActive) {
-      backgroundColor = "#8CF1FF";
+      backgroundColor = "#8CF1FF"
     } else if (canDrop) {
-      backgroundColor = "#3B81F6";
+      backgroundColor = "#3B81F6"
     }
-    return backgroundColor;
-  };
+    return backgroundColor
+  }
 
   const dropdownOptions = [
     {
@@ -365,7 +366,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
       value: "sameLabel",
       label: "Same Label",
     },
-  ];
+  ]
 
   return (
     <div className="container p-labelsControls h-full">
@@ -419,7 +420,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
             )}
           </div>
           <p
-            className={`text-sm14 font-normal text-cta-500 max-w-[500px] h-min`}
+            className={"text-sm14 font-normal text-cta-500 max-w-[500px] h-min"}
           >
             {isGood
               ? "An object has been detected in the video. You can now proceed to view additional details."
@@ -482,7 +483,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
           className={`ml-2 bg-cta-100 font-bold text-base16 text-white py-[15.5px] px-[29px] rounded-[5px] h-[50px] ${labeling ? "opacity-50 cursor-not-allowed" : ""
             }`}
           onClick={() => {
-            submitLabel();
+            submitLabel()
           }}
         >
           Submit
@@ -503,9 +504,9 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
           images
             .filter((labeledImage) => {
               if (!selectedCategory) {
-                return true;
+                return true
               } else {
-                return labeledImage.category === selectedCategory;
+                return labeledImage.category === selectedCategory
               }
             })
             .map((labeledImage) => {
@@ -514,7 +515,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
                   key={labeledImage.boxId}
                   labeledImage={labeledImage}
                 />
-              );
+              )
             })
         ) : (
           <p className="w-full text-center text-gray-500 col-span-full">
@@ -549,7 +550,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
                       key={`negative-${labeledImage.boxId}-${index}`}
                       labeledImage={labeledImage}
                     />
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -574,14 +575,14 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
               {isActive ? "Release to drop" : "Drag a box here"}
             </div>
             <div className="relative">
-              <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-1 mb-3 place-items-start justify-items-start`}>
+              <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2.5 rounded-md p-1 mb-3 place-items-start justify-items-start"}>
                 {imagesToLabel.map((labeledImage, index) => {
                   return (
                     <ImageComponent
                       key={`positive-${labeledImage.boxId}-${index}`}
                       labeledImage={labeledImage}
                     />
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -589,7 +590,7 @@ const LabelingControls: React.FC<LabelingControlsProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LabelingControls;
+export default LabelingControls

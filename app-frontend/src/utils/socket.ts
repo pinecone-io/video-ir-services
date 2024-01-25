@@ -1,12 +1,12 @@
-import io from "socket.io-client";
+import io from "socket.io-client"
 
-const indexerSocket = io('http://167.172.8.153/', {
-    path: '/app-sockets/socket',
+const indexerSocket = io("http://167.172.8.153/", {
+    path: "/app-sockets/socket",
     reconnection: true,
     secure: true,
-    transports: ['websocket'],
+    transports: ["websocket"],
     withCredentials: true
-});
+})
 
 
 

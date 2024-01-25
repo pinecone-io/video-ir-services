@@ -1,19 +1,18 @@
-import { Request, Response } from "express";
-import { labelBoxes, negativeLabel } from "./label";
-import { getNumberOfEntries, getSortedKeys, loadImagesWithOffset } from './loadImagesWithOffset';
-import { queryBox } from "./query";
-import { resetDB } from "./reset";
-import { DownloaderInstanceTracker } from "./utils/downloaderInstanceTracker";
-import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker";
-import { IndexerInstance, IndexerInstanceTracker } from "./utils/indexerInstanceTracker";
-import { LogTracker } from "./utils/logTracker";
-import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter";
-import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker";
-import { ProgressTracker } from './utils/progressTracker';
+import { Request, Response } from "express"
+import { labelBoxes, negativeLabel } from "./label"
+import { getNumberOfEntries, getSortedKeys, loadImagesWithOffset } from "./loadImagesWithOffset"
+import { queryBox } from "./query"
+import { resetDB } from "./reset"
+import { DownloaderInstanceTracker } from "./utils/downloaderInstanceTracker"
+import { EmbeddingsCountTracker } from "./utils/embeddingsCountTracker"
+import { IndexerInstance, IndexerInstanceTracker } from "./utils/indexerInstanceTracker"
+import { LogTracker } from "./utils/logTracker"
+import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter"
+import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker"
+import { ProgressTracker } from "./utils/progressTracker"
 
-
-const progressTracker = new ProgressTracker();
-const progressTrackerListener = progressTracker.getEmitter();
+const progressTracker = new ProgressTracker()
+const progressTrackerListener = progressTracker.getEmitter()
 const indexerInstancesTracker = new IndexerInstanceTracker()
 const indexerInstancesTrackerListener = indexerInstancesTracker.getAllInstancesReadyEmitter()
 const logTracker = new LogTracker()
@@ -22,8 +21,8 @@ const numberOfObjectsTracker = new NumberOfObjectsTracker()
 const numberOfObjectsTrackerListener = numberOfObjectsTracker.getNumberOfObjectsEventEmitter()
 const numberOfEmbeddingsTracker = new EmbeddingsCountTracker()
 const numberOfEmbeddingsTrackerListener = numberOfEmbeddingsTracker.getNumberOfEmbeddingsEventEmitter()
-const objectDetectionDataEmitter = new ObjectDetectionDataEmitter();
-const objectDetectionDataEmitterListener = objectDetectionDataEmitter.getOdDataEventEmitter();
+const objectDetectionDataEmitter = new ObjectDetectionDataEmitter()
+const objectDetectionDataEmitterListener = objectDetectionDataEmitter.getOdDataEventEmitter()
 const downloaderInstancesTracker = new DownloaderInstanceTracker()
 const downloaderInstancesTrackerListener = downloaderInstancesTracker.getDownloaderInstancesEmitter()
 
@@ -39,10 +38,10 @@ const routes: Route[] = [
     method: "get",
     handler: async (req, res) => {
       try {
-        await resetDB();
-        res.status(200).json({ message: "DB Reset" });
+        await resetDB()
+        res.status(200).json({ message: "DB Reset" })
       } catch (error) {
-        res.status(500).json({ error: "Error resetting DB" });
+        res.status(500).json({ error: "Error resetting DB" })
       }
     },
   },
@@ -50,17 +49,17 @@ const routes: Route[] = [
     route: "/getImagesWithOffset",
     method: "post",
     handler: async (req, res) => {
-      const offset = req.body.offset;
-      const limit = req.body.limit;
+      const { offset } = req.body
+      const { limit } = req.body
       try {
-        const [data, numberOfEntries] = await loadImagesWithOffset(offset, limit);
+        const [data, numberOfEntries] = await loadImagesWithOffset(offset, limit)
         console.log(`Emitting ${data.size} of ${numberOfEntries} entries from ${process.env.POD_NAME}`)
         Object.entries(data).forEach(([key, value]) => {
-          objectDetectionDataEmitter.addEntry({ [key]: value });
-        });
-        res.status(200).json({ message: "Images fetched", numberOfEntries });
+          objectDetectionDataEmitter.addEntry({ [key]: value })
+        })
+        res.status(200).json({ message: "Images fetched", numberOfEntries })
       } catch (error) {
-        res.status(500).json({ error: "Error fetching images", message: error });
+        res.status(500).json({ error: "Error fetching images", message: error })
       }
     },
   },
@@ -69,12 +68,12 @@ const routes: Route[] = [
     method: "get",
     handler: async (req, res) => {
       try {
-        const numberOfEntries = await getNumberOfEntries();
-        res.status(200).json({ numberOfEntries });
+        const numberOfEntries = await getNumberOfEntries()
+        res.status(200).json({ numberOfEntries })
       } catch (error) {
-        res.status(500).json({ error: "Error fetching images", message: error });
+        res.status(500).json({ error: "Error fetching images", message: error })
       }
-    }
+    },
   },
 
   {
@@ -82,26 +81,26 @@ const routes: Route[] = [
     method: "get",
     handler: async (req, res) => {
       try {
-        const sortedKeys = await getSortedKeys();
-        res.status(200).json({ sortedKeys });
+        const sortedKeys = await getSortedKeys()
+        res.status(200).json({ sortedKeys })
       } catch (error) {
-        res.status(500).json({ error: "Error fetching images", message: error });
+        res.status(500).json({ error: "Error fetching images", message: error })
       }
-    }
+    },
   },
 
   {
     route: "/queryBox",
     method: "post",
     handler: async (req, res) => {
-      const boxId = req.body.boxId as string;
-      const focused = req.body.focused as boolean ?? false;
+      const boxId = req.body.boxId as string
+      const focused = req.body.focused as boolean ?? false
       try {
-        const matches = await queryBox(boxId, focused);
+        const matches = await queryBox(boxId, focused)
 
-        res.json(matches);
+        res.json(matches)
       } catch (error) {
-        res.status(500).json({ error: "Error fetching images" });
+        res.status(500).json({ error: "Error fetching images" })
       }
     },
   },
@@ -109,14 +108,14 @@ const routes: Route[] = [
     route: "/labelBoxes",
     method: "post",
     handler: async (req, res) => {
-      const boxIds = req.body.boxIds as string[];
-      const label = req.body.label as string;
+      const boxIds = req.body.boxIds as string[]
+      const label = req.body.label as string
 
       try {
-        await labelBoxes(label, boxIds);
-        res.json({ message: "Labelled" });
+        await labelBoxes(label, boxIds)
+        res.json({ message: "Labelled" })
       } catch (error) {
-        res.status(500).json({ error: "Error labeling", message: error });
+        res.status(500).json({ error: "Error labeling", message: error })
       }
     },
   },
@@ -124,13 +123,13 @@ const routes: Route[] = [
     route: "/negativeLabel",
     method: "post",
     handler: async (req, res) => {
-      const originalBoxId = req.body.originalBoxId as string;
-      const targetBoxIds = req.body.targetBoxIds as string[];
+      const originalBoxId = req.body.originalBoxId as string
+      const targetBoxIds = req.body.targetBoxIds as string[]
       try {
-        await negativeLabel(originalBoxId, targetBoxIds);
-        res.json({ message: "Labelled" });
+        await negativeLabel(originalBoxId, targetBoxIds)
+        res.json({ message: "Labelled" })
       } catch (error) {
-        res.status(500).json({ error: "Error labeling", message: error });
+        res.status(500).json({ error: "Error labeling", message: error })
       }
     },
   },
@@ -142,22 +141,22 @@ const routes: Route[] = [
         res.status(500).json({ error: "Request timed out" })
       })
       try {
-        progressTracker.startTimer();
-        progressTracker.resetFiles();
-        indexerInstancesTracker.resetInstancesCounts();
-        numberOfObjectsTracker.clearNumberOfObjects();
-        numberOfEmbeddingsTracker.clearNumberOfEmbeddings();
+        progressTracker.startTimer()
+        progressTracker.resetFiles()
+        indexerInstancesTracker.resetInstancesCounts()
+        numberOfObjectsTracker.clearNumberOfObjects()
+        numberOfEmbeddingsTracker.clearNumberOfEmbeddings()
         const response = await fetch("http://video-ir-dev-video-splitter:3007/api/downloadAndSplit", {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(req.body),
-        });
-        const data = await response.json();
-        res.json(data);
+        })
+        const data = await response.json()
+        res.json(data)
       } catch (error) {
-        res.status(500).json({ error: "Error proxying download request", message: error });
+        res.status(500).json({ error: "Error proxying download request", message: error })
       }
     },
   },
@@ -165,19 +164,20 @@ const routes: Route[] = [
     route: "/log",
     method: "post",
     handler: async (req, res) => {
-      const message = req.body.message;
-      const payload = req.body.payload;
+      const { message } = req.body
+      const { payload } = req.body
       console.log("PAYLOAD", payload)
-      logTracker.log(message);
+      logTracker.log(message)
       if (payload && Object.keys(payload).length !== 0) {
         try {
-          const eventType = payload.eventType
+          const { eventType } = payload
+          // eslint-disable-next-line default-case
           switch (eventType) {
-            case 'boxCount': {
+            case "boxCount": {
               numberOfObjectsTracker.addToObjectCount(payload.boxesCount)
-              break;
+              break
             }
-            case 'embeddingCount': {
+            case "embeddingCount": {
               const { podId } = payload
               const instance = indexerInstancesTracker.getInstance(podId)
               console.log(`Updating instance ${podId} - ${payload.embeddingsProcessed}`)
@@ -199,7 +199,7 @@ const routes: Route[] = [
               }
               indexerInstancesTracker.updateInstance(updatedInstance)
               numberOfEmbeddingsTracker.addToEmbeddingsCount(payload.embeddingCount)
-              break;
+              break
             }
           }
         } catch (e) {
@@ -207,16 +207,16 @@ const routes: Route[] = [
         }
       }
 
-      res.status(200).json({ message: "Message logged successfully" });
+      res.status(200).json({ message: "Message logged successfully" })
     },
   },
   {
     route: "/trackFile",
     method: "post",
     handler: async (req, res) => {
-      const file = req.body.file;
-      const podId = req.body.podId;
-      progressTracker.addFile(file);
+      const { file } = req.body
+      const { podId } = req.body
+      progressTracker.addFile(file)
       const instance = downloaderInstancesTracker.getInstance(podId)
       if (instance) {
         downloaderInstancesTracker.updateInstance({
@@ -230,36 +230,34 @@ const routes: Route[] = [
           framesProduced: 1,
         })
       }
-      res.status(200).json({ message: "added file" });
+      res.status(200).json({ message: "added file" })
     },
   },
   {
     route: "/completeFile",
     method: "post",
     handler: async (req, res) => {
-      const file = req.body.file;
-      progressTracker.completeFile(file);
-      res.status(200).json({ message: "completed file" });
+      const { file } = req.body
+      progressTracker.completeFile(file)
+      res.status(200).json({ message: "completed file" })
     },
   },
   {
     route: "/registerIndexer",
     method: "post",
     handler: (req, res) => {
-
       const { id, status } = req.body
       console.log("registering instance", id, status)
       indexerInstancesTracker.updateInstance({
         id,
         ready: true,
       })
-      res.status(200).send('success')
-    }
+      res.status(200).send("success")
+    },
   },
 
-];
+]
 
 export {
-  downloaderInstancesTrackerListener, indexerInstancesTrackerListener, logTrackerListener, numberOfEmbeddingsTrackerListener, numberOfObjectsTrackerListener, objectDetectionDataEmitterListener, progressTrackerListener, routes as resolvers
-};
-
+  downloaderInstancesTrackerListener, indexerInstancesTrackerListener, logTrackerListener, numberOfEmbeddingsTrackerListener, numberOfObjectsTrackerListener, objectDetectionDataEmitterListener, progressTrackerListener, routes as resolvers,
+}

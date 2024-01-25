@@ -1,6 +1,6 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios"
 
-const DOWNLOAD_API = "http://167.172.8.153/api/download";
+const DOWNLOAD_API = "http://167.172.8.153/api/download"
 
 export const download = (
   target: string,
@@ -15,4 +15,4 @@ export const download = (
     name,
     chunkDuration,
     videoLimit,
-  });
+  })

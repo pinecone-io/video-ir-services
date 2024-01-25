@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import Loading from "../components/Loading";
-import { download } from "../services/downloadService.ts";
-import { socket } from "../utils/socket";
-import { useFps } from "../hooks/fpsHook.ts";
+import React, { useEffect, useRef, useState } from "react"
+import { useForm, SubmitHandler } from "react-hook-form"
+import Loading from "../components/Loading"
+import { download } from "../services/downloadService.ts"
+import { socket } from "../utils/socket"
+import { useFps } from "../hooks/fpsHook.ts"
 import Dataflow, {
   DownloaderInstance,
   IndexerInstance,
-} from "../components/Dataflow.tsx";
-import { Modal } from "../components/Modal.tsx";
+} from "../components/Dataflow.tsx"
+import { Modal } from "../components/Modal.tsx"
 
 type TFormInput = {
   fps: number;
@@ -21,133 +21,136 @@ type TFormInput = {
 type LogLine = { ts: Date; message: string };
 
 const IndexingPage: React.FC = () => {
-  const [started, setStarted] = useState(false);
-  const [serverError, setServerError] = useState();
-  const [progress, setProgress] = useState(0);
-  const [filesToProcess, setFileToProcess] = useState(0);
-  const [processedFiles, setProcessedFiles] = useState(0);
-  const [numberOfObjects, setNumberOfObjects] = useState(0);
-  const [numberOfEmbeddings, setNumberOfEmbeddings] = useState(0);
-  const [logs, setLogs] = useState<LogLine[]>([]);
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [showModal, setShowModal] = useState(false);
+  const [started, setStarted] = useState(false)
+  const [serverError, setServerError] = useState()
+  const [progress, setProgress] = useState(0)
+  const [filesToProcess, setFileToProcess] = useState(0)
+  const [processedFiles, setProcessedFiles] = useState(0)
+  const [numberOfObjects, setNumberOfObjects] = useState(0)
+  const [numberOfEmbeddings, setNumberOfEmbeddings] = useState(0)
+  const [logs, setLogs] = useState<LogLine[]>([])
+  const [isConnected, setIsConnected] = useState(socket.connected)
+  const [showModal, setShowModal] = useState(false)
   const [completed, setCompleted] = useState({
     numberOfFilesProcessed: 0,
     executionTime: "",
     status: false,
-  });
-  const { FPS, setFps } = useFps();
+  })
+  const [indexers, setIndexers] = useState<{ [key: string]: IndexerInstance }>(
+    {}
+  )
+  const [downloaders, setDownloaders] = useState<{
+    [key: string]: DownloaderInstance;
+  }>({})
+
+  const { FPS, setFps } = useFps()
   const resetProgress = (): void => {
-    setProgress(0);
-    setNumberOfObjects(0);
-    setFileToProcess(0);
-    setProcessedFiles(0);
+    setProgress(0)
+    setNumberOfObjects(0)
+    setFileToProcess(0)
+    setProcessedFiles(0)
     setCompleted({
       numberOfFilesProcessed: 0,
       executionTime: "",
       status: false,
-    });
-    setLogs([]);
-    setIndexers({});
-    setDownloaders({});
-    setStarted(false);
-  };
-  const [indexers, setIndexers] = useState<{ [key: string]: IndexerInstance }>(
-    {}
-  );
-  const [downloaders, setDownloaders] = useState<{
-    [key: string]: DownloaderInstance;
-  }>({});
+    })
+    setLogs([])
+    setIndexers({})
+    setDownloaders({})
+    setStarted(false)
+  }
+
 
   const handleFilesToBeProcessedChanged = (data: {
     numberOfFilesToProcess: number;
   }): void => {
-    const { numberOfFilesToProcess } = data;
-    setFileToProcess(numberOfFilesToProcess);
-  };
+    const { numberOfFilesToProcess } = data
+    setFileToProcess(numberOfFilesToProcess)
+  }
 
   const handleProcessedFilesChanged = (data: {
     progress: { val: number };
     numberOfFilesProcessed: number;
     executionTime?: string;
   }): void => {
-    const { progress, numberOfFilesProcessed } = data;
-    setProcessedFiles(numberOfFilesProcessed);
-    setProgress(progress.val);
-  };
+    // eslint-disable-next-line no-shadow
+    const { progress, numberOfFilesProcessed } = data
+    setProcessedFiles(numberOfFilesProcessed)
+    setProgress(progress.val)
+  }
 
   const handleCompleted = (data: {
     numberOfFilesProcessed: number;
     executionTime: string;
     status: boolean;
   }): void => {
-    setIndexers({});
-    setCompleted(data);
-    setShowModal(true);
-    setStarted(false);
-  };
+    setIndexers({})
+    setCompleted(data)
+    setShowModal(true)
+    setStarted(false)
+  }
 
   const handleLogUpdated = (data: LogLine): void => {
-    setLogs([...logs, data]);
-  };
+    setLogs([...logs, data])
+  }
 
   const handleNumberOfObjects = (data: number): void => {
-    setNumberOfObjects(data);
-  };
+    setNumberOfObjects(data)
+  }
 
   const handleNumberOfEmbeddings = (data: number): void => {
-    setNumberOfEmbeddings(data);
-  };
+    setNumberOfEmbeddings(data)
+  }
 
   const handleDownloaderInstancesUpdated = (
     data: React.SetStateAction<{ [key: string]: DownloaderInstance }>
   ): void => {
-    setDownloaders(data);
-  };
+    setDownloaders(data)
+  }
 
   const handleIndexerInstancesUpdated = (
     data: React.SetStateAction<{ [key: string]: IndexerInstance }>
   ): void => {
-    setIndexers(data);
-  };
+    setIndexers(data)
+  }
 
   useEffect(() => {
     function onConnect() {
-      setIsConnected(true);
+      setIsConnected(true)
     }
 
     function onDisconnect() {
-      console.log("Socket disconnected");
-      setIsConnected(false);
+      console.log("Socket disconnected")
+      setIsConnected(false)
     }
 
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("instancesUpdated", handleIndexerInstancesUpdated);
-    socket.on("complete", handleCompleted);
-    socket.on("filesToProcessChanged", handleFilesToBeProcessedChanged);
-    socket.on("processedFilesChanged", handleProcessedFilesChanged);
-    socket.on("logUpdated", handleLogUpdated);
-    socket.on("numberOfObjectsUpdated", handleNumberOfObjects);
-    socket.on("numberOfEmbeddingsUpdated", handleNumberOfEmbeddings);
-    socket.on("downloaderInstancesUpdated", handleDownloaderInstancesUpdated);
+    socket.on("connect", onConnect)
+    socket.on("disconnect", onDisconnect)
+    socket.on("instancesUpdated", handleIndexerInstancesUpdated)
+    socket.on("complete", handleCompleted)
+    socket.on("filesToProcessChanged", handleFilesToBeProcessedChanged)
+    socket.on("processedFilesChanged", handleProcessedFilesChanged)
+    socket.on("logUpdated", handleLogUpdated)
+    socket.on("numberOfObjectsUpdated", handleNumberOfObjects)
+    socket.on("numberOfEmbeddingsUpdated", handleNumberOfEmbeddings)
+    socket.on("downloaderInstancesUpdated", handleDownloaderInstancesUpdated)
 
     return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("filesToProcessChanged", handleFilesToBeProcessedChanged);
-      socket.off("processedFilesChanged", handleProcessedFilesChanged);
-      socket.off("logUpdated", handleLogUpdated);
-      socket.off("complete", handleCompleted);
-      socket.off("numberOfObjectsUpdated", handleNumberOfObjects);
-      socket.off("numberOfEmbeddingsUpdated", handleNumberOfEmbeddings);
+      socket.off("connect", onConnect)
+      socket.off("disconnect", onDisconnect)
+      socket.off("filesToProcessChanged", handleFilesToBeProcessedChanged)
+      socket.off("processedFilesChanged", handleProcessedFilesChanged)
+      socket.off("logUpdated", handleLogUpdated)
+      socket.off("complete", handleCompleted)
+      socket.off("numberOfObjectsUpdated", handleNumberOfObjects)
+      socket.off("numberOfEmbeddingsUpdated", handleNumberOfEmbeddings)
       socket.off(
         "downloaderInstancesUpdated",
         handleDownloaderInstancesUpdated
-      );
-      socket.off("instancesUpdated", handleIndexerInstancesUpdated);
-    };
-  });
+      )
+      socket.off("instancesUpdated", handleIndexerInstancesUpdated)
+    }
+  })
 
   const {
     register,
@@ -160,15 +163,15 @@ const IndexingPage: React.FC = () => {
       fps: FPS,
       chunkDuration: 5,
     },
-  });
+  })
 
   const onSubmit: SubmitHandler<TFormInput> = (data) => {
     return new Promise((resolve) => {
-      resetProgress();
-      setStarted(true);
-      setShowModal(true);
-      setFps(data.fps);
-      resolve(true);
+      resetProgress()
+      setStarted(true)
+      setShowModal(true)
+      setFps(data.fps)
+      resolve(true)
       download(
         data.youtubeUrl,
         data.name,
@@ -177,19 +180,19 @@ const IndexingPage: React.FC = () => {
         data.videoLimit
       )
         .catch((e) => setServerError(e.toString()))
-        .finally(() => resolve(true));
-    });
-  };
+        .finally(() => resolve(true))
+    })
+  }
 
-  const endOfMessages = useRef<HTMLTableCellElement | null>(null);
-  const logsContainerRef = useRef<HTMLDivElement | null>(null);
+  const endOfMessages = useRef<HTMLTableCellElement | null>(null)
+  const logsContainerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (logsContainerRef.current) {
       logsContainerRef.current.scrollTop =
-        logsContainerRef.current.scrollHeight;
+        logsContainerRef.current.scrollHeight
     }
-  }, [logs]);
+  }, [logs])
 
   console.log(started, completed)
 
@@ -200,7 +203,7 @@ const IndexingPage: React.FC = () => {
           Video Image Recognition
         </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className={`border-[0.5px] border-black border-opacity-[5%] bg-white formShadow relative pl-[36px] pr-[38px] pt-[62px] mb-[27px]`}>
+          <div className={"border-[0.5px] border-black border-opacity-[5%] bg-white formShadow relative pl-[36px] pr-[38px] pt-[62px] mb-[27px]"}>
             <div className="flex flex-col mb-[27px]">
               <label
                 htmlFor="youtubeUrl"
@@ -409,7 +412,7 @@ const IndexingPage: React.FC = () => {
                   <tr key={index}>
                     <td>{entry.message}</td>
                   </tr>
-                );
+                )
               })}
               <tr>
                 <td ref={endOfMessages}></td>
@@ -433,7 +436,7 @@ const IndexingPage: React.FC = () => {
           title={completed.status ? "Processing Completed" : "Processing Video"}
           paragraph={
             completed.status
-              ? `Your video has been successfully processed. You can now view the results.`
+              ? "Your video has been successfully processed. You can now view the results."
               : "Your video is currently being processed. This may take some time. You can still view and label the parts of the video that have been processed on the labeling page. Thank you for your patience."
           }
           button={completed.status ? false : true}
@@ -443,7 +446,7 @@ const IndexingPage: React.FC = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default IndexingPage;
+export default IndexingPage

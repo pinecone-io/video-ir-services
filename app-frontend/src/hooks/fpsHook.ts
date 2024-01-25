@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState } from "react"
 
-let fps = 25;
+let fps = 25
 
 export const useFps = () => {
-    const [FPS, setFps] = useState(fps);
-    fps = FPS;
-    return { FPS, setFps };
-};
+    const [FPS, setFps] = useState(fps)
+    fps = FPS
+    return { FPS, setFps }
+}
+
+// TODO: Do we need this?

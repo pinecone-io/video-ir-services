@@ -1,5 +1,5 @@
-import React from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import React from "react"
+import { Link, NavLink, Outlet } from "react-router-dom"
 
 const Layout: React.FC = () => {
   return (
@@ -45,7 +45,7 @@ const Layout: React.FC = () => {
       </header>
       <Outlet />
     </div>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout
