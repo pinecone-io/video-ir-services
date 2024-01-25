@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from "express"
 
 interface Route {
   route: string;
@@ -11,9 +11,9 @@ const routes: Route[] = [
     route: "/health",
     method: "get",
     handler: (_, res) => {
-      res.status(200).json({ message: "Frame splitter server is healthy :)" });
+      res.status(200).json({ message: "Frame splitter server is healthy :)" })
     },
   },
-];
+]
 
-export { routes as resolvers };
+export { routes as resolvers }

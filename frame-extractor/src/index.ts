@@ -1,26 +1,25 @@
-import express, { Express, Router } from "express";
-import { initializeMessageQueue } from "./processMessages";
-import { resolvers } from "./routes";
-import { IS_PROD } from "./utils/environment";
+import express, { Express, Router } from "express"
+import { initializeMessageQueue } from "./processMessages"
+import { resolvers } from "./routes"
+import { IS_PROD } from "./utils/environment"
 
+const app: Express = express()
+const router = Router()
 
-const app: Express = express();
-const router = Router();
-
-initializeMessageQueue();
+initializeMessageQueue()
 
 resolvers.forEach((resolver) => {
-  router[resolver.method](resolver.route, resolver.handler);
-});
-app.use(express.json());
+  router[resolver.method](resolver.route, resolver.handler)
+})
+app.use(express.json())
 
-app.use("/api", router);
+app.use("/api", router)
 
 if (IS_PROD) {
-  const port = 3001;
+  const port = 3001
   app.listen(port, () => {
-    console.log(`Server started on ${port} port`);
-  });
+    console.log(`Server started on ${port} port`)
+  })
 }
 
-export const viteNodeApp = app;
+export const viteNodeApp = app

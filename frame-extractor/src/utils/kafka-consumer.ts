@@ -1,24 +1,26 @@
-import { Consumer, Kafka, KafkaMessage, logLevel } from "kafkajs";
+import {
+  Consumer, Kafka, KafkaMessage, logLevel,
+} from "kafkajs"
 
-const KAFKA_BROKER = "kafka-dev";
+const KAFKA_BROKER = "kafka-dev"
 
 async function createKafkaConsumer(
-  messageHandler: (message: KafkaMessage) => void
+  messageHandler: (message: KafkaMessage) => void,
 ): Promise<Consumer> {
-  let consumer;
+  let consumer
   try {
     const kafka = new Kafka({
       clientId: "consumer-service",
       brokers: [`${KAFKA_BROKER}:9092`],
       logLevel: logLevel.INFO,
-    });
-    const topic = "video-segments";
-    const consumerGroupId = "group-2"; // This has to be the same for all consumers
-    consumer = kafka.consumer({ groupId: consumerGroupId });
+    })
+    const topic = "video-segments"
+    const consumerGroupId = "group-2" // This has to be the same for all consumers
+    consumer = kafka.consumer({ groupId: consumerGroupId })
 
-    await consumer.connect();
-    await consumer.subscribe({ topic, fromBeginning: false });
-    console.log("Connected and subscribed to Kafka");
+    await consumer.connect()
+    await consumer.subscribe({ topic, fromBeginning: false })
+
     await consumer.run({
       eachBatch: async ({
         batch,
@@ -27,30 +29,30 @@ async function createKafkaConsumer(
         isRunning,
         isStale,
       }) => {
-        for (let message of batch.messages) {
-          console.log(message?.value?.toString());
+        for (const message of batch.messages) {
+          console.log(message?.value?.toString())
 
           if (!isRunning() || isStale()) {
             // This ensures we're not handling messages that were already handled
-            break;
+            break
           }
 
-          await messageHandler(message);
-          resolveOffset(message.offset);
-          await heartbeat();
+          await messageHandler(message)
+          resolveOffset(message.offset)
+          await heartbeat()
         }
       },
-    });
+    })
   } catch (e) {
-    console.log("Failed connecting to Kafka", e);
+    console.log("Failed connecting to Kafka", e)
 
     // kill the process and restart the pod
-    // if consumer is not connected it will not process mesages which will lead to server running without purpuse
-    console.log("exiting the process...");
-    process.exit(1);
+    // if consumer is not connected it will not process messages which will lead to server running without purpose
+    console.log("exiting the process...")
+    process.exit(1)
   }
 
-  return consumer;
+  return consumer
 }
 
-export { createKafkaConsumer };
+export { createKafkaConsumer }

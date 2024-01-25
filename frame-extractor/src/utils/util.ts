@@ -1,38 +1,37 @@
-import fs from "fs/promises";
-import path from "path";
+import fs from "fs/promises"
+import path from "path"
 
-const sliceIntoChunks = <T>(arr: T[], chunkSize: number) =>
-  Array.from({ length: Math.ceil(arr.length / chunkSize) }, (_, i) =>
-    arr.slice(i * chunkSize, (i + 1) * chunkSize),
-  );
+const sliceIntoChunks = <T>(arr: T[], chunkSize: number) => Array.from({ length: Math.ceil(arr.length / chunkSize) }, (_, i) => arr.slice(i * chunkSize, (i + 1) * chunkSize))
 
 async function listFiles(dir: string): Promise<string[]> {
-  const files = await fs.readdir(dir);
+  const files = await fs.readdir(dir)
 
-  const filePaths: string[] = [];
+  const filePaths: string[] = []
   for (const file of files) {
-    const filePath = path.join(dir, file);
-    const stats = await fs.stat(filePath);
+    const filePath = path.join(dir, file)
+    const stats = await fs.stat(filePath)
     if (stats.isFile()) {
-      filePaths.push(filePath);
+      filePaths.push(filePath)
     }
   }
-  return filePaths;
+  return filePaths
 }
 
 function* chunkArray<T>(array: T[], chunkSize: number): Generator<T[]> {
   for (let i = 0; i < array.length; i += chunkSize) {
-    yield array.slice(i, i + chunkSize);
+    yield array.slice(i, i + chunkSize)
   }
 }
 
-async function isDirectory(path: string): Promise<boolean> {
+async function isDirectory(dirPath: string): Promise<boolean> {
   try {
-    const stats = await fs.stat(path, {});
-    return stats.isDirectory();
+    const stats = await fs.stat(dirPath, {})
+    return stats.isDirectory()
   } catch (error) {
-    return false;
+    return false
   }
 }
 
-export { listFiles, sliceIntoChunks, chunkArray, isDirectory };
+export {
+  listFiles, sliceIntoChunks, chunkArray, isDirectory,
+}
