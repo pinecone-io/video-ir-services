@@ -1,9 +1,13 @@
+import dotenv from "dotenv-flow"
+
+dotenv.config()
+
 export const getEnv = (key: string): string => {
-  const value = import.meta.env[key]
+  const value = import.meta.env[key] || process.env[key]
   if (!value) {
     throw new Error(`${key} environment variable not set`)
   }
-  return value
+  return String(value)
 }
 
 export const PINECONE_API_KEY = getEnv("VITE_PINECONE_API_KEY")
@@ -13,7 +17,8 @@ export const PINECONE_DATA_DIR_PATH = getEnv("VITE_PINECONE_DATA_DIR_PATH")
 export const PINECONE_OUTPUT_DIR_PATH = getEnv("VITE_PINECONE_OUTPUT_DIR_PATH")
 export const PINECONE_PROJECT_ID = getEnv("VITE_PINECONE_PROJECT_ID")
 export const PINECONE_NAMESPACE = getEnv("VITE_PINECONE_NAMESPACE")
-
+export const KAFKA_BROKER = getEnv("KAFKA_BROKER")
+export const BACKEND = getEnv("BACKEND")
 export const AWS_REGION = getEnv("VITE_AWS_REGION")
 export const AWS_ACCESS_KEY_ID = getEnv("VITE_AWS_ACCESS_KEY_ID")
 export const AWS_SECRET_ACCESS_KEY = getEnv("VITE_AWS_SECRET_ACCESS_KEY")

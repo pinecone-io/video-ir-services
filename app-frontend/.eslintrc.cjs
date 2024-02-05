@@ -47,6 +47,7 @@ module.exports = {
     "no-use-before-define": 0,
     "no-useless-constructor": 0,
     "no-async-promise-executor": 0,
+    "no-multiple-empty-lines": 1,
     "semi": [
       "error",
       "never"

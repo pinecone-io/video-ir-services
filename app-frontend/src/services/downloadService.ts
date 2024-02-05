@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios"
 
-const DOWNLOAD_API = "http://167.172.8.153/api/download"
+const DOWNLOAD_API = `http://${import.meta.env.VITE_APP_BACKEND_API}/download`
 
 export const download = (
   target: string,

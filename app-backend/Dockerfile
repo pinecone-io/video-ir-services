@@ -5,7 +5,7 @@ FROM node:18.17.1
 WORKDIR /app-backend
 
 # Install pnpm
-RUN npm install -g pnpm@8.6.12
+RUN npm install -g pnpm@8.14.3
 
 # Copy package.json and pnpm-lock.yaml to the working directory
 COPY package.json ./
@@ -19,6 +19,8 @@ COPY . .
 
 # Build everything
 RUN pnpm build
+
+ENV NODE_ENV=production
 
 # Expose port 3000 for the app to listen on
 EXPOSE 3000

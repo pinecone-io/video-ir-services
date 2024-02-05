@@ -1,6 +1,5 @@
 import { Pinecone } from "@pinecone-database/pinecone"
 import { PINECONE_INDEX, getEnv, PINECONE_NAMESPACE } from "./utils/environment"
-import { Metadata } from "./types"
 
 const namespace = PINECONE_NAMESPACE
 const indexName = PINECONE_INDEX

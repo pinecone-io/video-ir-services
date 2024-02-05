@@ -3,7 +3,7 @@ import {
 } from "kafkajs"
 import { log } from "./logger"
 
-const KAFKA_BROKER = "kafka-dev"
+import { KAFKA_BROKER } from "./environment"
 
 class KafkaProducer {
   private producer: Producer

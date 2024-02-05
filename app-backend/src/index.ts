@@ -5,7 +5,9 @@ import { createServer } from "http"
 import { Server } from "socket.io"
 import { createAdapter } from "socket.io-redis"
 import Redis from "ioredis"
+import cors from "cors"
 
+import dotenvFlow from "dotenv-flow"
 import {
   downloaderInstancesTrackerListener, logTrackerListener, numberOfEmbeddingsTrackerListener, numberOfObjectsTrackerListener, objectDetectionDataEmitterListener, resolvers,
   indexerInstancesTrackerListener, progressTrackerListener,
@@ -16,7 +18,8 @@ import {
   PINECONE_OUTPUT_DIR_PATH,
 } from "./utils/environment"
 import { initIndex } from "./utils/pinecone"
-import { ObjectDetectionData } from "./types"
+
+dotenvFlow.config()
 
 const pubClient = new Redis({
   host: process.env.REDIS_HOST,
@@ -32,18 +35,6 @@ const __dirname = dirname(__filename)
 const app: Express = express()
 const server = createServer(app)
 
-const io = new Server(server, {
-  path: "/app-sockets/socket",
-  cors: {
-    origin: "*", // Allow all origins
-    methods: ["GET", "POST"], // Allow GET and POST methods
-    credentials: true,
-  },
-  transports: ["polling", "websocket"],
-})
-
-io.adapter(createAdapter({ pubClient, subClient }))
-
 // Ensure that Pinecone index exist
 await initIndex()
 
@@ -54,11 +45,15 @@ resolvers.forEach((resolver) => {
 })
 app.use(express.json())
 
+app.use(cors({
+  credentials: true,
+  origin: "*",
+}))
+
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept",
   )
   next()
 })
@@ -67,7 +62,18 @@ app.use("/api", router)
 
 app.use("/data", express.static(join(__dirname, PINECONE_DATA_DIR_PATH)))
 app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)))
-app.get("/ping", (req, res) => res.send("pong2"))
+
+const io = new Server(server, {
+  path: "/app-sockets/socket",
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"], // Allow GET and POST methods
+    credentials: true,
+  },
+  transports: ["polling", "websocket"],
+})
+
+io.adapter(createAdapter({ pubClient, subClient }))
 
 io.on("connection", (socket) => {
   console.log("A client has connect:", socket.id)
@@ -111,8 +117,12 @@ io.on("connection", (socket) => {
   })
 })
 
+io.on("connect_error", (err) => {
+  console.log(`Connect error: ${err.message}`)
+})
+
 if (IS_PROD) {
-  const port = 3000
+  const port = process.env.PORT || 3000
   server.listen(port, () => {
     console.log(`Server started on ${port} port`)
   })

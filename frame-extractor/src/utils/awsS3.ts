@@ -4,8 +4,8 @@ import {
   S3Client,
   S3ClientConfig,
 } from "@aws-sdk/client-s3"
-import { NodeHttpHandler } from "@smithy/node-http-handler"
-import { Agent } from "node:https"
+// import { NodeHttpHandler } from "@smithy/node-http-handler"
+// import { Agent } from "node:https"
 
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { Readable } from "node:stream"
@@ -25,23 +25,23 @@ export const getAwsS3Client: () => Promise<S3Client> = async () => {
     return awsS3Client
   }
 
-  const agent = new Agent({
-    keepAlive: true,
-    maxSockets: 50,
-    maxFreeSockets: 10,
-    timeout: 60000,
-    noDelay: false,
+  // const agent = new Agent({
+  //   keepAlive: true,
+  //   maxSockets: 50,
+  //   maxFreeSockets: 10,
+  //   timeout: 60000,
+  //   noDelay: false,
 
-  })
+  // })
 
-  const requestHandler = new NodeHttpHandler({
-    httpsAgent: agent,
-    connectionTimeout: 6000,
-    socketTimeout: 6000,
-  })
+  // const requestHandler = new NodeHttpHandler({
+  //   httpsAgent: agent,
+  //   connectionTimeout: 6000,
+  //   socketTimeout: 6000,
+  // })
 
   const config: S3ClientConfig = {
-    requestHandler,
+    // requestHandler,
     maxAttempts: 5,
     useDualstackEndpoint: true,
     retryMode: "adaptive",

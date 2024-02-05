@@ -1,6 +1,7 @@
 import io from "socket.io-client"
 
-const indexerSocket = io("http://167.172.8.153/", {
+console.log(import.meta.env.VITE_APP_BACKEND)
+const socket = io(`http://${import.meta.env.VITE_APP_BACKEND}`, {
     path: "/app-sockets/socket",
     reconnection: true,
     secure: true,
@@ -8,6 +9,8 @@ const indexerSocket = io("http://167.172.8.153/", {
     withCredentials: true
 })
 
+socket.on("connect_error", (error) => {
+    console.log(`Connection Error?!: ${error.message}`)
+  })
 
-
-export { indexerSocket as socket }
+export { socket }

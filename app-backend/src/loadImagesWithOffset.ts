@@ -1,10 +1,4 @@
 import { Index, PineconeRecord } from "@pinecone-database/pinecone"
-import {
-  ImageWithBoundingBoxes,
-  LabeledBoxSetItem,
-  Metadata,
-  ObjectDetectionData,
-} from "./types"
 import { PINECONE_INDEX, PINECONE_NAMESPACE } from "./utils/environment"
 
 import redis from "./redis"

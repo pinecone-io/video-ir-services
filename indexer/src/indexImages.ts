@@ -255,8 +255,10 @@ async function embedAndUpsert({
 await embedder.init(modelName)
 
 const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: number; filesList?: string[]; }) => {
+  // Get the S3 client
   const client = await getAwsS3Client()
   let list: string[] = []
+  // If no filesList is provided and name is provided, get the list of files from S3
   if (!filesList && name) {
     const files = await client.send(
       new ListObjectsV2Command({
@@ -264,26 +266,35 @@ const indexImages = async ({ name, limit, filesList }: { name?: string; limit?: 
         Prefix: `${name}/frame`,
       }),
     )
+    // If files are found, map them to a list
     if (files && files.Contents) {
       list = limit ? files.Contents.slice(0, limit).map((x) => x.Key!) : files.Contents.map((x) => x.Key!)
     }
   } else {
+    // If filesList is not provided, throw an error
     if (!filesList) {
       throw new Error("No files list provided")
     }
     list = filesList
   }
 
+  // Map each file in the list to a task
   const tasks = list.map(async (fileName) => {
     try {
+      // Segment the image and filter out any undefined segments
       const segmentedFiles = (await segmentImage(fileName || ""))?.filter((x) => x) || []
+      // Embed and upsert the segmented files
       await embedAndUpsert({ imagePaths: segmentedFiles, chunkSize: 100 })
+      // Log the completion of indexing for the file
       await log(`Done indexing ${fileName}`)
+      // Mark the file as complete
       await completeFile(fileName)
     } catch (error) {
+      // Log any errors encountered during processing
       console.error(`Error processing file ${fileName}: ${error}`)
     }
   })
+  // Wait for all tasks to complete
   await Promise.all(tasks)
 }
 

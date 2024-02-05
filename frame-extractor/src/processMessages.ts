@@ -1,6 +1,6 @@
 import type { KafkaMessage } from "kafkajs"
 import EventEmitter from "node:events"
-import { downloadFromS3 } from "./download"
+import { processVideo } from "./processVideo"
 import { createKafkaConsumer } from "./utils/kafka-consumer"
 import { log } from "./utils/logger"
 
@@ -34,7 +34,7 @@ const processMessages = async () => {
 
     if (!isProcessing) {
       isProcessing = true
-      await downloadFromS3({
+      await processVideo({
         videoPath, index: index.toString(), name, fps, videoLimit,
       })
       isProcessing = false

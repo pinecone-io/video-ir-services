@@ -1,4 +1,4 @@
-import EventEmitter from "node:events";
+import EventEmitter from "node:events"
 
 interface LogLine {
     ts: string,
@@ -6,34 +6,35 @@ interface LogLine {
 }
 
 class LogTracker {
-    private _logLines: LogLine[] = []
-    private eventEmitter = new EventEmitter();
+  private _logLines: LogLine[] = []
 
-    constructor() {
-        this.eventEmitter.setMaxListeners(100);
-    }
+  private eventEmitter = new EventEmitter()
 
-    get logs(): LogLine[] {
-        return this._logLines
-    }
+  constructor() {
+    this.eventEmitter.setMaxListeners(100)
+  }
 
-    set logs(logs: LogLine[]) {
-        this._logLines = logs
-        console.log(`Updated logs to ${this._logLines.length}`);
-        this.eventEmitter.emit('logUpdated', this._logLines[this._logLines.length - 1])
-    }
+  get logs(): LogLine[] {
+    return this._logLines
+  }
 
-    log(message: string) {
-        this.logs = [...this._logLines, { ts: new Date().toISOString(), message }]
-    }
+  set logs(logs: LogLine[]) {
+    this._logLines = logs
+    console.log(`Updated logs to ${this._logLines.length}`)
+    this.eventEmitter.emit("logUpdated", this._logLines[this._logLines.length - 1])
+  }
 
-    clearLogs(): void {
-        this.logs = [];
-    }
+  log(message: string) {
+    this.logs = [...this._logLines, { ts: new Date().toISOString(), message }]
+  }
 
-    getLogsEventEmitter(): EventEmitter {
-        return this.eventEmitter;
-    }
+  clearLogs(): void {
+    this.logs = []
+  }
+
+  getLogsEventEmitter(): EventEmitter {
+    return this.eventEmitter
+  }
 }
 
 export { LogTracker }

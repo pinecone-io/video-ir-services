@@ -1,0 +1,7 @@
+redis:  
+  fullnameOverride: redis
+  usePassword: false
+  replica:
+    replicaCount: 0
+  auth:
+    enabled: false

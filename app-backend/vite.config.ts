@@ -1,5 +1,5 @@
-import { defineConfig } from "vitest/config";
-import { VitePluginNode } from "vite-plugin-node";
+import { defineConfig } from "vitest/config"
+import { VitePluginNode } from "vite-plugin-node"
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -9,8 +9,8 @@ export default defineConfig({
     port: 3000,
   },
   optimizeDeps: {
-    exclude: ['fsevents'],
-    include: ['ioredis']
+    exclude: ["fsevents"],
+    include: ["ioredis"],
   },
   plugins: [
     VitePluginNode({
@@ -22,13 +22,13 @@ export default defineConfig({
     emptyOutDir: true,
     target: "node18.17.1",
     rollupOptions: {
-      external: ['ioredis'],
+      external: ["ioredis"],
       output: {
         globals: {
-          'ioredis': 'ioredis'
-        }
-      }
-    }
+          "ioredis": "ioredis",
+        },
+      },
+    },
   },
   test: {
     globals: true,
@@ -50,4 +50,4 @@ export default defineConfig({
     globalSetup: ["server/tests/globalSetup/startUp.ts"],
 
   },
-});
+})

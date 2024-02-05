@@ -20,7 +20,7 @@ spec:
         image: {{ .Values.frameExtractor.deployment.image }}
         imagePullPolicy: {{ .Values.frameExtractor.deployment.imagePullPolicy }}        
         ports:
-        - containerPort: 3001
+        - containerPort: 3002
         env:
         - name: KAFKA_BROKER
           value: kafka-service.dev.svc.cluster.local

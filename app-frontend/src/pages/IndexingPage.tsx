@@ -194,8 +194,6 @@ const IndexingPage: React.FC = () => {
     }
   }, [logs])
 
-  console.log(started, completed)
-
   return (
     <div className="min-h-screen text-darkLabel w-full">
       <div className="flex flex-col bg-gray-200 items-center flex-wrap justify-center pb-[35px] mb-[53px]">

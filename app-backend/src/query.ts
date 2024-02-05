@@ -1,10 +1,5 @@
 import { Index, QueryOptions, RecordMetadata } from "@pinecone-database/pinecone"
 import redis from "./redis"
-import {
-  BoxResult,
-  Metadata,
-  Vector,
-} from "./types"
 import { PINECONE_INDEX, PINECONE_NAMESPACE } from "./utils/environment"
 import { embedder, isEmbedderError } from "./embeddings"
 import { calculateAverageVector } from "./utils/calculateAverageVector"

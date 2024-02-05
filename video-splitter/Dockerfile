@@ -5,7 +5,7 @@ FROM node:18.17.1
 WORKDIR /splitter
 
 # Install pnpm
-RUN npm install -g pnpm@8.6.12
+RUN npm install -g pnpm@8.14.3
 
 RUN apt-get update && \
     apt-get install -y ffmpeg
@@ -21,11 +21,13 @@ RUN pnpm install --frozen-lockfile
 # Copy the rest of the app's source code to the working directory
 COPY . .
 
+ENV NODE_ENV=production
+
 # Build everything
 RUN pnpm build
 
 # Expose port 3001 for the app to listen on
-EXPOSE 3003
+EXPOSE 3001
 
 # Start the app
 CMD [ "pnpm", "start" ]

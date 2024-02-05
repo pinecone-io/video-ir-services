@@ -1,7 +1,7 @@
-import path from "path";
-import { defineConfig } from "vitest/config";
-import { VitePluginNode } from "vite-plugin-node";
-import { viteStaticCopy } from "vite-plugin-static-copy";
+import path from "path"
+import { defineConfig } from "vitest/config"
+import { VitePluginNode } from "vite-plugin-node"
+import { viteStaticCopy } from "vite-plugin-static-copy"
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,13 +11,13 @@ export default defineConfig({
     port: 3001,
   },
   optimizeDeps: {
-    exclude: ['fsevents']
+    exclude: ["fsevents"],
   },
   plugins: [
     VitePluginNode({
       adapter: "express",
       appPath: "./src/index.ts",
-    })
+    }),
   ],
   build: {
     emptyOutDir: true,
@@ -42,4 +42,4 @@ export default defineConfig({
     retry: 5,
     globalSetup: ["server/tests/globalSetup/startUp.ts"],
   },
-});
+})

@@ -1,10 +1,4 @@
-import { Request, Response } from "express"
-
-interface Route {
-  route: string;
-  method: "get" | "post" | "put" | "delete";
-  handler: (req: Request, res: Response) => void;
-}
+import { Route } from "../types"
 
 const routes: Route[] = [
   {

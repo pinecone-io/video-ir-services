@@ -1,33 +1,34 @@
-import EventEmitter from "node:events";
+import EventEmitter from "node:events"
 
 class EmbeddingsCountTracker {
-    private _numberOfEmbeddings: number = 0
-    private eventEmitter = new EventEmitter();
+  private _numberOfEmbeddings: number = 0
 
-    constructor() {
-        this.eventEmitter.setMaxListeners(100);
-    }
+  private eventEmitter = new EventEmitter()
 
-    get embeddings(): number {
-        return this._numberOfEmbeddings
-    }
+  constructor() {
+    this.eventEmitter.setMaxListeners(100)
+  }
 
-    set embeddings(val: number) {
-        this._numberOfEmbeddings = val
-        this.eventEmitter.emit('numberOfEmbeddingsUpdated', this._numberOfEmbeddings)
-    }
+  get embeddings(): number {
+    return this._numberOfEmbeddings
+  }
 
-    addToEmbeddingsCount(numberOfEmbeddings: number) {
-        this.embeddings = this.embeddings + numberOfEmbeddings
-    }
+  set embeddings(val: number) {
+    this._numberOfEmbeddings = val
+    this.eventEmitter.emit("numberOfEmbeddingsUpdated", this._numberOfEmbeddings)
+  }
 
-    clearNumberOfEmbeddings(): void {
-        this.embeddings = 0;
-    }
+  addToEmbeddingsCount(numberOfEmbeddings: number) {
+    this.embeddings += numberOfEmbeddings
+  }
 
-    getNumberOfEmbeddingsEventEmitter(): EventEmitter {
-        return this.eventEmitter;
-    }
+  clearNumberOfEmbeddings(): void {
+    this.embeddings = 0
+  }
+
+  getNumberOfEmbeddingsEventEmitter(): EventEmitter {
+    return this.eventEmitter
+  }
 }
 
 export { EmbeddingsCountTracker }

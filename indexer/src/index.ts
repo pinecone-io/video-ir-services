@@ -4,6 +4,7 @@ import { fileURLToPath } from "url"
 
 import { KafkaMessage } from "kafkajs"
 import EventEmitter from "events"
+import dotenv from "dotenv-flow"
 import { resolvers } from "./routes"
 import {
   PINECONE_DATA_DIR_PATH,
@@ -13,6 +14,8 @@ import {
 import { initIndex } from "./utils/pinecone"
 import { createKafkaConsumer } from "./utils/kafka-consumer"
 import { indexImages } from "./indexImages"
+
+dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -24,8 +27,8 @@ await initIndex();
 
 (async () => {
   console.log(`Registering pod ${process.env.POD_NAME}`)
-  // Your code here
-  const response = await fetch("http://video-ir-dev-app-backend:3000/api/registerIndexer", {
+  console.log("process.env.BACKEND", process.env.BACKEND)
+  const response = await fetch(`http://${process.env.BACKEND}/registerIndexer`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -80,14 +83,13 @@ app.use("/api", router)
 
 app.use("/data", express.static(join(__dirname, PINECONE_DATA_DIR_PATH)))
 app.use("/output", express.static(join(__dirname, PINECONE_OUTPUT_DIR_PATH)))
-app.get("/ping", (req, res) => res.send("pong2"))
 
 if (IS_PROD) {
-  const port = 3002
+  const port = process.env.PORT || 3002
   app.listen(port, async () => {
     console.log(`Server started on ${port} port`)
     console.log(`Pod ${process.env.POD_NAME} is ready.`)
-    const response = await fetch("http://video-ir-dev-app-backend:3000/api/registerIndexer", {
+    const response = await fetch(`http://${process.env.BACKEND}/registerIndexer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

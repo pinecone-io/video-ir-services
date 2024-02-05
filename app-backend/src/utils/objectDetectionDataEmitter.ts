@@ -1,41 +1,41 @@
-import EventEmitter from "node:events";
-import { ObjectDetectionData } from "../types";
+import EventEmitter from "node:events"
+import { ObjectDetectionData } from "../types"
 
 class ObjectDetectionDataEmitter {
-    private _odData: ObjectDetectionData = {}
-    private eventEmitter = new EventEmitter();
+  private _odData: ObjectDetectionData = {}
 
-    constructor() {
-        this.eventEmitter.setMaxListeners(100);
-    }
+  private eventEmitter = new EventEmitter()
 
-    get odData(): ObjectDetectionData {
-        return this._odData
-    }
+  constructor() {
+    this.eventEmitter.setMaxListeners(100)
+  }
 
-    set odData(odData: ObjectDetectionData) {
-        this._odData = odData
+  get odData(): ObjectDetectionData {
+    return this._odData
+  }
 
-    }
+  set odData(odData: ObjectDetectionData) {
+    this._odData = odData
+  }
 
-    addEntry(entry: ObjectDetectionData) {
-        console.log("Adding entry")
-        this._odData = { ...this._odData, ...entry }
-        this.eventEmitter.emit('odDataAdded', entry)
-    }
+  addEntry(entry: ObjectDetectionData) {
+    console.log("Adding entry")
+    this._odData = { ...this._odData, ...entry }
+    this.eventEmitter.emit("odDataAdded", entry)
+  }
 
-    markAsComplete() {
-        this.eventEmitter.emit('odDataDone')
-        this._odData = {}
-    }
+  markAsComplete() {
+    this.eventEmitter.emit("odDataDone")
+    this._odData = {}
+  }
 
-    clearLogs(): void {
-        this._odData = {};
-    }
+  clearLogs(): void {
+    this._odData = {}
+  }
 
-    getOdDataEventEmitter(): EventEmitter {
-        return this.eventEmitter;
-    }
+  getOdDataEventEmitter(): EventEmitter {
+    return this.eventEmitter
+  }
 }
 
 export { ObjectDetectionDataEmitter }

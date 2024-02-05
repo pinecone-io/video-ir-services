@@ -55,7 +55,7 @@ export const Modal: React.FC<ModalProps> = ({
             ) : (
               <>
                 <img
-                  src="/public/images/rotating_logo.svg"
+                  src="/images/rotating_logo.svg"
                   alt="Pinecone Logo"
                   className="slow-rotate animate-slowRotate mb-[26px]"
                 />

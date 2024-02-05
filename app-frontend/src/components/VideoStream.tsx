@@ -11,7 +11,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 import LabelingControls, { LabeledImage } from "./LabelingControls"
 import VideoScrubber from "./VideoScrubber"
-// import { FilesLoadingStatus } from "./FilesLoadingStatus";
 
 const CANVAS_WIDTH = 1269
 const CANVAS_HEIGHT = 707
@@ -28,7 +27,6 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
   const [labeledBoundingBox, setLabeledBoundingBox] = useState<
     LabeledBoundingBox[]
   >([])
-
 
   const FPS = 25
 
@@ -101,8 +99,7 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
     }
   }, [])
 
-
-
+  
   return (
     <>
       <div
@@ -160,8 +157,6 @@ const VideoStream: React.FC<VideoStreamProps> = (props) => {
           </div>
 
         </div>
-
-
 
 
         {labeledBoundingBox && (

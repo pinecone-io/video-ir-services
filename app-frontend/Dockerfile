@@ -5,7 +5,7 @@ FROM node:18.17.1 as builder
 WORKDIR /app-frontend
 
 # Install pnpm
-RUN npm install -g pnpm@8.6.12
+RUN npm install -g pnpm@8.14.3
 
 # Copy local shared repo
 COPY tmp-shared /shared

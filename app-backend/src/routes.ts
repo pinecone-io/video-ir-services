@@ -10,6 +10,7 @@ import { LogTracker } from "./utils/logTracker"
 import { ObjectDetectionDataEmitter } from "./utils/objectDetectionDataEmitter"
 import { NumberOfObjectsTracker } from "./utils/objectDetectionTracker"
 import { ProgressTracker } from "./utils/progressTracker"
+import { VIDEO_SPLITTER } from "./utils/environment"
 
 const progressTracker = new ProgressTracker()
 const progressTrackerListener = progressTracker.getEmitter()
@@ -75,7 +76,6 @@ const routes: Route[] = [
       }
     },
   },
-
   {
     route: "/getSortedKeys",
     method: "get",
@@ -88,7 +88,6 @@ const routes: Route[] = [
       }
     },
   },
-
   {
     route: "/queryBox",
     method: "post",
@@ -146,7 +145,7 @@ const routes: Route[] = [
         indexerInstancesTracker.resetInstancesCounts()
         numberOfObjectsTracker.clearNumberOfObjects()
         numberOfEmbeddingsTracker.clearNumberOfEmbeddings()
-        const response = await fetch("http://video-ir-dev-video-splitter:3007/api/downloadAndSplit", {
+        const response = await fetch(`http://${VIDEO_SPLITTER}/api/downloadAndSplit`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -255,7 +254,13 @@ const routes: Route[] = [
       res.status(200).send("success")
     },
   },
-
+  {
+    route: "/health",
+    method: "get",
+    handler: (req, res) => {
+      res.status(200).send("success")
+    },
+  },
 ]
 
 export {

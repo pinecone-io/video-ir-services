@@ -1,12 +1,12 @@
-import { defineConfig } from "vitest/config";
-import { VitePluginNode } from "vite-plugin-node";
+import { defineConfig } from "vitest/config"
+import { VitePluginNode } from "vite-plugin-node"
 
 // https://vitejs.dev/config/
 export default defineConfig({
   root: __dirname,
   server: {
     strictPort: true,
-    port: 3002,
+    port: 3003,
   },
   optimizeDeps: {
     exclude: ["fsevents"],
@@ -25,9 +25,8 @@ export default defineConfig({
   test: {
     globals: true,
     cache: false,
-    threads: false,
     coverage: {
-      // TODO uncoment in future
+      // TODO uncomment in future
       // lines: 100,
       // branches: 100,
       // functions: 100,
@@ -41,4 +40,4 @@ export default defineConfig({
     retry: 5,
     globalSetup: ["server/tests/globalSetup/startUp.ts"],
   },
-});
+})

@@ -1,0 +1,9 @@
+{
+  "ignore": {
+    "files": [
+      "/Users/roie.s.c/dev/viral-services/app-backend/dist/index.js",
+      "/Users/roie.s.c/dev/viral-services/app-backend/src/index.ts",
+      "/Users/roie.s.c/dev/viral-services/video-splitter/vite.config.ts"
+    ]
+  }
+}

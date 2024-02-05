@@ -1,25 +1,28 @@
-import express, { Express, Router } from "express";
-import { resolvers } from "./routes";
-import { IS_PROD } from "./utils/environment";
+import express, { Express, Router } from "express"
+import dotenv from "dotenv-flow"
+import cors from "cors"
+import { resolvers } from "./routes"
+import { IS_PROD } from "./utils/environment"
 
-const app: Express = express();
+dotenv.config()
+const app: Express = express()
 
-const router = Router();
+const router = Router()
 
 resolvers.forEach((resolver) => {
-  router[resolver.method](resolver.route, resolver.handler);
-});
-app.use(express.json());
+  router[resolver.method](resolver.route, resolver.handler)
+})
+app.use(express.json())
 
-app.use("/api", router);
+app.use(cors())
+
+app.use("/api", router)
 
 if (IS_PROD) {
-  const port = 3007;
+  const port = process.env.PORT || 3007
   app.listen(port, () => {
-    console.log(`Server started on ${port} port`);
-  });
+    console.log(`Server started on ${port} port`)
+  })
 }
 
-
-export const viteNodeApp = app;
-
+export const viteNodeApp = app

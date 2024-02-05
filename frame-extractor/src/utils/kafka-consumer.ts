@@ -2,7 +2,7 @@ import {
   Consumer, Kafka, KafkaMessage, logLevel,
 } from "kafkajs"
 
-const KAFKA_BROKER = "kafka-dev"
+import { KAFKA_BROKER } from "./environment"
 
 async function createKafkaConsumer(
   messageHandler: (message: KafkaMessage) => void,
@@ -19,6 +19,7 @@ async function createKafkaConsumer(
     consumer = kafka.consumer({ groupId: consumerGroupId })
 
     await consumer.connect()
+    console.log("Connected and subscribed to Kafka")
     await consumer.subscribe({ topic, fromBeginning: false })
 
     await consumer.run({

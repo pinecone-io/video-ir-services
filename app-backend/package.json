@@ -4,12 +4,13 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "vite --config ./vite.config.ts build",
-    "dev": "vite --force --config vite.config.ts",
+    "dev": "NODE_ENV=local vite --force --config vite.config.ts",
     "format:server": "eslint . --fix",
     "lint": "tsc --p . && eslint .",
     "maintance:depcheck": "pnpm dlx depcheck",
     "maintance:outdated": "pnpm outdated",
-    "start": "node dist",
+    "start": "NODE_ENV=production node dist",
+    "startDev": "NODE_ENV=local node dist",
     "test": "vitest run --config vite.config.ts  --coverage --retry 5",
     "docker": "pnpm docker:build && pnpm docker:tag && pnpm docker:push",
     "docker:build": "docker build --platform=linux/amd64 -t video-recognition_app-backend .",
@@ -23,22 +24,29 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
+  "findUnusedExports": {
+    "include": [ "./src/**/*.d.ts", "src/**/*.ts" ],
+    "exclude": [ "./src/**/*.js" ]
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.428.0",
     "@aws-sdk/s3-request-presigner": "^3.428.0",
     "@pinecone-database/pinecone": "^1.1.1",
     "@smithy/node-http-handler": "^2.1.7",
     "@xenova/transformers": "^2.6.2",
+    "cors": "^2.8.5",
+    "dotenv-flow": "^4.1.0",
     "express": "^4.18.2",
     "ioredis": "^5.3.2",
     "kafkajs": "^2.2.4",
     "mathjs": "^11.11.2",
     "redis": "^4.6.10",
     "sharp": "^0.32.6",
-    "socket.io": "^4.7.2",
+    "socket.io": "^4.7.4",
     "socket.io-redis": "^6.1.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.19",
     "@types/node": "^20.6.2",
     "@types/supertest": "^2.0.12",
@@ -56,10 +64,11 @@
     "supertest": "^6.3.3",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2",
-    "vite": "^4.4.11",
-    "vite-plugin-node": "^3.0.2",
-    "vite-plugin-static-copy": "^0.17.0",
-    "vitest": "^0.34.4"
+    "vite": "^5.0.12",
+    "vite-plugin-node": "^3.1.0",
+    "vite-plugin-socket-io": "^1.0.2",
+    "vite-plugin-static-copy": "^1.0.1",
+    "vitest": "^0.34.6"
   },
   "packageManager": "pnpm@8.14.3",
   "engines": {
